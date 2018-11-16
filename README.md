@@ -1,5 +1,4 @@
-Fuzzy Match
-=============
+# <img src="fuzzy-logo.svg" height="60" width="60"/> Fuzzy-Matcher
 * [Introduction](#introduction)
 * [How does this work](#how-does-this-work)
     * [Four Stages of Fuzzy Match](#four-stages-of-fuzzy-match)
