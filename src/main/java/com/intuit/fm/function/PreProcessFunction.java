@@ -4,10 +4,7 @@ import com.intuit.fm.component.Dictionary;
 import com.intuit.fm.util.Utils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
-import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * A functional interface to pre-process the elements. These function are applied to element.value String's
