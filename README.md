@@ -81,11 +81,12 @@ mvn clean install
 ## Using the Library
 
 ### Maven Import
+The library is pusblished to maven central
 ```
 <dependency>
     <groupId>com.intuit.fuzzymatcher</groupId>
     <artifactId>fuzzy-matcher</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.0.3</version>
 </dependency>
 ```
 
