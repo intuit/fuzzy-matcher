@@ -83,7 +83,7 @@ mvn clean install
 ### Maven Import
 ```
 <dependency>
-    <groupId>com.intuit.fm</groupId>
+    <groupId>com.intuit.fuzzymatcher</groupId>
     <artifactId>fuzzy-matcher</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
@@ -218,7 +218,7 @@ Stephen Kilsman wilkson
 
 Run this maven test for the above set of example
 ```
-mvn -Dtest=com.intuit.fm.component.MatchServiceTest#itShouldApplyMatchForDemo test
+mvn -Dtest=com.intuit.fuzzymatcher.component.MatchServiceTest#itShouldApplyMatchForDemo test
 ```
 
 You should see a response like this printed on your console
