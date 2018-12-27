@@ -10,9 +10,9 @@ public interface Matchable {
 
     public long getChildCount();
 
-    public long getEmptyChildCount();
-
     public Function<Match, Score> getScoringFunction();
 
     public double getWeight();
+
+    public long getUnmatchedChildCount(Matchable other);
 }

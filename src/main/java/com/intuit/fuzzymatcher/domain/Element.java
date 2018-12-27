@@ -118,8 +118,14 @@ public class Element implements Matchable {
     }
 
     @Override
-    public long getEmptyChildCount() {
-        return getTokens().filter(token -> StringUtils.isEmpty(token.getValue())).count();
+    public long getUnmatchedChildCount(Matchable other) {
+        if (other instanceof Element) {
+            Element o = (Element) other;
+            long emptyChildren = this.getTokens().filter(token -> StringUtils.isEmpty(token.getValue())).count();
+            long oEmptyChildren = o.getTokens().filter(token -> StringUtils.isEmpty(token.getValue())).count();
+            return Math.max(emptyChildren, oEmptyChildren);
+        }
+        return 0;
     }
 
     @Override

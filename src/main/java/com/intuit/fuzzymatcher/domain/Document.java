@@ -75,8 +75,21 @@ public class Document implements Matchable {
     }
 
     @Override
-    public long getEmptyChildCount() {
-        return this.elements.stream().filter(element -> StringUtils.isEmpty(element.getPreProcessedValue())).count();
+    public long getUnmatchedChildCount(Matchable other) {
+        if (other instanceof Document) {
+            Document o = (Document) other;
+            List<ElementType> emptyChildrenCount =  this.elements.stream()
+                    .filter(element -> StringUtils.isEmpty(element.getPreProcessedValue())).map(Element::getType)
+                    .collect(Collectors.toList());
+            List<ElementType> oEmptyChildrenCount =  o.elements.stream()
+                    .filter(element -> StringUtils.isEmpty(element.getPreProcessedValue())).map(Element::getType)
+                    .collect(Collectors.toList());
+            long diffCount= emptyChildrenCount.stream().filter(e -> !oEmptyChildrenCount.contains(e)).count()
+                    + oEmptyChildrenCount.stream().filter(e -> !emptyChildrenCount.contains(e)).count();
+
+            return Math.max(Math.max(diffCount, emptyChildrenCount.size()), oEmptyChildrenCount.size());
+        }
+        return 0;
     }
 
     @Override

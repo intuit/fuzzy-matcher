@@ -8,8 +8,10 @@ import com.intuit.fuzzymatcher.function.PreProcessFunction;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
+import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -23,12 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -81,7 +78,7 @@ public class MatchServiceTest {
         Assert.assertEquals(6, result.size());
     }
 
-    public Stream<Element> getOrderedElements(Set<Element> elements) {
+    public static Stream<Element> getOrderedElements(Set<Element> elements) {
         List<Element> l = elements.stream().sorted(Comparator.comparing(Element::getType)).collect(Collectors.toList());
         return l.stream();
     }
@@ -271,13 +268,13 @@ public class MatchServiceTest {
                 .addElement(new Element.Builder().setType(NAME).setValue("sdwet ert rdfgh, LLC").createElement())
                 .addElement(new Element.Builder().setType(ADDRESS).setValue(" ").createElement())
                 .addElement(new Element.Builder().setType(PHONE).setWeight(2).setValue("").setThreshold(0.5).createElement())
-                .addElement(new Element.Builder().setType(EMAIL).setValue("info@abc.com").setThreshold(0.5).createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("sdwet@abc.com").setThreshold(0.5).createElement())
                 .createDocument());
         inputData.add(new Document.Builder("2")
                 .addElement(new Element.Builder().setType(NAME).setValue("sad sdf LLC").createElement())
                 .addElement(new Element.Builder().setType(ADDRESS).setValue(" ").createElement())
                 .addElement(new Element.Builder().setType(PHONE).setWeight(2).setValue("").setThreshold(0.5).createElement())
-                .addElement(new Element.Builder().setType(EMAIL).setValue("info@something.com").setThreshold(0.5).createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("sad@something.com").setThreshold(0.5).createElement())
                 .createDocument());
 
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(inputData);
@@ -327,9 +324,9 @@ public class MatchServiceTest {
         }).collect(Collectors.toList());
     }
 
-    public CSVReader getCSVReader(String FileName) throws FileNotFoundException {
+    public static CSVReader getCSVReader(String FileName) throws FileNotFoundException {
         return new CSVReaderBuilder(
-                new FileReader(this.getClass().getClassLoader().getResource(FileName).getFile()))
+                new FileReader(MatchServiceTest.class.getClassLoader().getResource(FileName).getFile()))
                 .withSkipLines(1)
                 .build();
     }
@@ -416,7 +413,55 @@ public class MatchServiceTest {
         Assert.assertEquals(4, result2.size());
     }
 
-    public void writeOutput(Map<String, List<Match<Document>>> result) throws IOException {
+    @Test
+    public void itShouldApplyMatchForBalancedEmptyElements() throws FileNotFoundException {
+        List<Document> inputData = new ArrayList<>();
+        inputData.add(new Document.Builder("1")
+                .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
+                .addElement(new Element.Builder().setType(ADDRESS).setValue("").createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("parker@email.com").createElement())
+                .createDocument());
+        inputData.add(new Document.Builder("2")
+                .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
+                .addElement(new Element.Builder().setType(ADDRESS).setValue("").createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("james@email.com").createElement())
+                .createDocument());
+
+        Map<Document, List<Match<Document>>> result = matchService.applyMatch(inputData);
+        Assert.assertThat(result.entrySet().stream()
+                        .map(entry -> entry.getKey().getKey()).collect(Collectors.toList()),
+                CoreMatchers.hasItems("1", "2"));
+        Assert.assertEquals(0.5, result.entrySet().stream()
+                .map(entry -> entry.getValue()).collect(Collectors.toList()).get(0).get(0).getResult(), 0.0);
+    }
+
+    @Test
+    public void itShouldApplyMatchForUnBalancedEmptyElements() throws FileNotFoundException {
+        List<Document> inputData = new ArrayList<>();
+        inputData.add(new Document.Builder("1")
+                .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
+                .addElement(new Element.Builder().setType(ADDRESS).setValue("123 Some Street").createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("parker@email.com").createElement())
+                .createDocument());
+        inputData.add(new Document.Builder("2")
+                .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
+                .addElement(new Element.Builder().setType(ADDRESS).setValue("").createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("123-123-1234").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("james@email.com").createElement())
+                .createDocument());
+
+        Map<Document, List<Match<Document>>> result = matchService.applyMatch(inputData);
+        Assert.assertThat(result.entrySet().stream()
+                        .map(entry -> entry.getKey().getKey()).collect(Collectors.toList()),
+                CoreMatchers.hasItems("1", "2"));
+        Assert.assertEquals(0.5, result.entrySet().stream()
+                .map(entry -> entry.getValue()).collect(Collectors.toList()).get(0).get(0).getResult(), 0.0);
+    }
+
+    public static void writeOutput(Map<String, List<Match<Document>>> result) throws IOException {
         CSVWriter writer = new CSVWriter(new FileWriter("src/test/resources/output.csv"));
         writer.writeNext(new String[]{"Key", "Matched Key", "Score", "Name", "Address", "Email", "Phone"});
 
