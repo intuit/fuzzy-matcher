@@ -52,8 +52,25 @@ public class DocumentTest {
     }
 
     @Test
-    @Ignore
-    public void itShouldGetUnmatchedCountForMultiElements() {
+    public void itShouldGetUnmatchedCountForUnbalancedDocWithEmpty() {
+        Document d1 = new Document.Builder("1")
+                .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
+                .addElement(new Element.Builder().setType(ADDRESS).setValue("").createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("123").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("").createElement())
+                .createDocument();
+        Document d2 = new Document.Builder("2")
+                .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
+                .addElement(new Element.Builder().setType(ADDRESS).setValue("123 Some Street").createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("").createElement())
+                .createDocument();
+
+        Assert.assertEquals(3, d1.getUnmatchedChildCount(d2));
+    }
+
+    @Test
+    public void itShouldGetUnmatchedCountForMultiElementTypes() {
         Document d1 = new Document.Builder("1")
                 .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
                 .addElement(new Element.Builder().setType(ADDRESS).setValue("").createElement())

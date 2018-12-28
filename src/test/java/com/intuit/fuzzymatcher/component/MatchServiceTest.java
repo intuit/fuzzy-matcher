@@ -55,7 +55,7 @@ public class MatchServiceTest {
                 System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
             });
         });
-        Assert.assertEquals(4, result.size());
+        Assert.assertEquals(5, result.size());
     }
 
     @Test
@@ -89,18 +89,18 @@ public class MatchServiceTest {
         inputData.add(new Document.Builder("1")
                 .addElement(new Element.Builder().setType(NAME).setValue("Kapa Limited").createElement())
                 .addElement(new Element.Builder().setType(ADDRESS).setValue("texas").createElement())
-                .addElement(new Element.Builder().setType(PHONE).setValue("8204354957 xyz").setThreshold(0.5).setWeight(2).createElement())
-                .addElement(new Element.Builder().setType(PHONE).setValue("").setThreshold(0.5).setWeight(2).createElement())
-                .addElement(new Element.Builder().setType(PHONE).setValue("(848) 398-3868").setWeight(2).setThreshold(0.5).createElement())
-                .addElement(new Element.Builder().setType(EMAIL).setValue("kirit@kapalimited.com").setThreshold(0.5).createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("8204354957 xyz").createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("").createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("(848) 398-3868").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("kirit@kapalimited.com").createElement())
                 .createDocument());
         inputData.add(new Document.Builder("2")
                 .addElement(new Element.Builder().setType(NAME).setValue("Tram Kapa Ltd LLC").createElement())
                 .addElement(new Element.Builder().setType(ADDRESS).setValue("texas").createElement())
-                .addElement(new Element.Builder().setType(PHONE).setValue("(848) 398-3868").setWeight(2).setThreshold(0.5).createElement())
-                .addElement(new Element.Builder().setType(PHONE).setValue("(820) 435-4957").setWeight(2).setThreshold(0.5).createElement())
-                .addElement(new Element.Builder().setType(PHONE).setValue("").setWeight(2).setThreshold(0.5).createElement())
-                .addElement(new Element.Builder().setType(EMAIL).setValue("kirit@nekoproductions.com").setThreshold(0.5).createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("(848) 398-3868").createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("(820) 435-4957").createElement())
+                .addElement(new Element.Builder().setType(PHONE).setValue("").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("kirit@nekoproductions.com").createElement())
                 .createDocument());
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(inputData);
         Assert.assertEquals(2, result.size());

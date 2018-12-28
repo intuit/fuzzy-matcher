@@ -78,16 +78,14 @@ public class Document implements Matchable {
     public long getUnmatchedChildCount(Matchable other) {
         if (other instanceof Document) {
             Document o = (Document) other;
-            List<ElementType> emptyChildrenCount =  this.elements.stream()
-                    .filter(element -> StringUtils.isEmpty(element.getPreProcessedValue())).map(Element::getType)
-                    .collect(Collectors.toList());
-            List<ElementType> oEmptyChildrenCount =  o.elements.stream()
-                    .filter(element -> StringUtils.isEmpty(element.getPreProcessedValue())).map(Element::getType)
-                    .collect(Collectors.toList());
-            long diffCount= emptyChildrenCount.stream().filter(e -> !oEmptyChildrenCount.contains(e)).count()
-                    + oEmptyChildrenCount.stream().filter(e -> !emptyChildrenCount.contains(e)).count();
-
-            return Math.max(Math.max(diffCount, emptyChildrenCount.size()), oEmptyChildrenCount.size());
+            Stream<ElementType> emptyChildrenType =  this.elements.stream()
+                    .filter(element -> StringUtils.isEmpty(element.getPreProcessedValue())).map(Element::getType);
+            Stream<ElementType> oEmptyChildrenType =  o.elements.stream()
+                    .filter(element -> StringUtils.isEmpty(element.getPreProcessedValue())).map(Element::getType);
+            Set<ElementType> totalEmptyType = Stream.concat(emptyChildrenType, oEmptyChildrenType).collect(Collectors.toSet());
+            long elemTypeCount = this.elements.stream().filter(element -> totalEmptyType.contains(element.getType())).count();
+            long oElemTypeCount = o.elements.stream().filter(element -> totalEmptyType.contains(element.getType())).count();
+            return Math.max(elemTypeCount, oElemTypeCount);
         }
         return 0;
     }
