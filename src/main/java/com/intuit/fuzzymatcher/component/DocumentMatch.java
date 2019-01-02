@@ -32,7 +32,7 @@ public class DocumentMatch {
      * @return Stream of Match of Document type objects
      */
     public Stream<Match<Document>> matchDocuments(Stream<Document> documents) {
-        Stream<Element> elements = documents.flatMap(d -> d.getDistinctNonEmptyElements());
+        Stream<Element> elements = documents.flatMap(d -> d.getPreProcessedElement().stream());
         Stream<Match<Element>> matchedElements = elementMatch.matchElements(elements);
         return rollupDocumentScore(matchedElements);
     }
@@ -51,9 +51,8 @@ public class DocumentMatch {
                                     .stream()
                                     .map(d -> d.getScore())
                                     .collect(Collectors.toList());
-                            childScoreList.forEach(score -> System.out.println(score.getMatch()));
                             return new Match<Document>(leftDocumentEntry.getKey(), rightDocumentEntry.getKey(), childScoreList);
                         }))
-                .filter(match -> match.getResult() >= match.getData().getThreshold());
+                .filter(match -> match.getResult() > match.getData().getThreshold());
     }
 }

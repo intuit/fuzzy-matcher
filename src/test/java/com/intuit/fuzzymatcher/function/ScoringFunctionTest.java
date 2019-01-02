@@ -158,7 +158,7 @@ public class ScoringFunctionTest {
 
     private Document getMockDocument(long childCount, long emptyCount) {
         Document doc = mock(Document.class);
-        when(doc.getChildCount()).thenReturn(childCount);
+        when(doc.getChildCount(any())).thenReturn(childCount);
         when(doc.getUnmatchedChildCount(any())).thenReturn(emptyCount);
         return doc;
     }

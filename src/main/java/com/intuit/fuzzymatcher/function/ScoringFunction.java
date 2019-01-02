@@ -43,11 +43,9 @@ public interface ScoringFunction extends Function<Match, Score> {
             List<Score> childScoreList = match.getChildScores();
             double numerator = getSumOfWeightedResult(childScoreList)
                     + getUnmatchedChildScore(match);
-            System.out.println(numerator);
             double denominator = getSumOfWeights(childScoreList)
                     + getMaxChildCount(match)
                     - childScoreList.size();
-            System.out.println(getSumOfWeights(childScoreList) + " " + getMaxChildCount(match) + " "+ childScoreList.size());
             return new Score(numerator / denominator, match);
         };
     }
@@ -114,7 +112,7 @@ public interface ScoringFunction extends Function<Match, Score> {
     static ScoringFunction getJaccardScore() {
         return match ->
                 new Score((double) match.getChildScores().size() /
-                        ((match.getData().getChildCount() + match.getMatchedWith().getChildCount() - match.getChildScores().size())), match);
+                        ((match.getData().getChildCount(match.getMatchedWith()))), match);
     }
 
     static double getSumOfWeightedResult(List<Score> childScoreList) {
@@ -146,7 +144,7 @@ public interface ScoringFunction extends Function<Match, Score> {
     }
 
     static double getMaxChildCount(Match match) {
-        return (double) Long.max(match.getData().getChildCount(), match.getMatchedWith().getChildCount());
+        return (double) match.getData().getChildCount(match.getMatchedWith());
     }
 
     static double getUnmatchedChildScore(Match match) {

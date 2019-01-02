@@ -420,21 +420,21 @@ public class MatchServiceTest {
                 .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
                 .addElement(new Element.Builder().setType(ADDRESS).setValue("").createElement())
                 .addElement(new Element.Builder().setType(PHONE).setValue("").createElement())
-                .addElement(new Element.Builder().setType(EMAIL).setValue("parker@email.com").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("jamesparker@email.com").createElement())
                 .createDocument());
         inputData.add(new Document.Builder("2")
-                .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
+                .addElement(new Element.Builder().setType(NAME).setValue("James").createElement())
                 .addElement(new Element.Builder().setType(ADDRESS).setValue("").createElement())
                 .addElement(new Element.Builder().setType(PHONE).setValue("").createElement())
-                .addElement(new Element.Builder().setType(EMAIL).setValue("james@email.com").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("jamesparker@email.com").createElement())
                 .createDocument());
 
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(inputData);
         Assert.assertThat(result.entrySet().stream()
                         .map(entry -> entry.getKey().getKey()).collect(Collectors.toList()),
                 CoreMatchers.hasItems("1", "2"));
-        Assert.assertEquals(0.5, result.entrySet().stream()
-                .map(entry -> entry.getValue()).collect(Collectors.toList()).get(0).get(0).getResult(), 0.0);
+        Assert.assertEquals(0.75, result.entrySet().stream()
+                .map(entry -> entry.getValue()).collect(Collectors.toList()).get(0).get(0).getResult(), 0.01);
     }
 
     @Test
@@ -444,28 +444,29 @@ public class MatchServiceTest {
                 .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
                 .addElement(new Element.Builder().setType(ADDRESS).setValue("123 Some Street").createElement())
                 .addElement(new Element.Builder().setType(PHONE).setValue("").createElement())
-                .addElement(new Element.Builder().setType(EMAIL).setValue("parker@email.com").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("jamesparker@email.com").createElement())
                 .createDocument());
         inputData.add(new Document.Builder("2")
-                .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
+                .addElement(new Element.Builder().setType(NAME).setValue("James").createElement())
                 .addElement(new Element.Builder().setType(ADDRESS).setValue("").createElement())
                 .addElement(new Element.Builder().setType(PHONE).setValue("123-123-1234").createElement())
-                .addElement(new Element.Builder().setType(EMAIL).setValue("james@email.com").createElement())
+                .addElement(new Element.Builder().setType(EMAIL).setValue("jamesparker@email.com").createElement())
                 .createDocument());
 
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(inputData);
         Assert.assertThat(result.entrySet().stream()
                         .map(entry -> entry.getKey().getKey()).collect(Collectors.toList()),
                 CoreMatchers.hasItems("1", "2"));
-        Assert.assertEquals(0.5, result.entrySet().stream()
-                .map(entry -> entry.getValue()).collect(Collectors.toList()).get(0).get(0).getResult(), 0.0);
+        Assert.assertEquals(0.625, result.entrySet().stream()
+                .map(entry -> entry.getValue()).collect(Collectors.toList()).get(0).get(0).getResult(), 0.01);
     }
 
     public static void writeOutput(Map<String, List<Match<Document>>> result) throws IOException {
         CSVWriter writer = new CSVWriter(new FileWriter("src/test/resources/output.csv"));
         writer.writeNext(new String[]{"Key", "Matched Key", "Score", "Name", "Address", "Email", "Phone"});
 
-        result.entrySet().forEach(entry -> {
+        result.entrySet().stream().sorted(Map.Entry.<String, List<Match<Document>>>comparingByKey())
+                .forEach(entry -> {
             String[] keyArrs = Stream.concat(Stream.of(entry.getKey(), entry.getKey(), ""),
                     getOrderedElements(entry.getValue().stream()
                             .map(match -> match.getData())

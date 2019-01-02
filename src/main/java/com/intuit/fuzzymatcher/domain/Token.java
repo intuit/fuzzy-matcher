@@ -60,7 +60,7 @@ public class Token implements Matchable{
     }
 
     @Override
-    public long getChildCount() {
+    public long getChildCount(Matchable other) {
         return 0;
     }
 

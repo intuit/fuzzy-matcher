@@ -8,7 +8,7 @@ import java.util.function.Function;
  */
 public interface Matchable {
 
-    public long getChildCount();
+    public long getChildCount(Matchable other);
 
     public Function<Match, Score> getScoringFunction();
 

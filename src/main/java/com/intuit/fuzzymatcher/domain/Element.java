@@ -113,8 +113,12 @@ public class Element implements Matchable {
     }
 
     @Override
-    public long getChildCount() {
-        return getTokens().count();
+    public long getChildCount(Matchable other) {
+        if (other instanceof Element) {
+            Element o = (Element) other;
+            return Math.max(this.getTokens().count(), o.getTokens().count());
+        }
+        return 0;
     }
 
     @Override
