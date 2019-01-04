@@ -1,6 +1,7 @@
 package com.intuit.fuzzymatcher.domain;
 
 import com.intuit.fuzzymatcher.function.ScoringFunction;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 
@@ -35,6 +36,7 @@ public class Document implements Matchable {
 
     private String key;
     private Set<Element> elements;
+    private Set<Element> preProcessedElement;
     private double threshold;
     private Function<Match, Score> scoringFunction;
     private Boolean source;
@@ -47,6 +49,13 @@ public class Document implements Matchable {
 
     public Set<Element> getElements() {
         return elements;
+    }
+
+    public Set<Element> getPreProcessedElement() {
+        if (this.preProcessedElement == null) {
+            this.preProcessedElement = getDistinctNonEmptyElements().collect(Collectors.toSet());
+        }
+        return preProcessedElement;
     }
 
     public double getThreshold() {
@@ -68,15 +77,31 @@ public class Document implements Matchable {
         return t -> seen.add(keyExtractor.apply(t));
     }
 
-
     @Override
-    public long getChildCount() {
-        return this.getDistinctElements().count();
+    public long getChildCount(Matchable other) {
+        if (other instanceof Document) {
+            Document o = (Document) other;
+            List<ElementType> childrenType =  this.getPreProcessedElement().stream()
+                    .map(Element::getType).collect(Collectors.toList());
+            List<ElementType> oChildrenType =  o.getPreProcessedElement().stream()
+                    .map(Element::getType).collect(Collectors.toList());
+            return CollectionUtils.union(childrenType, oChildrenType).size();
+        }
+        return 0;
+
     }
 
     @Override
-    public long getEmptyChildCount() {
-        return this.elements.stream().filter(element -> StringUtils.isEmpty(element.getPreProcessedValue())).count();
+    public long getUnmatchedChildCount(Matchable other) {
+        if (other instanceof Document) {
+            Document o = (Document) other;
+            List<ElementType> childrenType =  this.getPreProcessedElement().stream()
+                    .map(Element::getType).collect(Collectors.toList());
+            List<ElementType> oChildrenType =  o.getPreProcessedElement().stream()
+                    .map(Element::getType).collect(Collectors.toList());
+            return CollectionUtils.disjunction(childrenType, oChildrenType).size();
+        }
+        return 0;
     }
 
     @Override

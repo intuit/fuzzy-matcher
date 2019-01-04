@@ -60,12 +60,12 @@ public class Token implements Matchable{
     }
 
     @Override
-    public long getChildCount() {
+    public long getChildCount(Matchable other) {
         return 0;
     }
 
     @Override
-    public long getEmptyChildCount() {
+    public long getUnmatchedChildCount(Matchable other) {
         return 0;
     }
 

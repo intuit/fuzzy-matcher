@@ -32,7 +32,7 @@ public class DocumentMatch {
      * @return Stream of Match of Document type objects
      */
     public Stream<Match<Document>> matchDocuments(Stream<Document> documents) {
-        Stream<Element> elements = documents.flatMap(d -> d.getDistinctNonEmptyElements());
+        Stream<Element> elements = documents.flatMap(d -> d.getPreProcessedElement().stream());
         Stream<Match<Element>> matchedElements = elementMatch.matchElements(elements);
         return rollupDocumentScore(matchedElements);
     }

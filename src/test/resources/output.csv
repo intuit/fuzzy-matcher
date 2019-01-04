@@ -1,3 +1,0 @@
-"Key","Matched Key","Score","Name","Address","Email","Phone"
-"TestMatch","TestMatch","","john doe","546 freeman ave dallas tx 75024","john@doe.com","2122232235"
-"","4","0.8386095222035911","john doe","546 freeman avenue dallas tx 75024","john@doe.com","435-334-2234"

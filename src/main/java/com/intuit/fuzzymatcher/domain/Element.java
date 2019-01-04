@@ -113,13 +113,23 @@ public class Element implements Matchable {
     }
 
     @Override
-    public long getChildCount() {
-        return getTokens().count();
+    public long getChildCount(Matchable other) {
+        if (other instanceof Element) {
+            Element o = (Element) other;
+            return Math.max(this.getTokens().count(), o.getTokens().count());
+        }
+        return 0;
     }
 
     @Override
-    public long getEmptyChildCount() {
-        return getTokens().filter(token -> StringUtils.isEmpty(token.getValue())).count();
+    public long getUnmatchedChildCount(Matchable other) {
+        if (other instanceof Element) {
+            Element o = (Element) other;
+            long emptyChildren = this.getTokens().filter(token -> StringUtils.isEmpty(token.getValue())).count();
+            long oEmptyChildren = o.getTokens().filter(token -> StringUtils.isEmpty(token.getValue())).count();
+            return Math.max(emptyChildren, oEmptyChildren);
+        }
+        return 0;
     }
 
     @Override

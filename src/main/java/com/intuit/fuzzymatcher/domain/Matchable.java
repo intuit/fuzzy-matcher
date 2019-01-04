@@ -8,11 +8,11 @@ import java.util.function.Function;
  */
 public interface Matchable {
 
-    public long getChildCount();
-
-    public long getEmptyChildCount();
+    public long getChildCount(Matchable other);
 
     public Function<Match, Score> getScoringFunction();
 
     public double getWeight();
+
+    public long getUnmatchedChildCount(Matchable other);
 }

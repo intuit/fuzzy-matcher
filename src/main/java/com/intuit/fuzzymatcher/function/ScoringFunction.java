@@ -14,7 +14,7 @@ public interface ScoringFunction extends Function<Match, Score> {
 
     double EXPONENT = 1.5;
     double EXPONENTIAL_INCREASE_THRESHOLD = 0.9;
-    double DEFAULT_EMPTY_ELEMENT_SCORE = 0.5;
+    double DEFAULT_UNMATCHED_CHILD_SCORE = 0.5;
 
     /**
      * For all the childScores in a Match object it calculates the average.
@@ -26,7 +26,7 @@ public interface ScoringFunction extends Function<Match, Score> {
     static ScoringFunction getAverageScore() {
         return match -> {
             List<Score> childScores = match.getChildScores();
-            double numerator = getSumOfResult(childScores) + getEmptyElementScore(match);
+            double numerator = getSumOfResult(childScores) + getUnmatchedChildScore(match);
             double denominator = getMaxChildCount(match);
             return new Score(numerator / denominator, match);
         };
@@ -42,7 +42,7 @@ public interface ScoringFunction extends Function<Match, Score> {
         return match -> {
             List<Score> childScoreList = match.getChildScores();
             double numerator = getSumOfWeightedResult(childScoreList)
-                    + getEmptyElementScore(match);
+                    + getUnmatchedChildScore(match);
             double denominator = getSumOfWeights(childScoreList)
                     + getMaxChildCount(match)
                     - childScoreList.size();
@@ -64,7 +64,7 @@ public interface ScoringFunction extends Function<Match, Score> {
             if (perfectMatchedElements.size() > 1 && getSumOfResult(perfectMatchedElements) > 1) {
                 double numerator = getExponentiallyIncreasedValue(getSumOfResult(perfectMatchedElements))
                         + getSumOfResult(getNonPerfectMatchedElement(childScoreList))
-                        + getEmptyElementScore(match);
+                        + getUnmatchedChildScore(match);
 
                 double denominator = getExponentiallyIncreasedValue(perfectMatchedElements.size())
                         + getMaxChildCount(match)
@@ -86,11 +86,12 @@ public interface ScoringFunction extends Function<Match, Score> {
             List<Score> childScoreList = match.getChildScores();
             List<Score> perfectMatchedElements = getPerfectMatchedElement(childScoreList);
 
+            // Apply Exponent if match elements > 1
             if (perfectMatchedElements.size() > 1 && getSumOfWeightedResult(perfectMatchedElements) > 1) {
                 List<Score> notPerfectMachedElements = getNonPerfectMatchedElement(childScoreList);
                 double numerator = getExponentiallyIncreasedValue(getSumOfWeightedResult(perfectMatchedElements))
                         + getSumOfWeightedResult(notPerfectMachedElements)
-                        + getEmptyElementScore(match);
+                        + getUnmatchedChildScore(match);
 
                 double denominator = getExponentiallyIncreasedValue(getSumOfWeights(perfectMatchedElements))
                         + getSumOfWeights(notPerfectMachedElements)
@@ -111,7 +112,7 @@ public interface ScoringFunction extends Function<Match, Score> {
     static ScoringFunction getJaccardScore() {
         return match ->
                 new Score((double) match.getChildScores().size() /
-                        ((match.getData().getChildCount() + match.getMatchedWith().getChildCount() - match.getChildScores().size())), match);
+                        ((match.getData().getChildCount(match.getMatchedWith()))), match);
     }
 
     static double getSumOfWeightedResult(List<Score> childScoreList) {
@@ -143,12 +144,11 @@ public interface ScoringFunction extends Function<Match, Score> {
     }
 
     static double getMaxChildCount(Match match) {
-        return (double) Long.max(match.getData().getChildCount(), match.getMatchedWith().getChildCount());
+        return (double) match.getData().getChildCount(match.getMatchedWith());
     }
 
-    static double getEmptyElementScore(Match match) {
-        int maxCountEmptyElement = Integer.max((int) match.getData().getEmptyChildCount(),
-                (int) match.getMatchedWith().getEmptyChildCount());
-        return DEFAULT_EMPTY_ELEMENT_SCORE * maxCountEmptyElement;
+    static double getUnmatchedChildScore(Match match) {
+        long maxUnmatchedChildCount = match.getData().getUnmatchedChildCount(match.getMatchedWith());
+        return DEFAULT_UNMATCHED_CHILD_SCORE * maxUnmatchedChildCount;
     }
 }

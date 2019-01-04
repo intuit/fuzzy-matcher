@@ -10,6 +10,7 @@ import com.intuit.fuzzymatcher.domain.Token;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.internal.matchers.Any;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.intuit.fuzzymatcher.domain.ElementType.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -156,8 +158,8 @@ public class ScoringFunctionTest {
 
     private Document getMockDocument(long childCount, long emptyCount) {
         Document doc = mock(Document.class);
-        when(doc.getChildCount()).thenReturn(childCount);
-        when(doc.getEmptyChildCount()).thenReturn(emptyCount);
+        when(doc.getChildCount(any())).thenReturn(childCount);
+        when(doc.getUnmatchedChildCount(any())).thenReturn(emptyCount);
         return doc;
     }
 
