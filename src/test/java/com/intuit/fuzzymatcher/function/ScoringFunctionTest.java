@@ -1,18 +1,9 @@
 package com.intuit.fuzzymatcher.function;
 
-import com.intuit.fuzzymatcher.AppConfig;
 import com.intuit.fuzzymatcher.component.TokenMatch;
-import com.intuit.fuzzymatcher.domain.Document;
-import com.intuit.fuzzymatcher.domain.Element;
-import com.intuit.fuzzymatcher.domain.Match;
-import com.intuit.fuzzymatcher.domain.Score;
-import com.intuit.fuzzymatcher.domain.Token;
+import com.intuit.fuzzymatcher.domain.*;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.internal.matchers.Any;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,8 +14,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = AppConfig.class)
 public class ScoringFunctionTest {
 
     @Test

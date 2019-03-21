@@ -5,8 +5,6 @@ import com.intuit.fuzzymatcher.domain.Document;
 import com.intuit.fuzzymatcher.domain.Element;
 import com.intuit.fuzzymatcher.domain.Match;
 import com.intuit.fuzzymatcher.domain.Score;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -19,11 +17,9 @@ import java.util.stream.Stream;
  * Starts the Matching process by element level matching and aggregates the results back
  * This uses the ScoringFunction defined at each Document to get the aggregated Document score for matched Elements
  */
-@Component
 public class DocumentMatch {
 
-    @Autowired
-    private ElementMatch elementMatch;
+    private static ElementMatch elementMatch = new ElementMatch();
 
     /**
      * Executes matching of a document stream

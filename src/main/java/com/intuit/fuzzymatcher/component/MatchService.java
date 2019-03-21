@@ -2,8 +2,6 @@ package com.intuit.fuzzymatcher.component;
 
 import com.intuit.fuzzymatcher.domain.Document;
 import com.intuit.fuzzymatcher.domain.Match;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,11 +18,9 @@ import java.util.stream.Stream;
  * <p>
  * This also has similar implementation to aggregate results in different formats.
  */
-@Component
 public class MatchService {
 
-    @Autowired
-    private DocumentMatch documentMatch;
+    private static DocumentMatch documentMatch = new DocumentMatch();
 
     /**
      * Use this for De-duplication of data, where for a given list of documents it finds duplicates
