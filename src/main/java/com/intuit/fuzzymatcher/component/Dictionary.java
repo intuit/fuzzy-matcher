@@ -6,9 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -28,9 +26,9 @@ public class Dictionary {
     private static Map<String, String>  getAddressDictionary() {
         try {
             ClassLoader classLoader = Dictionary.class.getClassLoader();
-            BufferedReader br = Files.newBufferedReader(Paths.get(classLoader.getResource("address-dictionary.txt").toURI()));
+            BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream("address-dictionary.txt")));
             return getDictionary(br);
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             LOGGER.error("could not load address dictonary", e);
             throw new MatchException("could not load address dictonary", e);
         }
@@ -39,9 +37,9 @@ public class Dictionary {
     private static Map<String, String> getNameDictionary() {
         try {
             ClassLoader classLoader = Dictionary.class.getClassLoader();
-            BufferedReader br = Files.newBufferedReader(Paths.get(classLoader.getResource("name-dictionary.txt").toURI()));
+            BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream("name-dictionary.txt")));
             return getDictionary(br);
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             LOGGER.error("could not load address dictonary", e);
             throw new MatchException("could not load address dictonary", e);
         }
