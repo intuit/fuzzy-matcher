@@ -1,28 +1,14 @@
 package com.intuit.fuzzymatcher.component;
 
-import com.intuit.fuzzymatcher.AppConfig;
-import com.intuit.fuzzymatcher.domain.Document;
-import com.intuit.fuzzymatcher.domain.Element;
-import com.intuit.fuzzymatcher.domain.ElementType;
-import com.intuit.fuzzymatcher.domain.Match;
-import com.intuit.fuzzymatcher.domain.Token;
+import com.intuit.fuzzymatcher.domain.*;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.stream.Stream;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = AppConfig.class)
 public class ElementMatchTest {
 
-    @Autowired
-    @InjectMocks
-    private ElementMatch elementMatch;
+    private ElementMatch elementMatch = new ElementMatch();
 
     @Test
     public void itShouldMatchElements() {

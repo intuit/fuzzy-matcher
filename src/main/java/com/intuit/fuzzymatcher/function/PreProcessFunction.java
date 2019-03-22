@@ -87,7 +87,7 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform addressNormalization
      */
     static PreProcessFunction addressNormalization() {
-        return str -> Utils.getNormalizedString(str, Dictionary.getAddressDictionary());
+        return str -> Utils.getNormalizedString(str, Dictionary.addressDictionary);
     }
 
     /**
@@ -106,7 +106,7 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform nameNormalization
      */
     static PreProcessFunction nameNormalization() {
-        return str -> Utils.getNormalizedString(str, Dictionary.getNameDictionary());
+        return str -> Utils.getNormalizedString(str, Dictionary.nameDictionary);
     }
 
     /**

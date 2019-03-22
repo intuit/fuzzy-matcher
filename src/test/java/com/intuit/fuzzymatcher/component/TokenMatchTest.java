@@ -1,13 +1,11 @@
 package com.intuit.fuzzymatcher.component;
 
-import com.intuit.fuzzymatcher.AppConfig;
-import com.intuit.fuzzymatcher.domain.*;
-
+import com.intuit.fuzzymatcher.domain.Document;
+import com.intuit.fuzzymatcher.domain.Element;
+import com.intuit.fuzzymatcher.domain.Match;
+import com.intuit.fuzzymatcher.domain.Token;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,8 +16,6 @@ import static com.intuit.fuzzymatcher.domain.ElementType.*;
 /**
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = AppConfig.class)
 public class TokenMatchTest {
     @Test
     public void itShouldMatchTokens_Success(){

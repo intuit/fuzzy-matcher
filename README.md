@@ -120,11 +120,10 @@ Below is the list of _Element Types_ available in the library with default _PreP
 
 ### Applying the Match
 The entry point for running this program is through MatchService class.
-Import Match service using spring in your class
+Create a new instance of Match service.
 
 ```
-@Autowired
-MatchService matchService;
+MatchService matchService = new MatchService();
 ```
 
 It support 3 ways to match the documents

@@ -1,18 +1,10 @@
 package com.intuit.fuzzymatcher.domain;
 
-import com.intuit.fuzzymatcher.AppConfig;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static com.intuit.fuzzymatcher.domain.ElementType.*;
-import static com.intuit.fuzzymatcher.domain.ElementType.EMAIL;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = AppConfig.class)
 public class DocumentTest {
 
     @Test

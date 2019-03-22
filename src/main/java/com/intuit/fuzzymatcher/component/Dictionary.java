@@ -3,14 +3,12 @@ package com.intuit.fuzzymatcher.component;
 import com.intuit.fuzzymatcher.exception.MatchException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -19,49 +17,38 @@ import java.util.stream.Collectors;
  * found in names and adresses.
  *
  */
-@Component
 public class Dictionary {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Dictionary.class);
-    private static Map<String, String> addressDictionary;
+    public static final Map<String, String> addressDictionary = getAddressDictionary();
 
-    private static Map<String, String> nameDictionary;
+    public static final Map<String, String> nameDictionary = getNameDictionary();
 
-    @Value("classpath:address-dictionary.txt")
-    private Resource addressDictonaryPath;
 
-    @Value("classpath:name-dictionary.txt")
-    private Resource nameDictonaryPath;
-
-    public static Map<String, String> getAddressDictionary() {
-        return addressDictionary;
-    }
-    public static Map<String, String> getNameDictionary() {
-        return nameDictionary;
-    }
-
-    @PostConstruct
-    public void setAddressDictionary() {
+    private static Map<String, String>  getAddressDictionary() {
         try {
-            addressDictionary = getDictionary(addressDictonaryPath);
-        } catch (IOException e) {
+            ClassLoader classLoader = Dictionary.class.getClassLoader();
+            BufferedReader br = Files.newBufferedReader(Paths.get(classLoader.getResource("address-dictionary.txt").toURI()));
+            return getDictionary(br);
+        } catch (IOException | URISyntaxException e) {
             LOGGER.error("could not load address dictonary", e);
             throw new MatchException("could not load address dictonary", e);
         }
     }
 
-    @PostConstruct
-    public void setNameDictionary() {
+    private static Map<String, String> getNameDictionary() {
         try {
-            nameDictionary = getDictionary(nameDictonaryPath);
-        } catch (IOException e) {
+            ClassLoader classLoader = Dictionary.class.getClassLoader();
+            BufferedReader br = Files.newBufferedReader(Paths.get(classLoader.getResource("name-dictionary.txt").toURI()));
+            return getDictionary(br);
+        } catch (IOException | URISyntaxException e) {
             LOGGER.error("could not load address dictonary", e);
             throw new MatchException("could not load address dictonary", e);
         }
     }
 
-    private Map<String, String> getDictionary(Resource resource) throws IOException {
-            return new BufferedReader(new InputStreamReader(resource.getInputStream()))
+    private static Map<String, String> getDictionary(BufferedReader br) throws IOException {
+            return br
                     .lines()
                     .map(String::toLowerCase)
                     .map(s -> s.split(":", 2))

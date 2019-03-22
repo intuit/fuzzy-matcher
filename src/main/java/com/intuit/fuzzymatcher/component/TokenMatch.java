@@ -5,7 +5,6 @@ import com.intuit.fuzzymatcher.domain.Match;
 import com.intuit.fuzzymatcher.domain.NGram;
 import com.intuit.fuzzymatcher.domain.Token;
 import org.apache.commons.lang3.BooleanUtils;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,6 @@ import java.util.stream.Stream;
  * Matches at Token level, this class uses the SimilarityMatchFunction to get a score at a Token level
  * This class also optimizes which tokens undergo match, by breaking it to NGram and figuring out the Search Groups
  */
-@Component
 public class TokenMatch {
 
     public Stream<Match<Token>> matchTokens(Stream<Token> input) {

@@ -1,6 +1,5 @@
 package com.intuit.fuzzymatcher.component;
 
-import com.intuit.fuzzymatcher.AppConfig;
 import com.intuit.fuzzymatcher.domain.Document;
 import com.intuit.fuzzymatcher.domain.Element;
 import com.intuit.fuzzymatcher.domain.Match;
@@ -8,18 +7,11 @@ import com.intuit.fuzzymatcher.function.PreProcessFunction;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
-import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -38,14 +30,10 @@ import static com.intuit.fuzzymatcher.domain.ElementType.*;
 /**
  *
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = AppConfig.class)
 public class MatchServiceTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(MatchServiceTest.class);
 
-    @InjectMocks
-    @Autowired
-    private MatchService matchService;
+    private MatchService matchService = new MatchService();
 
     @Test
     public void itShouldApplyMatchForDemo() throws IOException {

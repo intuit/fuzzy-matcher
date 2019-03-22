@@ -4,8 +4,6 @@ import com.intuit.fuzzymatcher.domain.Element;
 import com.intuit.fuzzymatcher.domain.Match;
 import com.intuit.fuzzymatcher.domain.Score;
 import com.intuit.fuzzymatcher.domain.Token;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -16,11 +14,9 @@ import java.util.stream.Stream;
  * Matches at element level with aggregated results from token.
  * This uses the ScoringFunction defined at each element to get the aggregated Element score for matched tokens
  */
-@Component
 public class ElementMatch {
 
-    @Autowired
-    private TokenMatch tokenMatch;
+    private static TokenMatch tokenMatch = new TokenMatch();
 
     public Stream<Match<Element>> matchElements(Stream<Element> elements) {
         Stream<Token> tokenStream = elements.flatMap(Element::getTokens);
