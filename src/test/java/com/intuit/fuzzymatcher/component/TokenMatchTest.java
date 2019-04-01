@@ -7,6 +7,7 @@ import com.intuit.fuzzymatcher.domain.Token;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,7 +42,7 @@ public class TokenMatchTest {
         Stream<Token> tokens = Stream.concat(element1.getType().getTokenizerFunction().apply(element1),element2.getType().getTokenizerFunction().apply(element2));
         TokenMatch tokenMatch = new TokenMatch();
         Stream<Match<Token>> matches = tokenMatch.matchTokens(tokens);
-        Assert.assertEquals(6, matches.collect(Collectors.toList()).size());
+        Assert.assertEquals(3, matches.collect(Collectors.toList()).size());
     }
 
 
@@ -100,5 +101,27 @@ public class TokenMatchTest {
         TokenMatch tokenMatch = new TokenMatch();
         Stream<Match<Token>> matches = tokenMatch.matchTokens(tokens);
         Assert.assertFalse(matches.anyMatch(d -> d.getData().getElement().getDocument().getKey().equals(d.getMatchedWith().getElement().getDocument().getKey())));
+    }
+
+    @Test
+    public void itShouldMatchTokens_ReducedMatchFunction(){
+        Element element1 = new Element.Builder().setType(NAME).setValue("James Parker").createElement();
+        Element element2 = new Element.Builder().setType(NAME).setValue("Parker Jamies").createElement();
+
+        Document document1 = new Document.Builder("1")
+                .addElement(element1)
+                .createDocument();
+        Document document2 = new Document.Builder("2")
+                .addElement(element2)
+                .createDocument();
+
+        element1.setDocument(document1);
+        element2.setDocument(document2);
+
+        Stream<Token> tokens = Stream.concat(element1.getType().getTokenizerFunction().apply(element1),element2.getType().getTokenizerFunction().apply(element2));
+        TokenMatch tokenMatch = new TokenMatch();
+        List<Match<Token>> matches = tokenMatch.matchTokens(tokens).collect(Collectors.toList());
+
+        Assert.assertEquals(2, matches.size());
     }
 }

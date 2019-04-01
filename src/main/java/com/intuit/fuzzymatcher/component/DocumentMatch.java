@@ -5,6 +5,7 @@ import com.intuit.fuzzymatcher.domain.Document;
 import com.intuit.fuzzymatcher.domain.Element;
 import com.intuit.fuzzymatcher.domain.Match;
 import com.intuit.fuzzymatcher.domain.Score;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -42,12 +43,17 @@ public class DocumentMatch {
         return groupBy.entrySet().parallelStream().flatMap(leftDocumentEntry ->
                 leftDocumentEntry.getValue().entrySet()
                         .parallelStream()
-                        .map(rightDocumentEntry -> {
+                        .flatMap(rightDocumentEntry -> {
                             List<Score> childScoreList = rightDocumentEntry.getValue()
                                     .stream()
                                     .map(d -> d.getScore())
                                     .collect(Collectors.toList());
-                            return new Match<Document>(leftDocumentEntry.getKey(), rightDocumentEntry.getKey(), childScoreList);
+                            Match<Document> leftMatch = new Match<Document>(leftDocumentEntry.getKey(), rightDocumentEntry.getKey(), childScoreList);
+                            if (BooleanUtils.isNotFalse(rightDocumentEntry.getKey().isSource())) {
+                                Match<Document> rightMatch = new Match<Document>(rightDocumentEntry.getKey(), leftDocumentEntry.getKey(), childScoreList);
+                                return Stream.of(leftMatch, rightMatch);
+                            }
+                            return Stream.of(leftMatch);
                         }))
                 .filter(match -> match.getResult() > match.getData().getThreshold());
     }

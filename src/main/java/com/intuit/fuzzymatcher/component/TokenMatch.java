@@ -6,8 +6,8 @@ import com.intuit.fuzzymatcher.domain.NGram;
 import com.intuit.fuzzymatcher.domain.Token;
 import org.apache.commons.lang3.BooleanUtils;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,17 +22,30 @@ public class TokenMatch {
         List<Token> tokenList = input.collect(Collectors.toList());
         initializeSearchGroups(tokenList);
 
+//        AtomicInteger index = new AtomicInteger();
+//        List<Match<Token>> res =  tokenList.parallelStream()
         return tokenList.parallelStream()
                 .filter(left -> BooleanUtils.isNotFalse(left.getElement().getDocument().isSource()))
                 .flatMap(
                         left -> left.getSearchGroups()
-                                .filter(right -> !left.getElement().getDocument().getKey().equals(right.getElement().getDocument().getKey()))
+                                .filter(right -> right != null && !left.getElement().getDocument().getKey().equals(right.getElement().getDocument().getKey()))
+                                //.filter(right -> !right.containstMatchedTokens(left))
                                 .map(right -> {
+                                    //index.incrementAndGet();
                                     double result = left.getElement().getSimilarityMatchFunction().apply(left, right);
+//                                    Match<Token> leftMatch =  new Match<Token>(left, right, result);
+//                                    if (BooleanUtils.isNotFalse(right.getElement().getDocument().isSource())) {
+//                                        return Stream.of(leftMatch, new Match<Token>(right, left, result));
+//                                    } else {
+//                                        return Stream.of(leftMatch);
+//                                    }
                                     return new Match<Token>(left, right, result);
                                 })
                                 .filter(match -> match.getResult() >= match.getData().getElement().getThreshold())
                 );
+//                .collect(Collectors.toList());
+//        System.out.println("conter : " + index.intValue());
+//        return  res.stream();
     }
 
     private void initializeSearchGroups(List<Token> input) {
@@ -50,9 +63,21 @@ public class TokenMatch {
                         .distinct()
                         .collect(Collectors.toList());
 
-                groups.parallelStream()
-                        .filter(token -> BooleanUtils.isNotFalse(token.getElement().getDocument().isSource()))
-                        .forEach(token -> token.setSearchGroups(Stream.concat(groups.stream(), token.getSearchGroups())));
+                groups.forEach(left -> {
+                    List<Token> matchGroups = groups.stream()
+                            .filter(right -> !left.getElement().getDocument().isMatchedWith(right.getElement().getDocument()))
+                            .collect(Collectors.toList());
+
+                    // Add Search Groups to reduce complexity
+                    if (BooleanUtils.isNotFalse(left.getElement().getDocument().isSource())) {
+                        left.setSearchGroups(Stream.concat(matchGroups.stream(), left.getSearchGroups()));
+                    }
+
+                    // Set Matched With Docs to reduce complexity to LogN
+                    matchGroups.parallelStream().forEach(right -> {
+                        right.getElement().getDocument().addMatchedWith(left.getElement().getDocument());
+                    });
+                });
 
             });
         });

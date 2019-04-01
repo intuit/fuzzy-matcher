@@ -40,6 +40,7 @@ public class Document implements Matchable {
     private double threshold;
     private Function<Match, Score> scoringFunction;
     private Boolean source;
+    private Set<Document> matchedWith = new HashSet<>();
 
     private static final Function<Match, Score> DEFAULT_DOCUMENT_SCORING = ScoringFunction.getExponentialWeightedAverageScore();
 
@@ -120,6 +121,14 @@ public class Document implements Matchable {
 
     public void setSource(Boolean source) {
         this.source = source;
+    }
+
+    public void addMatchedWith(Document document) {
+        this.matchedWith.add(document);
+    }
+
+    public boolean isMatchedWith(Document document) {
+        return this.matchedWith.contains(document);
     }
 
     public static class Builder {
