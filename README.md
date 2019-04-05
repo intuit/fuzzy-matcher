@@ -2,6 +2,7 @@
 * [Introduction](#introduction)
 * [How does this work](#how-does-this-work)
     * [Four Stages of Fuzzy Match](#four-stages-of-fuzzy-match)
+    * [Performance](#Performance)
 * [Building the Library](#building-the-library)
     * [Prerequisite](#prerequisite)
     * [Compiling and installing locally](#compiling-and-installing-locally)
@@ -60,6 +61,31 @@ be easily configured by passing a lambda expression.
     * _Exponential Average_: Again useful for Document Scoring, where if more than 1 element match, we can increase the scoring exponentially
     * _Exponential Weighted Average_: Uses both an exponents and weights for scoring. This is the default for Document Scoring
 
+### Performance
+Since this library can be used to match elements against a large set of records, knowing how it performs is essential.
+To find duplicates in a given set of records, this library avoids matching each element with every other element, and 
+reduces the complexity which otherwise would be O(N^2)
+
+#### Reducing Complexity to O(N Log N)
+To reduce the complexity, the similarity match algorithm's chosen are assumed to have an equivalence property. Where if 
+a name like "Stephen" matches with "Steven" with a score of 1.0, the reverse match is also assumed, and the library does
+not explicitly runs those matches
+
+#### Search Groups
+The library further reduces the complexity by not performing matches against the elements which have a very low 
+probability to match by creating "Search Groups". Take an example of list of names to match ```["steve","parker","stephen"]```
+These names are broken down into tri-grams like this
+```
+steve -> [ste,tev,eve]
+parker -> [par,ark,rke,ker]
+stephen -> [ste,tep,eph,phe,hen] 
+```    
+Here only the 1st and 3rd names have tri-grams in common "ste" (and a search group is created for them.)  
+The match algorithm assumes a very low probability that "parker" will match with the other 2, and hence no match is attempted with it. 
+
+The following chart shows the performance characterstics of this library as the number of elements increase.
+# <img src="perf.svg" height="60" width="60"/>
+
 ## Building the Library
 ### Prerequisite
 You need Java SDK v1.8 or higher. Before you begin, you should check your current Java installation by using the following command:
@@ -86,7 +112,7 @@ The library is pusblished to maven central
 <dependency>
     <groupId>com.intuit.fuzzymatcher</groupId>
     <artifactId>fuzzy-matcher</artifactId>
-    <version>0.1.0</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
