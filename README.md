@@ -84,7 +84,8 @@ Here only the 1st and 3rd names have tri-grams in common "ste" (and a search gro
 The match algorithm assumes a very low probability that "parker" will match with the other 2, and hence no match is attempted with it. 
 
 The following chart shows the performance characterstics of this library as the number of elements increase.
-# <img src="perf.svg" height="60" width="60"/>
+
+![Perf](perf.png?raw=true "Performance")
 
 ## Building the Library
 ### Prerequisite
