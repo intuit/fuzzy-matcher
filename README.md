@@ -63,12 +63,15 @@ be easily configured by passing a lambda expression.
 
 ### Performance
 Since this library can be used to match elements against a large set of records, knowing how it performs is essential.
-To find duplicates in a given set of records, this library avoids matching each element with every other element, and 
-reduces the complexity which otherwise would be O(N^2)
+
+
+This library makes use of Java 8 Stream to run all operations in parallel and makes optimum use of a multi-core cpu.
+Beyond that to find duplicates in a given set of records, this library avoids matching each element with every other 
+element, and reduces the complexity which otherwise would be O(N^2)
 
 #### Reducing Complexity to O(N Log N)
 To reduce the complexity, the similarity match algorithm's chosen are assumed to have an equivalence property. Where if 
-a name like "Stephen" matches with "Steven" with a score of 1.0, the reverse match is also assumed, and the library does
+a name like "Stephen" matches with "Steven" with a score of 1.0, the reverse match is assumed, and the library does
 not explicitly runs those matches
 
 #### Search Groups
@@ -80,10 +83,11 @@ steve -> [ste,tev,eve]
 parker -> [par,ark,rke,ker]
 stephen -> [ste,tep,eph,phe,hen] 
 ```    
-Here only the 1st and 3rd names have tri-grams in common "ste" (and a search group is created for them.)  
+Here only the 1st and 3rd names have tri-grams "ste" in common (and a search group is created for them.)  
 The match algorithm assumes a very low probability that "parker" will match with the other 2, and hence no match is attempted with it. 
 
-The following chart shows the performance characterstics of this library as the number of elements increase.
+The following chart shows the performance characteristics of this library as the number of elements increase. As you can see the 
+library maintains a near-linear performance and can match thousands of elements within seconds on a multi-core processor.
 
 ![Perf](perf.png?raw=true "Performance")
 
@@ -144,6 +148,10 @@ Below is the list of _Element Types_ available in the library with default _PreP
 | ___ADDRESS___ | addressPreprocessing() |    wordTokenizer()    |     soundex()    |
 |  ___EMAIL___  |     removeDomain()     |    nGramTokenizer()   |    equality()    |
 |  ___PHONE___  |     numericValue()     |    valueTokenizer()   |   phoneNumber()  |
+
+_Note: Since each element is unique in the way it should match, if you have a need to match a different element type than
+ what is supported, please open a new [GitHub Issue](https://github.com/intuit/fuzzy-matcher/issues) and the community 
+ will provide support and enhancement to this library_
 
 ### Applying the Match
 The entry point for running this program is through MatchService class.
