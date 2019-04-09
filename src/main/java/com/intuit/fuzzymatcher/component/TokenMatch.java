@@ -62,8 +62,8 @@ public class TokenMatch {
     private Stream<List<Token>> getGroupsByNGramAndType(List<Token> input) {
         Stream<NGram> nGramStream = input.parallelStream().flatMap(token -> token.getNGrams());
 
-        Map<ElementType, Map<String, List<Token>>> elementTypeByNgramByTokenMap =  nGramStream
-                .collect(Collectors.groupingBy(nGram -> nGram.getToken().getElement().getType(),
+        Map<String, Map<String, List<Token>>> elementTypeByNgramByTokenMap =  nGramStream
+                .collect(Collectors.groupingBy(nGram -> nGram.getToken().getElement().getClassification(),
                         Collectors.groupingBy(NGram::getValue,
                                 Collectors.mapping(NGram::getToken, Collectors.toList()))));
 

@@ -4,6 +4,7 @@ import com.intuit.fuzzymatcher.function.ScoringFunction;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.AbstractMap;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -32,22 +33,25 @@ public class Element implements Matchable {
     private double weight;
     private double threshold;
     private ElementType type;
+    private String variance;
     private Document document;
     private Function<String, String> preProcessFunction;
     private Function<Element, Stream<Token>> tokenizerFunction;
     private BiFunction<Token, Token, Double> similarityMatchFunction;
     private Function<Match, Score> scoringFunction;
+    private String classification;
 
     private String preProcessedValue;
 
     private static final Function<Match, Score> DEFAULT_ELEMENT_SCORING = ScoringFunction.getAverageScore();
 
-    public Element(ElementType type, String value, double weight, double threshold,
+    public Element(ElementType type, String variance, String value, double weight, double threshold,
                    Function<String, String> preProcessFunction,
                    Function<Element, Stream<Token>> tokenizerFunction,
                    BiFunction<Token, Token, Double> similarityMatchFunction, Function<Match, Score> scoringFunction) {
         this.weight = weight;
         this.type = type;
+        this.variance = variance;
         this.value = value;
         this.threshold = threshold;
         this.preProcessFunction = preProcessFunction;
@@ -58,6 +62,17 @@ public class Element implements Matchable {
 
     public ElementType getType() {
         return type;
+    }
+
+    public String getVariance() {
+        return variance;
+    }
+
+    public String getClassification() {
+        if (this.classification == null) {
+            this.classification = this.type.name() + StringUtils.defaultString(this.variance);
+        }
+        return this.classification;
     }
 
     public String getValue() {
@@ -97,7 +112,7 @@ public class Element implements Matchable {
     }
 
     public AbstractMap.SimpleEntry getPreprocessedValueWithType() {
-        return new AbstractMap.SimpleEntry(this.getType(), this.getPreProcessedValue());
+        return new AbstractMap.SimpleEntry(this.getClassification(), this.getPreProcessedValue());
     }
 
     public Function<Element, Stream<Token>> getTokenizerFunction() {
@@ -139,6 +154,7 @@ public class Element implements Matchable {
 
     public static class Builder {
         private ElementType type;
+        private String variance;
         private String value;
         private double weight = 1.0;
         private double threshold = 0.3;
@@ -150,6 +166,11 @@ public class Element implements Matchable {
 
         public Builder setType(ElementType type) {
             this.type = type;
+            return this;
+        }
+
+        public Builder setVariance(String variance) {
+            this.variance = variance;
             return this;
         }
 
@@ -190,7 +211,7 @@ public class Element implements Matchable {
         }
 
         public Element createElement() {
-            return new Element(type, value, weight, threshold, preProcessFunction, tokenizerFunction,
+            return new Element(type, variance, value, weight, threshold, preProcessFunction, tokenizerFunction,
                     similarityMatchFunction, scoringFunction);
         }
     }
@@ -211,13 +232,15 @@ public class Element implements Matchable {
 
         if (!value.equals(element.value)) return false;
         if (type != element.type) return false;
-        return !(document != null ? !document.equals(element.document) : element.document != null);
+        if (variance != null ? !variance.equals(element.variance) : element.variance != null) return false;
+        return document != null ? document.equals(element.document) : element.document == null;
     }
 
     @Override
     public int hashCode() {
         int result = value.hashCode();
         result = 31 * result + type.hashCode();
+        result = 31 * result + (variance != null ? variance.hashCode() : 0);
         result = 31 * result + (document != null ? document.hashCode() : 0);
         return result;
     }
