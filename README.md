@@ -232,6 +232,7 @@ This allows you to change the entire behavior of how matches are applied at all 
 ### Element Configuration
 * __Value__ : String representation of the value to match
 * __Type__ : These are predefined elements, which applies relevant functions for "PreProcessing", "Tokenization" and "SimilarityMatch"
+* __Variance__: (Optional) To differentiate same element types in a document. eg. a document containing 2 NAME element one for "user" and one for "spouse"
 * __Threshold__ : A double value between 0.0 - 1.0 above which the element be considered as match.
 * __Weight__ : A value applied to an element to increase or decrease the document score.
     The default is 1.0, any value above that will increase the document score if that element is matched.
