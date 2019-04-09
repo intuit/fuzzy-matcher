@@ -39,6 +39,7 @@ public class Element implements Matchable {
     private Function<Element, Stream<Token>> tokenizerFunction;
     private BiFunction<Token, Token, Double> similarityMatchFunction;
     private Function<Match, Score> scoringFunction;
+    private String classification;
 
     private String preProcessedValue;
 
@@ -68,7 +69,10 @@ public class Element implements Matchable {
     }
 
     public String getClassification() {
-        return this.type.name() + this.variance;
+        if (this.classification == null) {
+            this.classification = this.type.name() + StringUtils.defaultString(this.variance);
+        }
+        return this.classification;
     }
 
     public String getValue() {

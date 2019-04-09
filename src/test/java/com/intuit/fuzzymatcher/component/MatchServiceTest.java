@@ -449,6 +449,35 @@ public class MatchServiceTest {
                 .map(entry -> entry.getValue()).collect(Collectors.toList()).get(0).get(0).getResult(), 0.01);
     }
 
+    @Test
+    public void itShouldApplyMatchWithVariance() {
+        List<Document> inputData = new ArrayList<>();
+        inputData.add(new Document.Builder("1")
+                .addElement(new Element.Builder().setType(NAME).setVariance("self").setValue("Tom Kelly").createElement())
+                .createDocument());
+        inputData.add(new Document.Builder("2")
+                .addElement(new Element.Builder().setType(NAME).setVariance("self").setValue("tom kelly").createElement())
+                .createDocument());
+        Map<Document, List<Match<Document>>> result = matchService.applyMatch(inputData);
+        Assert.assertEquals(2, result.size());
+        Assert.assertThat(result.entrySet().stream()
+                        .map(entry -> entry.getKey().getKey()).collect(Collectors.toList()),
+                CoreMatchers.hasItems("1", "2"));
+    }
+
+    @Test
+    public void itShouldApplyMatchWithDifferentVariance() {
+        List<Document> inputData = new ArrayList<>();
+        inputData.add(new Document.Builder("1")
+                .addElement(new Element.Builder().setType(NAME).setVariance("self").setValue("Tom Kelly").createElement())
+                .createDocument());
+        inputData.add(new Document.Builder("2")
+                .addElement(new Element.Builder().setType(NAME).setVariance("spouse").setValue("tom kelly").createElement())
+                .createDocument());
+        Map<Document, List<Match<Document>>> result = matchService.applyMatch(inputData);
+        Assert.assertEquals(0, result.size());
+    }
+
     public static void writeOutput(Map<String, List<Match<Document>>> result) throws IOException {
         CSVWriter writer = new CSVWriter(new FileWriter("src/test/resources/output.csv"));
         writer.writeNext(new String[]{"Key", "Matched Key", "Score", "Name", "Address", "Email", "Phone"});

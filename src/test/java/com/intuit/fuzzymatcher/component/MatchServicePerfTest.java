@@ -30,6 +30,8 @@ public class MatchServicePerfTest {
 
     private MatchService matchService = new MatchService();
 
+    private static final int ELEM_PER_DOC = 4;
+
     @Test
     public void itShouldApplyMatchForBigData() throws IOException {
         List<Document> bigData = getBigDataDocuments();
@@ -52,7 +54,7 @@ public class MatchServicePerfTest {
         long endTime = System.nanoTime();
         //Assert.assertEquals(116, result.size());
         long duration = (endTime - startTime) / 1000000;
-        System.out.println("Execution time (ms) for + " + documentList.size() + " count : " + duration);
+        System.out.println("Execution time (ms) for + " + documentList.size() * ELEM_PER_DOC + " count : " + duration);
     }
 
     public List<Document> getBigDataDocuments() throws FileNotFoundException {
