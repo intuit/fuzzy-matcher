@@ -60,4 +60,18 @@ public class PreProcessFunctionTest {
         Element element = new Element.Builder().setType(PHONE).setValue(value).createElement();
         Assert.assertEquals("11234564345", element.getPreProcessedValue());
     }
+
+    @Test
+    public void itShouldApplyNumberPreprocessing_Success(){
+        String value = "$ value -34.76";
+        Element element = new Element.Builder().setType(NUMBER).setValue(value).createElement();
+        Assert.assertEquals("-34.76", element.getPreProcessedValue());
+    }
+
+    @Test
+    public void itShouldApplyNumberPreprocessing_Failure(){
+        String value = "$ value thirty four";
+        Element element = new Element.Builder().setType(NUMBER).setValue(value).createElement();
+        Assert.assertEquals(value, element.getPreProcessedValue());
+    }
 }

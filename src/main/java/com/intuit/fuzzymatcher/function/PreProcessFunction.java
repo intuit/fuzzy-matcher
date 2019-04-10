@@ -5,6 +5,8 @@ import com.intuit.fuzzymatcher.util.Utils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A functional interface to pre-process the elements. These function are applied to element.value String's
@@ -116,5 +118,13 @@ public interface PreProcessFunction extends Function<String, String> {
      */
     static PreProcessFunction usPhoneNormalization() {
         return str -> numericValue().andThen(s -> (s.length() == 10) ? "1" + s : s).apply(str);
+    }
+
+    static PreProcessFunction numberPreprocessing() {
+        return (str) ->  {
+            Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+            Matcher matcher = pattern.matcher(str);
+            return matcher.find() ? matcher.group() : str;
+        };
     }
 }

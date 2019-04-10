@@ -41,6 +41,15 @@ public class TokenizerFunctionTest {
         String value = "1234567890";
         Element elem = new Element.Builder().setType(PHONE).setValue(value).createElement();
         Assert.assertEquals(1, valueTokenizer().apply(elem).count() );
+        Assert.assertEquals("11234567890", valueTokenizer().apply(elem).findFirst().get().getValue() );
+    }
+
+    @Test
+    public void itShouldGetValueTokenizerForNumber_Success(){
+        String value = "123.34";
+        Element elem = new Element.Builder().setType(NUMBER).setValue(value).createElement();
+        Assert.assertEquals(1, valueTokenizer().apply(elem).count() );
+        Assert.assertEquals("123.34", valueTokenizer().apply(elem).findFirst().get().getValue() );
     }
 
     @Test

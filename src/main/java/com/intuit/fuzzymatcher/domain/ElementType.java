@@ -20,7 +20,9 @@ public enum ElementType {
     TEXT(removeSpecialChars(), wordTokenizer(), soundex()),
     ADDRESS(addressPreprocessing(), wordTokenizer(), soundex()),
     EMAIL(removeDomain(), triGramTokenizer(),  equality()),
-    PHONE(usPhoneNormalization(),decaGramTokenizer(), equality());
+    PHONE(usPhoneNormalization(),decaGramTokenizer(), equality()),
+    NUMBER(numberPreprocessing(),valueTokenizer(),numberDifferenceRate());
+
 
     private final Function<String, String> preProcessFunction;
 

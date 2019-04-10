@@ -102,4 +102,37 @@ public class SimilarityMatchFunctionTest {
         Assert.assertEquals(0.0, score, 0.0);
     }
 
+    @Test
+    public void itShouldGetNumberDifferenceRateWith1() {
+        Element element = new Element(ElementType.NUMBER,null,"", 1.0, 0.5,
+                null, null, null, null);
+        Token left = new Token("12.23", element);
+        Token right = new Token("12.23", element);
+
+        double score = SimilarityMatchFunction.numberDifferenceRate().apply(left, right);
+        Assert.assertEquals(1.0, score, 0.0);
+    }
+
+    @Test
+    public void itShouldGetNumberDifferenceRateWithLessThan1() {
+        Element element = new Element(ElementType.NUMBER,null,"", 1.0, 0.5,
+                null, null, null, null);
+        Token left = new Token("80", element);
+        Token right = new Token("100", element);
+
+        double score = SimilarityMatchFunction.numberDifferenceRate().apply(left, right);
+        Assert.assertEquals(0.778, score, 0.001);
+    }
+
+    @Test
+    public void itShouldGetNumberDifferenceRateWith0() {
+        Element element = new Element(ElementType.NUMBER,null,"", 1.0, 0.5,
+                null, null, null, null);
+        Token left = new Token("1000", element);
+        Token right = new Token("80", element);
+
+        double score = SimilarityMatchFunction.numberDifferenceRate().apply(left, right);
+        Assert.assertEquals(0.0, score, 0.001);
+    }
+
 }
