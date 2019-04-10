@@ -6,8 +6,11 @@ import com.intuit.fuzzymatcher.domain.NGram;
 import com.intuit.fuzzymatcher.domain.Token;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,7 +22,17 @@ import java.util.stream.Stream;
 public class TokenMatch {
 
     public Stream<Match<Token>> matchTokens(Stream<Token> input) {
-        List<Token> tokenList = input.collect(Collectors.toList());
+        Map<String, List<Token>> tokenClassMap =  input.collect(Collectors
+                .groupingBy(token -> token.getElement().getClassification()));
+        return tokenClassMap.entrySet().parallelStream().flatMap(entry -> {
+            if (entry.getKey().startsWith(ElementType.NUMBER.toString())) {
+                return matchTokensWithSortOptimization(entry.getValue());
+            }
+            return matchTokensWithSearchGroupsOptimization(entry.getValue());
+        });
+    }
+
+    public Stream<Match<Token>> matchTokensWithSearchGroupsOptimization(List<Token> tokenList) {
         initializeSearchGroups(tokenList);
 
         return tokenList.parallelStream()
@@ -35,9 +48,30 @@ public class TokenMatch {
                 );
     }
 
+
+
+    public Stream<Match<Token>> matchTokensWithSortOptimization(List<Token> tokenList) {
+        Collections.sort(tokenList);
+        List<Match<Token>> matchList = new ArrayList<>();
+        for (int i= 0; i < tokenList.size(); i++) {
+            Token left =  tokenList.get(i);
+            for (int j = i +1 ; j < tokenList.size(); j++) {
+                Token right = tokenList.get(j);
+                if (!left.getElement().getDocument().getKey().equals(right.getElement().getDocument().getKey())) {
+                    double result = left.getElement().getSimilarityMatchFunction().apply(left, right);
+//                    if(result < left.getElement().getThreshold()) {
+//                        break;
+//                    }
+                    matchList.add(new Match<Token>(left, right, result));
+                }
+            }
+        }
+        return matchList.stream();
+    }
+
     private void initializeSearchGroups(List<Token> input) {
 
-        getGroupsByNGramAndType(input).forEach(groups -> {
+        getGroupsByNGram(input).forEach(groups -> {
 
             groups.stream()
                     .filter(t -> BooleanUtils.isNotFalse(t.getElement().getDocument().isSource()))
@@ -59,14 +93,13 @@ public class TokenMatch {
 
     }
 
-    private Stream<List<Token>> getGroupsByNGramAndType(List<Token> input) {
+    private Stream<List<Token>> getGroupsByNGram(List<Token> input) {
         Stream<NGram> nGramStream = input.parallelStream().flatMap(token -> token.getNGrams());
 
-        Map<String, Map<String, List<Token>>> elementTypeByNgramByTokenMap =  nGramStream
-                .collect(Collectors.groupingBy(nGram -> nGram.getToken().getElement().getClassification(),
-                        Collectors.groupingBy(NGram::getValue,
-                                Collectors.mapping(NGram::getToken, Collectors.toList()))));
+        Map<String, List<Token>> ngramByTokenMap =  nGramStream
+                .collect(Collectors.groupingBy(NGram::getValue,
+                                Collectors.mapping(NGram::getToken, Collectors.toList())));
 
-        return elementTypeByNgramByTokenMap.values().stream().flatMap(map -> map.values().stream());
+        return ngramByTokenMap.values().stream();
     }
 }

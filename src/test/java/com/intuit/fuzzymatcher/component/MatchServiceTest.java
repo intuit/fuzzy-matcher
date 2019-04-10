@@ -478,6 +478,24 @@ public class MatchServiceTest {
         Assert.assertEquals(0, result.size());
     }
 
+    @Test
+    public void itShouldApplyMatchWithNumber() {
+        List<String> numbers = Arrays.asList("23", "22", "10", "5", "9", "11", "10.5", "23.5");
+        AtomicInteger ai = new AtomicInteger(0);
+        List<Document> documentList = numbers.stream().map(num -> {
+            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
+                    .addElement(new Element.Builder().setType(NUMBER).setValue(num).createElement())
+                    .createDocument();
+        }).collect(Collectors.toList());
+        Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
+        result.entrySet().forEach(entry -> {
+            entry.getValue().forEach(match -> {
+                System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
+            });
+        });
+        Assert.assertEquals(7, result.size());
+    }
+
     public static void writeOutput(Map<String, List<Match<Document>>> result) throws IOException {
         CSVWriter writer = new CSVWriter(new FileWriter("src/test/resources/output.csv"));
         writer.writeNext(new String[]{"Key", "Matched Key", "Score", "Name", "Address", "Email", "Phone"});
