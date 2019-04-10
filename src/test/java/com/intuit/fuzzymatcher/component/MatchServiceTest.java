@@ -484,7 +484,7 @@ public class MatchServiceTest {
         AtomicInteger ai = new AtomicInteger(0);
         List<Document> documentList = numbers.stream().map(num -> {
             return new Document.Builder(Integer.toString(ai.incrementAndGet()))
-                    .addElement(new Element.Builder().setType(NUMBER).setValue(num).createElement())
+                    .addElement(new Element.Builder().setType(NUMBER).setValue(num).setThreshold(0.95).createElement())
                     .createDocument();
         }).collect(Collectors.toList());
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
@@ -493,7 +493,7 @@ public class MatchServiceTest {
                 System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
             });
         });
-        Assert.assertEquals(7, result.size());
+        Assert.assertEquals(6, result.size());
     }
 
     public static void writeOutput(Map<String, List<Match<Document>>> result) throws IOException {
