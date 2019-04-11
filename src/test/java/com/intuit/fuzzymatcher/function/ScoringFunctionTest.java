@@ -104,7 +104,7 @@ public class ScoringFunctionTest {
         element1.setDocument(document1);
         element2.setDocument(document2);
 
-        Stream<Token> tokens = Stream.concat(element1.getType().getTokenizerFunction().apply(element1),element2.getType().getTokenizerFunction().apply(element2));
+        Stream<Token> tokens = Stream.concat(element1.getTokenizerFunction().apply(element1),element2.getTokenizerFunction().apply(element2));
         TokenMatch tokenMatch = new TokenMatch();
         Stream<Match<Token>> matches = tokenMatch.matchTokens(tokens);
         List<Score> childResults = matches.filter(d->d.getData().getElement().getDocument().getKey().equals("1"))

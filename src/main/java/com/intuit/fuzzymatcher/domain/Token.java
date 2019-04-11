@@ -10,7 +10,7 @@ import java.util.stream.Stream;
  *
  * Elements are broken down into Token class using the TokenizerFunction
  */
-public class Token implements Matchable, Comparable<Token> {
+public class Token implements Matchable {
 
     public Token(String value, Element element) {
         this(value, element, false);
@@ -99,10 +99,5 @@ public class Token implements Matchable, Comparable<Token> {
     public int hashCode() {
 
         return Objects.hash(value, element);
-    }
-
-    @Override
-    public int compareTo(Token o) {
-        return this.value.compareTo(o.value);
     }
 }
