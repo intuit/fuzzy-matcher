@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static com.intuit.fuzzymatcher.domain.ElementType.*;
@@ -22,11 +24,26 @@ public class ScoringFunctionTest {
         Document document2 = getMockDocument(4L, 0L);
 
         Match<Document> match = getMockMatch(document1, document2,
-                new Match(getMockElement(1.0), null, 0.66),
-                new Match(getMockElement(2.0), null, 1.0));
+                new Match(getMockElement(1.0, 1), null, 0.66),
+                new Match(getMockElement(2.0, 1), null, 1.0));
 
         Score score = ScoringFunction.getAverageScore().apply(match);
         Assert.assertEquals(0.41, score.getResult(), 0.01);
+    }
+
+    @Test
+    public void itShouldGiveAverageScoreWithElements_Success(){
+        Element element1 = getMockElement(1L, 7);
+        Element element2 = getMockElement(1L, 5);
+
+        Match<Document> match = getMockMatch(element1, element2,
+                new Match(getMockToken(), null, 0.66),
+                new Match(getMockToken(), null, 0.78),
+                new Match(getMockToken(), null, 0.95),
+                new Match(getMockToken(), null, 1.0));
+
+        Score score = ScoringFunction.getAverageScore().apply(match);
+        Assert.assertEquals(0.48, score.getResult(), 0.01);
     }
 
     @Test
@@ -35,13 +52,40 @@ public class ScoringFunctionTest {
         Document document2 = getMockDocument(4L, 0L);
 
         Match<Document> match = getMockMatch(document1, document2,
-                new Match(getMockElement(1.0), null, 0.5),
-                new Match(getMockElement(2.0), null, 1.0));
+                new Match(getMockElement(1.0, 1), null, 0.5),
+                new Match(getMockElement(2.0, 1), null, 1.0));
 
         Score score = ScoringFunction.getAverageScore().apply(match);
         Assert.assertEquals(.62, score.getResult(), 0.01);
     }
 
+    @Test
+    public void itShouldGiveSimpleAverageScore_Success(){
+        Document document1 = getMockDocument(4L, 0L);
+        Document document2 = getMockDocument(4L, 0L);
+
+        Match<Document> match = getMockMatch(document1, document2,
+                new Match(getMockElement(1.0, 1), null, 0.66),
+                new Match(getMockElement(2.0, 1), null, 1.0));
+
+        Score score = ScoringFunction.getSimpleAverageScore().apply(match);
+        Assert.assertEquals(0.41, score.getResult(), 0.01);
+    }
+
+    @Test
+    public void itShouldGiveSimpleAverageScoreWithElements_Success(){
+        Element element1 = getMockElement(1L, 7);
+        Element element2 = getMockElement(1L, 5);
+
+        Match<Document> match = getMockMatch(element1, element2,
+                new Match(getMockToken(), null, 0.66),
+                new Match(getMockToken(), null, 0.78),
+                new Match(getMockToken(), null, 0.95),
+                new Match(getMockToken(), null, 1.0));
+
+        Score score = ScoringFunction.getSimpleAverageScore().apply(match);
+        Assert.assertEquals(0.48, score.getResult(), 0.01);
+    }
 
     @Test
     public void itShouldGetExponentialScoring_Success(){
@@ -49,8 +93,8 @@ public class ScoringFunctionTest {
         Document document2 = getMockDocument(4L, 0L);
 
         Match<Document> match = getMockMatch(document1, document2,
-                new Match(getMockElement(1.0), null, 1.0),
-                new Match(getMockElement(2.0), null, 1.0));
+                new Match(getMockElement(1.0, 1), null, 1.0),
+                new Match(getMockElement(2.0, 1), null, 1.0));
 
         Score score = ScoringFunction.getExponentialAverageScore().apply(match);
         Assert.assertEquals(.79, score.getResult(), 0.01);
@@ -62,8 +106,8 @@ public class ScoringFunctionTest {
         Document document2 = getMockDocument(4L, 0L);
 
         Match<Document> match = getMockMatch(document1, document2,
-                new Match(getMockElement(1.0), null, 1.0),
-                new Match(getMockElement(2.0), null, 1.0));
+                new Match(getMockElement(1.0, 1), null, 1.0),
+                new Match(getMockElement(2.0, 1), null, 1.0));
         Score score = ScoringFunction.getWeightedAverageScore().apply(match);
         Assert.assertEquals(.8, score.getResult(), 0.01);
     }
@@ -75,8 +119,8 @@ public class ScoringFunctionTest {
         Document document2 = getMockDocument(4L, 0L);
 
         Match<Document> match = getMockMatch(document1, document2,
-                new Match(getMockElement(1.0), null, 1.0),
-                new Match(getMockElement(2.0), null, 1.0));
+                new Match(getMockElement(1.0, 1), null, 1.0),
+                new Match(getMockElement(2.0, 1), null, 1.0));
 
         Score score = ScoringFunction.getExponentialWeightedAverageScore().apply(match);
         Assert.assertEquals(.86, score.getResult(), 0.01);
@@ -152,14 +196,28 @@ public class ScoringFunctionTest {
         return doc;
     }
 
-    private Element getMockElement(double weight) {
+    private Element getMockElement(double weight, long childCount) {
         Element element = mock(Element.class);
         when(element.getWeight()).thenReturn(weight);
+        Stream<Token> tokens =  LongStream.range(0, childCount).mapToObj(l -> getMockToken());
+        when(element.getTokens()).thenReturn(tokens);
         return element;
+    }
+
+    private Token getMockToken() {
+        Token token = mock(Token.class);
+        return token;
     }
 
     private Match getMockMatch(Document doc1, Document doc2, Match... matches) {
         List<Score> childScores = Stream.of(matches).map(Match::getScore).collect(Collectors.toList());
         return new Match<>(doc1, doc2, childScores);
+    }
+
+    private Match getMockMatch(Element elem1, Element elem2, Match... matches) {
+        List<Score> childScores = Stream.of(matches).map(Match::getScore).collect(Collectors.toList());
+        long max = Math.max(elem1.getTokens().count(), elem2.getTokens().count());
+        when(elem1.getChildCount(any())).thenReturn(max);
+        return new Match<>(elem1, elem2, childScores);
     }
 }

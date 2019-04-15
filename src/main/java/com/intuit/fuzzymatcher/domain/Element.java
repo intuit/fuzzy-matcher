@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.intuit.fuzzymatcher.function.PreProcessFunction.toLowerCase;
@@ -39,10 +40,11 @@ public class Element implements Matchable {
     private Function<Element, Stream<Token>> tokenizerFunction;
     private BiFunction<Token, Token, Double> similarityMatchFunction;
     private Function<Match, Score> scoringFunction;
+    private List<Token> tokens;
 
     private String preProcessedValue;
 
-    private static final Function<Match, Score> DEFAULT_ELEMENT_SCORING = ScoringFunction.getAverageScore();
+    private static final Function<Match, Score> DEFAULT_ELEMENT_SCORING = ScoringFunction.getSimpleAverageScore();
 
     public Element(ElementType type, String variance, String value, double weight, double threshold,
                    Function<String, String> preProcessFunction,
@@ -116,13 +118,22 @@ public class Element implements Matchable {
     }
 
     public Stream<Token> getTokens() {
-        return getTokenizerFunction().apply(this).distinct();
+        if (this.tokens == null) {
+            this.tokens = getTokenizerFunction().apply(this).distinct().collect(Collectors.toList());
+        }
+        return this.tokens.stream();
     }
 
     public BiFunction<Token, Token, Double> getSimilarityMatchFunction() {
-        return this.similarityMatchFunction ;
+        return this.similarityMatchFunction;
     }
 
+
+    /**
+     * This gets the Max number of tokens present between matching Elements.
+     * For Elements that do not have a balanced set of tokens, it can push the score down.
+     * TODO: Need to evaluate an average of the two.
+     */
     @Override
     public long getChildCount(Matchable other) {
         if (other instanceof Element) {
