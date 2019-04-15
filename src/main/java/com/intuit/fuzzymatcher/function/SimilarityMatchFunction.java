@@ -68,7 +68,7 @@ public interface SimilarityMatchFunction extends BiFunction<Token, Token, Double
         return (left, right) -> {
             Double leftValue = NumberUtils.isNumber(left.getValue()) ? Double.valueOf(left.getValue()) : Double.NaN;
             Double rightValue = NumberUtils.isNumber(right.getValue()) ? Double.valueOf(right.getValue()) : Double.NaN;
-            if(leftValue == Double.NaN || rightValue == Double.NaN) {
+            if(leftValue.isNaN()|| rightValue.isNaN()) {
                 return  0.0;
             }
             Double diff = Math.abs(leftValue - rightValue);

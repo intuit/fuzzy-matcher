@@ -54,6 +54,7 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
                 Token right = tokenList.get(j);
                 if (!left.getElement().getDocument().getKey().equals(right.getElement().getDocument().getKey())) {
                     double result = left.getElement().getSimilarityMatchFunction().apply(left, right);
+                    // TODO: Should break at a Token Threshold (which should be a function of Element Threshold)
                     if(result < left.getElement().getThreshold()) {
                         break;
                     }
