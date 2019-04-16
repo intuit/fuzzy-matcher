@@ -66,13 +66,6 @@ public class Element implements Matchable {
         return elementClassification;
     }
 
-//    public String getClassification() {
-//        if (this.classification == null) {
-//            this.classification = this.type.name() + StringUtils.defaultString(this.variance);
-//        }
-//        return this.classification;
-//    }
-
     public String getValue() {
         return value;
     }
