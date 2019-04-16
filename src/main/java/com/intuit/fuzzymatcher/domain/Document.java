@@ -70,7 +70,12 @@ public class Document implements Matchable {
 
     public Stream<Element> getDistinctNonEmptyElements() {
         return getDistinctElements()
-                .filter(m -> !StringUtils.isEmpty(m.getPreProcessedValue()));
+                .filter(m -> {
+                    if (m.getPreProcessedValue() instanceof String) {
+                        return !StringUtils.isEmpty(m.getPreProcessedValue().toString());
+                    } else
+                    return m.getPreProcessedValue() != null;
+                });
     }
 
     private static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {

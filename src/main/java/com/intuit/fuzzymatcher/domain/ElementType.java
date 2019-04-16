@@ -26,7 +26,7 @@ public enum ElementType {
     NUMBER(numberPreprocessing(),valueTokenizer(),numberDifferenceRate(), numberSortOptimizer());
 
 
-    private final Function<String, String> preProcessFunction;
+    private final Function<Object, Object> preProcessFunction;
 
     private final Function<Element, Stream<Token>> tokenizerFunction;
 
@@ -34,7 +34,7 @@ public enum ElementType {
 
     private final Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction;
 
-    ElementType(Function<String, String> preProcessFunction, Function<Element, Stream<Token>> tokenizerFunction,
+    ElementType(Function<Object, Object> preProcessFunction, Function<Element, Stream<Token>> tokenizerFunction,
                 BiFunction<Token, Token, Double> similarityMatchFunction, Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction) {
         this.preProcessFunction = preProcessFunction;
         this.tokenizerFunction = tokenizerFunction;
@@ -42,7 +42,7 @@ public enum ElementType {
         this.matchOptimizerFunction = matchOptimizerFunction;
     }
 
-    public Function<String, String> getPreProcessFunction() {
+    public Function<Object, Object> getPreProcessFunction() {
         return preProcessFunction;
     }
 

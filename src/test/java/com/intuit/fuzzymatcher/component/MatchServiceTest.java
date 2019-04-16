@@ -498,6 +498,24 @@ public class MatchServiceTest {
         Assert.assertEquals(6, result.size());
     }
 
+    @Test
+    public void itShouldApplyMatchWithDoubleType() {
+        List<Double> numbers = Arrays.asList(23D, 22D, 10D, 5D, 9D, 11D, 10.5, 23.5);
+        AtomicInteger ai = new AtomicInteger(0);
+        List<Document> documentList = numbers.stream().map(num -> {
+            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
+                    .addElement(new Element.Builder().setType(NUMBER).setValue(num).setThreshold(0.95).createElement())
+                    .createDocument();
+        }).collect(Collectors.toList());
+        Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
+        result.entrySet().forEach(entry -> {
+            entry.getValue().forEach(match -> {
+                System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
+            });
+        });
+        Assert.assertEquals(6, result.size());
+    }
+
     public static void writeOutput(Map<String, List<Match<Document>>> result) throws IOException {
         CSVWriter writer = new CSVWriter(new FileWriter("src/test/resources/output.csv"));
         writer.writeNext(new String[]{"Key", "Matched Key", "Score", "Name", "Address", "Email", "Phone"});
@@ -522,8 +540,8 @@ public class MatchServiceTest {
         writer.close();
     }
 
-    private List<Document> getTestData(Function<String, String> namePreProcessing,
-                                       Function<String, String> addressPreProcessing, double docThreshold) throws FileNotFoundException {
+    private List<Document> getTestData(Function<Object, Object> namePreProcessing,
+                                       Function<Object, Object> addressPreProcessing, double docThreshold) throws FileNotFoundException {
         return StreamSupport.stream(getCSVReader("test-data.csv").spliterator(), false).map(csv -> {
             return new Document.Builder(csv[0])
                     .addElement(new Element.Builder().setType(NAME).setValue(csv[1])

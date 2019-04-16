@@ -8,7 +8,7 @@ package com.intuit.fuzzymatcher.domain;
  * A similar set of Token's are identified and stored in the Tokens as "SearchGroups"
  */
 public class NGram extends Token {
-    public NGram(String value, Token token) {
+    public NGram(Object value, Token token) {
         super(value, token.getElement());
         this.token = token;
     }

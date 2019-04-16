@@ -17,7 +17,7 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
             Collections.sort(tokenList, new Comparator<Token>() {
                 @Override
                 public int compare(Token o1, Token o2) {
-                    return stringToDouble(o1.getValue()).compareTo(stringToDouble(o2.getValue()));
+                    return stringToDouble(o1.getValue().toString()).compareTo(stringToDouble(o2.getValue().toString()));
                 }
             });
             return applySortMatch(tokenList);
@@ -37,7 +37,7 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
             Collections.sort(tokenList, new Comparator<Token>() {
                 @Override
                 public int compare(Token o1, Token o2) {
-                    return o1.getValue().compareTo(o2.getValue());
+                    return o1.getValue().toString().compareTo(o2.getValue().toString());
                 }
             });
             return applySortMatch(tokenList);
@@ -109,11 +109,11 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
     static Stream<List<Token>> getGroupsByNGram(List<Token> input) {
         Stream<NGram> nGramStream = input.parallelStream().flatMap(token -> token.getNGrams());
 
-        Map<String, List<Token>> ngramByTokenMap = nGramStream
+        Map<Object, List<Token>> ngramByTokenMap = nGramStream
                 .collect(Collectors.groupingBy(NGram::getValue,
                         Collectors.mapping(NGram::getToken, Collectors.toList())));
 
-        return ngramByTokenMap.values().stream();
+        return ngramByTokenMap.values().stream().distinct().filter(list -> list.size() > 1);
     }
 
 }

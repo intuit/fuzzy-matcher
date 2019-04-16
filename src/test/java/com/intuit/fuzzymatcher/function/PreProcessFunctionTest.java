@@ -43,7 +43,7 @@ public class PreProcessFunctionTest {
 
         Element element1 = new Element.Builder().setType(TEXT).setValue(value)
                 .setPreProcessingFunction(PreProcessFunction.removeSpecialChars()
-                        .compose(str -> str.replace("jr.", ""))).createElement();
+                        .compose(str -> str.toString().replace("jr.", ""))).createElement();
         Assert.assertEquals("james parker", element1.getPreProcessedValue());
     }
 
