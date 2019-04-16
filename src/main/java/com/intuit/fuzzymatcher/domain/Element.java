@@ -4,9 +4,11 @@ import com.intuit.fuzzymatcher.function.ScoringFunction;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.AbstractMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.intuit.fuzzymatcher.function.PreProcessFunction.toLowerCase;
@@ -32,47 +34,36 @@ public class Element implements Matchable {
     private String value;
     private double weight;
     private double threshold;
-    private ElementType type;
-    private String variance;
+    private ElementClassification elementClassification;
     private Document document;
     private Function<String, String> preProcessFunction;
     private Function<Element, Stream<Token>> tokenizerFunction;
     private BiFunction<Token, Token, Double> similarityMatchFunction;
     private Function<Match, Score> scoringFunction;
-    private String classification;
+    private List<Token> tokens;
 
     private String preProcessedValue;
 
-    private static final Function<Match, Score> DEFAULT_ELEMENT_SCORING = ScoringFunction.getAverageScore();
+    private static final Function<Match, Score> DEFAULT_ELEMENT_SCORING = ScoringFunction.getSimpleAverageScore();
 
     public Element(ElementType type, String variance, String value, double weight, double threshold,
                    Function<String, String> preProcessFunction,
                    Function<Element, Stream<Token>> tokenizerFunction,
-                   BiFunction<Token, Token, Double> similarityMatchFunction, Function<Match, Score> scoringFunction) {
+                   BiFunction<Token, Token, Double> similarityMatchFunction, Function<Match, Score> scoringFunction,
+                   Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction) {
         this.weight = weight;
-        this.type = type;
-        this.variance = variance;
+        this.elementClassification = new ElementClassification(type, variance,
+                matchOptimizerFunction == null ? type.getMatchOptimizerFunction() : matchOptimizerFunction);
         this.value = value;
         this.threshold = threshold;
-        this.preProcessFunction = preProcessFunction;
-        this.tokenizerFunction = tokenizerFunction;
-        this.similarityMatchFunction = similarityMatchFunction;
-        this.scoringFunction = scoringFunction;
+        this.preProcessFunction = preProcessFunction == null ? type.getPreProcessFunction() : preProcessFunction;
+        this.tokenizerFunction = tokenizerFunction == null ? type.getTokenizerFunction() : tokenizerFunction;
+        this.similarityMatchFunction = similarityMatchFunction == null ? type.getSimilarityMatchFunction() : similarityMatchFunction;
+        this.scoringFunction = scoringFunction != null ? this.scoringFunction : DEFAULT_ELEMENT_SCORING;
     }
 
-    public ElementType getType() {
-        return type;
-    }
-
-    public String getVariance() {
-        return variance;
-    }
-
-    public String getClassification() {
-        if (this.classification == null) {
-            this.classification = this.type.name() + StringUtils.defaultString(this.variance);
-        }
-        return this.classification;
+    public ElementClassification getElementClassification() {
+        return elementClassification;
     }
 
     public String getValue() {
@@ -101,7 +92,7 @@ public class Element implements Matchable {
     }
 
     public Function<String, String> getPreProcessFunction() {
-        return this.preProcessFunction != null ? this.preProcessFunction : this.type.getPreProcessFunction();
+        return this.preProcessFunction;
     }
 
     public String getPreProcessedValue() {
@@ -112,21 +103,30 @@ public class Element implements Matchable {
     }
 
     public AbstractMap.SimpleEntry getPreprocessedValueWithType() {
-        return new AbstractMap.SimpleEntry(this.getClassification(), this.getPreProcessedValue());
+        return new AbstractMap.SimpleEntry(this.getElementClassification(), this.getPreProcessedValue());
     }
 
     public Function<Element, Stream<Token>> getTokenizerFunction() {
-        return this.tokenizerFunction != null ? this.tokenizerFunction : this.type.getTokenizerFunction();
+        return this.tokenizerFunction;
     }
 
     public Stream<Token> getTokens() {
-        return getTokenizerFunction().apply(this).distinct();
+        if (this.tokens == null) {
+            this.tokens = getTokenizerFunction().apply(this).distinct().collect(Collectors.toList());
+        }
+        return this.tokens.stream();
     }
 
     public BiFunction<Token, Token, Double> getSimilarityMatchFunction() {
-        return this.similarityMatchFunction != null ? this.similarityMatchFunction : this.type.getSimilarityMatchFunction();
+        return this.similarityMatchFunction;
     }
 
+
+    /**
+     * This gets the Max number of tokens present between matching Elements.
+     * For Elements that do not have a balanced set of tokens, it can push the score down.
+     * TODO: Need to evaluate an average of the two.
+     */
     @Override
     public long getChildCount(Matchable other) {
         if (other instanceof Element) {
@@ -149,7 +149,7 @@ public class Element implements Matchable {
 
     @Override
     public Function<Match, Score> getScoringFunction() {
-        return this.scoringFunction != null ? this.scoringFunction : DEFAULT_ELEMENT_SCORING;
+        return this.scoringFunction;
     }
 
     public static class Builder {
@@ -163,6 +163,7 @@ public class Element implements Matchable {
         private Function<Element, Stream<Token>> tokenizerFunction;
         private BiFunction<Token, Token, Double> similarityMatchFunction;
         private Function<Match, Score> scoringFunction;
+        private Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction;
 
         public Builder setType(ElementType type) {
             this.type = type;
@@ -210,9 +211,14 @@ public class Element implements Matchable {
             return this;
         }
 
+        public Builder setMatchOptimizerFunction(Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction) {
+            this.matchOptimizerFunction = matchOptimizerFunction;
+            return this;
+        }
+
         public Element createElement() {
             return new Element(type, variance, value, weight, threshold, preProcessFunction, tokenizerFunction,
-                    similarityMatchFunction, scoringFunction);
+                    similarityMatchFunction, scoringFunction, matchOptimizerFunction);
         }
     }
 
@@ -230,17 +236,16 @@ public class Element implements Matchable {
 
         Element element = (Element) o;
 
-        if (!value.equals(element.value)) return false;
-        if (type != element.type) return false;
-        if (variance != null ? !variance.equals(element.variance) : element.variance != null) return false;
+        if (value != null ? !value.equals(element.value) : element.value != null) return false;
+        if (elementClassification != null ? !elementClassification.equals(element.elementClassification) : element.elementClassification != null)
+            return false;
         return document != null ? document.equals(element.document) : element.document == null;
     }
 
     @Override
     public int hashCode() {
-        int result = value.hashCode();
-        result = 31 * result + type.hashCode();
-        result = 31 * result + (variance != null ? variance.hashCode() : 0);
+        int result = value != null ? value.hashCode() : 0;
+        result = 31 * result + (elementClassification != null ? elementClassification.hashCode() : 0);
         result = 31 * result + (document != null ? document.hashCode() : 0);
         return result;
     }

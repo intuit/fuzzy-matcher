@@ -67,7 +67,9 @@ public class MatchServiceTest {
     }
 
     public static Stream<Element> getOrderedElements(Set<Element> elements) {
-        List<Element> l = elements.stream().sorted(Comparator.comparing(Element::getType)).collect(Collectors.toList());
+        List<Element> l = elements.stream()
+                .sorted(Comparator.comparing(ele -> ele.getElementClassification().getElementType()))
+                .collect(Collectors.toList());
         return l.stream();
     }
 
@@ -476,6 +478,24 @@ public class MatchServiceTest {
                 .createDocument());
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(inputData);
         Assert.assertEquals(0, result.size());
+    }
+
+    @Test
+    public void itShouldApplyMatchWithNumber() {
+        List<String> numbers = Arrays.asList("23", "22", "10", "5", "str", "9", "11", "10.5", "23.5", "str");
+        AtomicInteger ai = new AtomicInteger(0);
+        List<Document> documentList = numbers.stream().map(num -> {
+            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
+                    .addElement(new Element.Builder().setType(NUMBER).setValue(num).setThreshold(0.95).createElement())
+                    .createDocument();
+        }).collect(Collectors.toList());
+        Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
+        result.entrySet().forEach(entry -> {
+            entry.getValue().forEach(match -> {
+                System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
+            });
+        });
+        Assert.assertEquals(6, result.size());
     }
 
     public static void writeOutput(Map<String, List<Match<Document>>> result) throws IOException {

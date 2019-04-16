@@ -19,7 +19,7 @@ public interface ScoringFunction extends Function<Match, Score> {
     /**
      * For all the childScores in a Match object it calculates the average.
      * To get a balanced average for 2 Match object which do not have same number of childScores.
-     * It gives a score of 0.5 for missing children, and uses the max of children count to calculate the average
+     * It gives a score of 0.5 for missing children
      *
      * @return the scoring function for Average
      */
@@ -27,7 +27,22 @@ public interface ScoringFunction extends Function<Match, Score> {
         return match -> {
             List<Score> childScores = match.getChildScores();
             double numerator = getSumOfResult(childScores) + getUnmatchedChildScore(match);
-            double denominator = getMaxChildCount(match);
+            double denominator = getChildCount(match);
+            return new Score(numerator / denominator, match);
+        };
+    }
+
+    /**
+     * For all the childScores in a Match object it calculates the average.
+     * Average is calculated with a total of child scored divided by the child count
+     *
+     * @return the scoring function for Simple Average
+     */
+    static ScoringFunction getSimpleAverageScore() {
+        return match -> {
+            List<Score> childScores = match.getChildScores();
+            double numerator = getSumOfResult(childScores);
+            double denominator = getChildCount(match);
             return new Score(numerator / denominator, match);
         };
     }
@@ -44,7 +59,7 @@ public interface ScoringFunction extends Function<Match, Score> {
             double numerator = getSumOfWeightedResult(childScoreList)
                     + getUnmatchedChildScore(match);
             double denominator = getSumOfWeights(childScoreList)
-                    + getMaxChildCount(match)
+                    + getChildCount(match)
                     - childScoreList.size();
             return new Score(numerator / denominator, match);
         };
@@ -67,7 +82,7 @@ public interface ScoringFunction extends Function<Match, Score> {
                         + getUnmatchedChildScore(match);
 
                 double denominator = getExponentiallyIncreasedValue(perfectMatchedElements.size())
-                        + getMaxChildCount(match)
+                        + getChildCount(match)
                         - perfectMatchedElements.size();
                 return new Score(numerator / denominator, match);
             } else
@@ -95,7 +110,7 @@ public interface ScoringFunction extends Function<Match, Score> {
 
                 double denominator = getExponentiallyIncreasedValue(getSumOfWeights(perfectMatchedElements))
                         + getSumOfWeights(notPerfectMachedElements)
-                        + getMaxChildCount(match)
+                        + getChildCount(match)
                         - childScoreList.size();
                 return new Score(numerator / denominator, match);
             } else
@@ -143,7 +158,7 @@ public interface ScoringFunction extends Function<Match, Score> {
                 .collect(Collectors.toList());
     }
 
-    static double getMaxChildCount(Match match) {
+    static double getChildCount(Match match) {
         return (double) match.getData().getChildCount(match.getMatchedWith());
     }
 

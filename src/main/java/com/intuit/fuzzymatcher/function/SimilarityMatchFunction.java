@@ -4,6 +4,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.intuit.fuzzymatcher.domain.Token;
 import org.apache.commons.codec.language.Soundex;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.text.similarity.JaccardSimilarity;
 import org.apache.commons.text.similarity.JaroWinklerDistance;
 
@@ -61,5 +62,23 @@ public interface SimilarityMatchFunction extends BiFunction<Token, Token, Double
                     || output == PhoneNumberUtil.MatchType.EXACT_MATCH
                     || output == PhoneNumberUtil.MatchType.SHORT_NSN_MATCH) ? 1.0 : 0.0;
         };
+    }
+
+    static SimilarityMatchFunction numberDifferenceRate() {
+        return (left, right) -> {
+            Double leftValue = NumberUtils.isNumber(left.getValue()) ? Double.valueOf(left.getValue()) : Double.NaN;
+            Double rightValue = NumberUtils.isNumber(right.getValue()) ? Double.valueOf(right.getValue()) : Double.NaN;
+            if(leftValue.isNaN()|| rightValue.isNaN()) {
+                return  0.0;
+            }
+            Double diff = Math.abs(leftValue - rightValue);
+            Double denominator = (leftValue + rightValue) / 2;
+            Double result = 1 - diff / denominator;
+            return ensureRange(result, 0.0, 1.0);
+        };
+    }
+
+    static double ensureRange(double value, double min, double max) {
+        return Math.min(Math.max(value, min), max);
     }
 }

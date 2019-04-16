@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.intuit.fuzzymatcher.domain.ElementType.*;
@@ -34,18 +35,17 @@ public class MatchServicePerfTest {
 
     @Test
     public void itShouldApplyMatchForBigData() throws IOException {
-        List<Document> bigData = getBigDataDocuments();
-        applyMatch(bigData.stream().limit(500).collect(Collectors.toList()));
+        applyMatch(getBigDataDocuments().limit(500).collect(Collectors.toList()));
 
-        applyMatch(bigData.stream().limit(1000).collect(Collectors.toList()));
+        applyMatch(getBigDataDocuments().limit(1000).collect(Collectors.toList()));
 
-        applyMatch(bigData.stream().limit(1500).collect(Collectors.toList()));
+        applyMatch(getBigDataDocuments().limit(1500).collect(Collectors.toList()));
 
-        applyMatch(bigData.stream().limit(2000).collect(Collectors.toList()));
+        applyMatch(getBigDataDocuments().limit(2000).collect(Collectors.toList()));
 
-        applyMatch(bigData.stream().limit(2500).collect(Collectors.toList()));
+        applyMatch(getBigDataDocuments().limit(2500).collect(Collectors.toList()));
 
-        applyMatch(bigData.stream().limit(3000).collect(Collectors.toList()));
+        applyMatch(getBigDataDocuments().limit(3000).collect(Collectors.toList()));
     }
 
     private void applyMatch(List<Document> documentList) {
@@ -57,7 +57,7 @@ public class MatchServicePerfTest {
         System.out.println("Execution time (ms) for + " + documentList.size() * ELEM_PER_DOC + " count : " + duration);
     }
 
-    public List<Document> getBigDataDocuments() throws FileNotFoundException {
+    public Stream<Document> getBigDataDocuments() throws FileNotFoundException {
         AtomicInteger index = new AtomicInteger();
         return StreamSupport.stream(MatchServiceTest.getCSVReader("Sample-Big-Data.csv").spliterator(), false).map(csv -> {
             return new Document.Builder(index.incrementAndGet() + "")
@@ -66,7 +66,7 @@ public class MatchServicePerfTest {
                     .addElement(new Element.Builder().setType(PHONE).setValue(csv[5]).createElement())
                     .addElement(new Element.Builder().setType(EMAIL).setValue(csv[6]).createElement())
                     .createDocument();
-        }).collect(Collectors.toList());
+        });
     }
 
     static String getAddress(String[] csv) {
