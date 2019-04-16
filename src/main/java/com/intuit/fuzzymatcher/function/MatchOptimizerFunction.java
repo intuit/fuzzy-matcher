@@ -14,7 +14,6 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
 
     static MatchOptimizerFunction numberSortOptimizer() {
         return (tokenList) -> {
-            //List<Token> tokenList = tokenStream.sorted().collect(Collectors.toList());
             Collections.sort(tokenList, new Comparator<Token>() {
                 @Override
                 public int compare(Token o1, Token o2) {
@@ -35,7 +34,6 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
 
     static MatchOptimizerFunction textSortOptimizer() {
         return (tokenList) -> {
-            //List<Token> tokenList = tokenStream.sorted().collect(Collectors.toList());
             Collections.sort(tokenList, new Comparator<Token>() {
                 @Override
                 public int compare(Token o1, Token o2) {
