@@ -141,13 +141,15 @@ to be applied at different stages of match.
  
 Below is the list of _Element Types_ available in the library with default _PreProcessing Function_, _Tokenizer Function_ and _Scoring Function_.
 
-|  Element Type | PreProcessing Function | Tokenizer Function | Scoring Function |
-|:-------------:|------------------------|-----------------------|------------------|
-|   ___NAME___  |   namePreprocessing()  |    wordTokenizer()    |     soundex()    |
-|   ___TEXT___  |  removeSpecialChars()  |    wordTokenizer()    |     soundex()    |
-| ___ADDRESS___ | addressPreprocessing() |    wordTokenizer()    |     soundex()    |
-|  ___EMAIL___  |     removeDomain()     |    nGramTokenizer()   |    equality()    |
-|  ___PHONE___  |     numericValue()     |    valueTokenizer()   |   phoneNumber()  |
+|  Element Type | PreProcessing Function | Tokenizer Function    | Scoring Function         |
+|:-------------:|------------------------|-----------------------|--------------------------|
+|   ___NAME___  |   namePreprocessing()  |    wordTokenizer()    |     soundex()            |
+|   ___TEXT___  |  removeSpecialChars()  |    wordTokenizer()    |     soundex()            |
+| ___ADDRESS___ | addressPreprocessing() |    wordTokenizer()    |     soundex()            |
+|  ___EMAIL___  |     removeDomain()     |    nGramTokenizer()   |    equality()            |
+|  ___PHONE___  |     numericValue()     |    valueTokenizer()   |   phoneNumber()          |
+|  ___NUMBER___ | numberPreprocessing()  |    valueTokenizer()   |numberDifferenceRate()    |
+|  ___DATE___   | none()                 |    valueTokenizer()   |dateDifferenceWithinYear()|
 
 _Note: Since each element is unique in the way it should match, if you have a need to match a different element type than
  what is supported, please open a new [GitHub Issue](https://github.com/intuit/fuzzy-matcher/issues) and the community 
