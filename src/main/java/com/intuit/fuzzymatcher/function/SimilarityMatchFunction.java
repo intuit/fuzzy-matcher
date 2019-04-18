@@ -2,12 +2,15 @@ package com.intuit.fuzzymatcher.function;
 
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.intuit.fuzzymatcher.domain.Token;
+import com.intuit.fuzzymatcher.exception.MatchException;
 import org.apache.commons.codec.language.Soundex;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.text.similarity.JaccardSimilarity;
 import org.apache.commons.text.similarity.JaroWinklerDistance;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
 /**
@@ -97,5 +100,19 @@ public interface SimilarityMatchFunction extends BiFunction<Token, Token, Double
 
     static double ensureRange(double value, double min, double max) {
         return Math.min(Math.max(value, min), max);
+    }
+
+    static SimilarityMatchFunction dateDifferenceWithinYear() {
+        return (left, right) -> {
+            if (!(left.getValue() instanceof Date && right.getValue() instanceof Date)) {
+                throw new MatchException("input values are not Dates");
+            }
+            Date leftValue = (Date) left.getValue();
+            Date rightValue = (Date) right.getValue();
+            long diffInMillies = Math.abs(leftValue.getTime() - rightValue.getTime());
+            double diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+            double result = 1D - (diff/365);
+            return ensureRange(result, 0.0, 1.0);
+        };
     }
 }

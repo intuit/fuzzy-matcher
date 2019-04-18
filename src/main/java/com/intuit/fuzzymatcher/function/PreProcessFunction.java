@@ -132,4 +132,8 @@ public interface PreProcessFunction extends Function<Object, Object> {
             return matcher.find() ? matcher.group() : str;
         };
     }
+
+    static PreProcessFunction none() {
+        return obj -> obj;
+    }
 }

@@ -99,6 +99,7 @@ public class Element implements Matchable {
     public Object getPreProcessedValue() {
         if (this.preProcessedValue == null) {
             if (this.value instanceof String) {
+                // Default String pre-processing
                 setPreProcessedValue(getPreProcessFunction().andThen(trim()).andThen(toLowerCase()).apply(this.value.toString()));
             } else {
                 setPreProcessedValue(getPreProcessFunction().apply(this.value));

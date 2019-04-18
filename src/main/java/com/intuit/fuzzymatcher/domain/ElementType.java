@@ -23,7 +23,8 @@ public enum ElementType {
     ADDRESS(addressPreprocessing(), wordTokenizer(), soundex(), searchGroupOptimizer()),
     EMAIL(removeDomain(), triGramTokenizer(),  equality(), searchGroupOptimizer()),
     PHONE(usPhoneNormalization(),decaGramTokenizer(), equality(), searchGroupOptimizer()),
-    NUMBER(numberPreprocessing(),valueTokenizer(),numberDifferenceRate(), numberSortOptimizer());
+    NUMBER(numberPreprocessing(),valueTokenizer(),numberDifferenceRate(), numberSortOptimizer()),
+    DATE(none(),valueTokenizer(),dateDifferenceWithinYear(), dateSortOptimizer());
 
 
     private final Function<Object, Object> preProcessFunction;

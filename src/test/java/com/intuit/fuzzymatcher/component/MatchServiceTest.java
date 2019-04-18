@@ -17,6 +17,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -490,11 +493,6 @@ public class MatchServiceTest {
                     .createDocument();
         }).collect(Collectors.toList());
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
-        result.entrySet().forEach(entry -> {
-            entry.getValue().forEach(match -> {
-                System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
-            });
-        });
         Assert.assertEquals(6, result.size());
     }
 
@@ -508,12 +506,30 @@ public class MatchServiceTest {
                     .createDocument();
         }).collect(Collectors.toList());
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
-        result.entrySet().forEach(entry -> {
-            entry.getValue().forEach(match -> {
-                System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
-            });
-        });
         Assert.assertEquals(6, result.size());
+    }
+
+    @Test
+    public void itShouldApplyMatchWithDate() {
+        List<Date> numbers = Arrays.asList(getDate("01/01/2020"), getDate("12/01/2020"), getDate("02/01/2020"));
+        AtomicInteger ai = new AtomicInteger(0);
+        List<Document> documentList = numbers.stream().map(num -> {
+            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
+                    .addElement(new Element.Builder().setType(DATE).setValue(num).setThreshold(0.90).createElement())
+                    .createDocument();
+        }).collect(Collectors.toList());
+        Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
+        Assert.assertEquals(2, result.size());
+    }
+
+    private Date getDate(String val) {
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+        try {
+            return df.parse(val);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static void writeOutput(Map<String, List<Match<Document>>> result) throws IOException {

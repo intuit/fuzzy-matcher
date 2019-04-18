@@ -3,6 +3,7 @@ package com.intuit.fuzzymatcher.function;
 import com.intuit.fuzzymatcher.domain.Match;
 import com.intuit.fuzzymatcher.domain.NGram;
 import com.intuit.fuzzymatcher.domain.Token;
+import com.intuit.fuzzymatcher.exception.MatchException;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.*;
@@ -38,6 +39,21 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
                 @Override
                 public int compare(Token o1, Token o2) {
                     return o1.getValue().toString().compareTo(o2.getValue().toString());
+                }
+            });
+            return applySortMatch(tokenList);
+        };
+    }
+
+    static MatchOptimizerFunction dateSortOptimizer() {
+        return (tokenList) -> {
+            Collections.sort(tokenList, new Comparator<Token>() {
+                @Override
+                public int compare(Token o1, Token o2) {
+                    if (!(o1.getValue() instanceof Date && o2.getValue() instanceof Date)) {
+                        throw new MatchException("input values are not Dates");
+                    }
+                    return ((Date)o1.getValue()).compareTo((Date)o2.getValue());
                 }
             });
             return applySortMatch(tokenList);
