@@ -18,7 +18,7 @@ public interface TokenizerFunction extends Function<Element, Stream<Token>> {
     }
 
     static TokenizerFunction wordTokenizer() {
-        return (element) -> Arrays.stream(element.getPreProcessedValue().split("\\s+"))
+        return (element) -> Arrays.stream(element.getPreProcessedValue().toString().split("\\s+"))
                 .map(token -> getToken(element, token, false));
     }
 
@@ -32,13 +32,13 @@ public interface TokenizerFunction extends Function<Element, Stream<Token>> {
 
 
     static Stream<Token> getTokens(int size, Element element) {
-        String elementValue = element.getPreProcessedValue();
+        Object elementValue = element.getPreProcessedValue();
         return Utils.getNGrams(elementValue, size)
                 .map(str -> getToken(element, str, true));
 
     }
 
-    static Token getToken(Element element, String token, boolean nGramTokenized) {
+    static Token getToken(Element element, Object token, boolean nGramTokenized) {
         return new Token(token, element, nGramTokenized);
     }
 }

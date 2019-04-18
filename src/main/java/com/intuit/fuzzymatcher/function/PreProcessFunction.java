@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 /**
  * A functional interface to pre-process the elements. These function are applied to element.value String's
  */
-public interface PreProcessFunction extends Function<String, String> {
+public interface PreProcessFunction extends Function<Object, Object> {
 
     /**
      * Uses Apache commons StringUtils trim method
@@ -19,7 +19,7 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform trim
      */
     static PreProcessFunction trim() {
-        return (str) -> StringUtils.trim(str);
+        return (obj) -> StringUtils.trim(obj.toString());
     }
 
     /**
@@ -28,7 +28,7 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform toLowerCase
      */
     static PreProcessFunction toLowerCase() {
-        return (str) -> StringUtils.lowerCase(str);
+        return (obj) -> StringUtils.lowerCase(obj.toString());
     }
 
     /**
@@ -37,7 +37,7 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform numericValue
      */
     static PreProcessFunction numericValue() {
-        return (str) -> str.replaceAll("[^0-9]", "");
+        return (obj) -> obj.toString().replaceAll("[^0-9]", "");
     }
 
     /**
@@ -46,7 +46,7 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform removeSpecialChars
      */
     static PreProcessFunction removeSpecialChars() {
-        return (str) -> str.replaceAll("[^A-Za-z0-9 ]+", "");
+        return (obj) -> obj.toString().replaceAll("[^A-Za-z0-9 ]+", "");
     }
 
     /**
@@ -55,7 +55,8 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform removeDomain
      */
     static PreProcessFunction removeDomain() {
-        return str -> {
+        return obj -> {
+            String str = obj.toString();
             if (StringUtils.contains(str, "@")) {
                 int index = str.indexOf('@');
                 return str.substring(0, index);
@@ -70,7 +71,7 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform addressPreprocessing
      */
     static PreProcessFunction addressPreprocessing() {
-        return (str) -> removeSpecialChars().andThen(addressNormalization()).apply(str);
+        return (obj) -> removeSpecialChars().andThen(addressNormalization()).apply(obj);
     }
 
     /**
@@ -79,7 +80,7 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform namePreprocessing
      */
     static PreProcessFunction namePreprocessing() {
-        return (str) -> removeTrailingNumber().andThen(removeSpecialChars()).andThen(nameNormalization()).apply(str);
+        return (obj) -> removeTrailingNumber().andThen(removeSpecialChars()).andThen(nameNormalization()).apply(obj);
     }
 
     /**
@@ -89,7 +90,7 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform addressNormalization
      */
     static PreProcessFunction addressNormalization() {
-        return str -> Utils.getNormalizedString(str, Dictionary.addressDictionary);
+        return obj -> Utils.getNormalizedString(obj.toString(), Dictionary.addressDictionary);
     }
 
     /**
@@ -98,7 +99,7 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform removeTrailingNumber
      */
     static PreProcessFunction removeTrailingNumber() {
-        return (str) -> str.replaceAll("\\d+$", "");
+        return (obj) -> obj.toString().replaceAll("\\d+$", "");
     }
 
     /**
@@ -108,7 +109,7 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform nameNormalization
      */
     static PreProcessFunction nameNormalization() {
-        return str -> Utils.getNormalizedString(str, Dictionary.nameDictionary);
+        return obj -> Utils.getNormalizedString(obj.toString(), Dictionary.nameDictionary);
     }
 
     /**
@@ -117,14 +118,22 @@ public interface PreProcessFunction extends Function<String, String> {
      * @return the function to perform usPhoneNormalization
      */
     static PreProcessFunction usPhoneNormalization() {
-        return str -> numericValue().andThen(s -> (s.length() == 10) ? "1" + s : s).apply(str);
+        return obj -> numericValue().andThen(s -> (s.toString().length() == 10) ? "1" + s : s).apply(obj);
     }
 
     static PreProcessFunction numberPreprocessing() {
-        return (str) ->  {
+        return (obj) ->  {
+            if (obj instanceof Double) {
+                return obj;
+            }
+            String str = obj.toString();
             Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
             Matcher matcher = pattern.matcher(str);
             return matcher.find() ? matcher.group() : str;
         };
+    }
+
+    static PreProcessFunction none() {
+        return obj -> obj;
     }
 }

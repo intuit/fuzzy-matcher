@@ -4,6 +4,11 @@ import com.intuit.fuzzymatcher.domain.Element;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static com.intuit.fuzzymatcher.domain.ElementType.*;
 
 public class PreProcessFunctionTest {
@@ -43,7 +48,7 @@ public class PreProcessFunctionTest {
 
         Element element1 = new Element.Builder().setType(TEXT).setValue(value)
                 .setPreProcessingFunction(PreProcessFunction.removeSpecialChars()
-                        .compose(str -> str.replace("jr.", ""))).createElement();
+                        .compose(str -> str.toString().replace("jr.", ""))).createElement();
         Assert.assertEquals("james parker", element1.getPreProcessedValue());
     }
 
@@ -57,21 +62,29 @@ public class PreProcessFunctionTest {
     @Test
     public void itShouldRemoveSpecialCharPhone_Success(){
         String value = "+1-(123)-456-4345";
-        Element element = new Element.Builder().setType(PHONE).setValue(value).createElement();
-        Assert.assertEquals("11234564345", element.getPreProcessedValue());
+        String result = (String)PreProcessFunction.removeSpecialChars().apply(value);
+        Assert.assertEquals("11234564345", result);
     }
 
     @Test
     public void itShouldApplyNumberPreprocessing_Success(){
         String value = "$ value -34.76";
-        Element element = new Element.Builder().setType(NUMBER).setValue(value).createElement();
-        Assert.assertEquals("-34.76", element.getPreProcessedValue());
+        String result = (String)PreProcessFunction.numberPreprocessing().apply(value);
+        Assert.assertEquals("-34.76",result);
     }
 
     @Test
     public void itShouldApplyNumberPreprocessing_Failure(){
         String value = "$ value thirty four";
-        Element element = new Element.Builder().setType(NUMBER).setValue(value).createElement();
-        Assert.assertEquals(value, element.getPreProcessedValue());
+        String result = (String)PreProcessFunction.numberPreprocessing().apply(value);
+        Assert.assertEquals(value, result);
+    }
+
+    @Test
+    public void itShouldApplyNonePreprocessing_Success() throws ParseException {
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+        Date input = df.parse("04/01/2020");
+        Date result = (Date) PreProcessFunction.none().apply(input);
+        Assert.assertEquals(input, result);
     }
 }
