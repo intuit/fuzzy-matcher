@@ -121,6 +121,11 @@ public interface PreProcessFunction extends Function<Object, Object> {
         return obj -> numericValue().andThen(s -> (s.toString().length() == 10) ? "1" + s : s).apply(obj);
     }
 
+    /**
+     * removes all characters and retains only double numbers
+     *
+     * @return
+     */
     static PreProcessFunction numberPreprocessing() {
         return (obj) ->  {
             if (obj instanceof Double) {
@@ -133,6 +138,11 @@ public interface PreProcessFunction extends Function<Object, Object> {
         };
     }
 
+    /**
+     * Does nothing, used for already preprocessed values
+     *
+     * @return
+     */
     static PreProcessFunction none() {
         return obj -> obj;
     }

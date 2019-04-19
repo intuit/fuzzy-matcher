@@ -5,6 +5,14 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+/**
+ * Defines how each element is classified using ElementType and variance.
+ * <ul>
+ * <li>ElementType is an enum which gives a template on all the functions that should be applied during match</li>
+ * <li>Variance is a user defined String, that allows multiple ElementType to be defined in a Document</li>
+ * <li>matchOptimizerFunction is a configurable function for match performance that minimizes complexity.</li>
+ * </ul>
+ */
 public class ElementClassification {
 
     private ElementType elementType;
