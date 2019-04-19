@@ -42,8 +42,8 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
 
     /**
      * Utility to convert String to Date
-     * @param str
-     * @return
+     * @param str - input String
+     * @return Double
      */
     static Double stringToDouble(String str) {
         try {
@@ -108,8 +108,8 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
     /**
      * Does the matching for all Sort Optimizers.
      *
-     * @param tokenList
-     * @return Stream<Match<Token>>
+     * @param tokenList - List of tokens
+     * @return Stream of Match Tokens
      */
     static Stream<Match<Token>> applySortMatch(List<Token> tokenList) {
         List<Match<Token>> matchList = new ArrayList<>();

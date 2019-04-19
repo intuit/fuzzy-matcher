@@ -124,7 +124,7 @@ public interface PreProcessFunction extends Function<Object, Object> {
     /**
      * removes all characters and retains only double numbers
      *
-     * @return
+     * @return PreProcessFunction
      */
     static PreProcessFunction numberPreprocessing() {
         return (obj) ->  {
@@ -141,7 +141,7 @@ public interface PreProcessFunction extends Function<Object, Object> {
     /**
      * Does nothing, used for already preprocessed values
      *
-     * @return
+     * @return PreProcessFunction
      */
     static PreProcessFunction none() {
         return obj -> obj;
