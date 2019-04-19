@@ -23,7 +23,7 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
      * After the sort, each Token are matched only with their nearest neighbours.
      * The matches are performed until a match result falls below a Threshold defined (in Element)
      *
-     * eg: input [80, 2, 90, 3, 100] -> sorted [2, 3, 80, 90, 100] -> 2 is matched with 3 and 80 only.
+     * eg: input [80, 2, 90, 3, 100] - sorted [2, 3, 80, 90, 100] - 2 is matched with 3 and 80 only.
      * Since 2 and 80 match will fall below Threshold, further matches are not attempted
      *
      * @return MatchOptimizerFunction
@@ -58,7 +58,7 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
      * After the sort, each Token are matched only with their nearest neighbours.
      * The matches are performed until a match result falls below a Threshold defined (in Element)
      *
-     * eg: input ["a", "z", "k", "a", l] -> sorted ["a", "a", "k", "l", "z"] -> a is matched with a and k only.
+     * eg: input ["a", "z", "k", "a", l] - sorted ["a", "a", "k", "l", "z"] - a is matched with a and k only.
      * Since a and k match will fall below Threshold, further matches are not attempted
      *
      * Note: for Strings, this is relevant only if we are looking for matches that are equal.
@@ -84,7 +84,7 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
      * After the sort, each Token are matched only with their nearest neighbours.
      * The matches are performed until a match result falls below a Threshold defined (in Element)
      *
-     * eg: input [Jan-1-2020, Dec-1-2020, Nov-1-2020, Jan-2-2020] -> sorted [Jan-1-2020, Jan-2-2020, Nov-1-2020, Dec-1-2020]
+     * eg: input [Jan-1-2020, Dec-1-2020, Nov-1-2020, Jan-2-2020] - sorted [Jan-1-2020, Jan-2-2020, Nov-1-2020, Dec-1-2020]
      * Jan-1-2020 is matched with Jan-2-2020 and Nov-1-2020 only.
      * Since Jan-1-2020 and Nov-1-2020 match will fall below Threshold, further matches are not attempted
      *
@@ -133,11 +133,11 @@ public interface MatchOptimizerFunction extends Function<List<Token>, Stream<Mat
     /**
      * Reduces the complexity by not performing matches against the elements which have a very low probability to match by creating "Search Groups".
      *
-     * Take an example of list of names to match ```["steve","parker","stephen"]
+     * Take an example of list of names to match ["steve","parker","stephen"]
      * These names are broken down into tri-grams like this
-     * steve -> [ste,tev,eve]
-     * parker -> [par,ark,rke,ker]
-     * stephen -> [ste,tep,eph,phe,hen]
+     * steve - [ste,tev,eve]
+     * parker - [par,ark,rke,ker]
+     * stephen - [ste,tep,eph,phe,hen]
      *
      * Here only the 1st and 3rd names have tri-grams "ste" in common (and a search group is created for them.)
      * The match algorithm assumes a very low probability that "parker" will match with the other 2, and hence no match is attempted with it
