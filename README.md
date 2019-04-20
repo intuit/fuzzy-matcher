@@ -55,7 +55,7 @@ be easily configured by passing a lambda expression.
     * _Jaccard_: Gets the Jaccard score using apache commons similarity library
 
 * __Scoring__ : Expects a ```Function<Match, Double>```, this defines functions on how to accumulate scores from Tokens into Elements and from Elements into Documents
-    * _Average_: Adds up total scores of each child matches / total children. This is the default scoring for Elements
+    * _Simple Average_: Adds up total scores of each child matches / total children. This is the default scoring for Elements
     * _Weighted Average_: This is useful for Document Scoring, where users can input weights on elements.
         Example a phone number or email could be considered an important element to identify match between 2 User objects, and we can add weights to such elements.
     * _Exponential Average_: Again useful for Document Scoring, where if more than 1 element match, we can increase the scoring exponentially
@@ -117,7 +117,7 @@ The library is pusblished to maven central
 <dependency>
     <groupId>com.intuit.fuzzymatcher</groupId>
     <artifactId>fuzzy-matcher</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 

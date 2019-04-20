@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.0 - 2019-04-19
+### Added
+- Element Variance. This allows multiple ElementTypes to be added in same document. Addresses [issue](https://github.com/intuit/fuzzy-matcher/issues/1)
+- New NUMBER ElementType, this allows fuzzy match with numbers and score numbers according to how close they are to each other in value
+- New DATE ElementType, similar to numbers dates that are closer in values are scored higher
+- MatchOptimizerFunction. This can be set at element level and allows reducing complexity of the match. With this tokens
+ with low probability to match are eliminated and helps improve performance. This can configured now for each element type
+
+### Changed
+- Overridden ElementBuilder.setValue and now accepts Double and Date java type along with String
+- Performance improvement, changed element default scoring and cached Token list for each element
+- Within Element, Token and NGram classes "value" attribute is now Object type, instead of String. 
+This allows the library to accept multiple java data type as input in the future 
+
 ## 0.3.0 - 2019-04-05
 ### Changed
 - Performance improvements. Reduced complexity to O(N LogN)
