@@ -24,6 +24,6 @@ public class TokenMatch {
                 .groupingBy(token -> token.getElement().getElementClassification()));
         return tokenClassMap.entrySet().parallelStream().
                 flatMap(entry -> entry.getKey().getMatchOptimizerFunction().apply(entry.getValue()))
-                .filter(tokenMatch -> tokenMatch.getResult() > tokenMatch.getData().getElement().getThreshold());
+                .filter(tokenMatch -> tokenMatch.getResult() >= tokenMatch.getData().getElement().getThreshold());
     }
 }
