@@ -180,6 +180,11 @@ public class Element implements Matchable {
             return this;
         }
 
+        public Builder setValue(Object value) {
+            this.value = value;
+            return this;
+        }
+
         public Builder setValue(String value) {
             this.value = value;
             return this;

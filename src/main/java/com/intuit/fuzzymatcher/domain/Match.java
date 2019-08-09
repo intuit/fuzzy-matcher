@@ -46,10 +46,6 @@ public class Match<T extends Matchable> {
         return matchedWith;
     }
 
-    public void setMatchedWith(T matchedWith) {
-        this.matchedWith = matchedWith;
-    }
-
     public double getResult() {
         return this.score.getResult();
     }
