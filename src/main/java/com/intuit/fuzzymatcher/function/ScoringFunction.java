@@ -4,13 +4,14 @@ import com.intuit.fuzzymatcher.domain.Match;
 import com.intuit.fuzzymatcher.domain.Score;
 
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * A functional interface to get a score between 2 Match objects
  */
-public interface ScoringFunction extends Function<Match, Score> {
+public interface ScoringFunction extends BiFunction<Match, List<Score>, Score> {
 
     double EXPONENT = 1.5;
     double EXPONENTIAL_INCREASE_THRESHOLD = 0.9;
@@ -24,8 +25,7 @@ public interface ScoringFunction extends Function<Match, Score> {
      * @return the scoring function for Average
      */
     static ScoringFunction getAverageScore() {
-        return match -> {
-            List<Score> childScores = match.getChildScores();
+        return (match, childScores) -> {
             double numerator = getSumOfResult(childScores) + getUnmatchedChildScore(match);
             double denominator = getChildCount(match);
             return new Score(numerator / denominator, match);
@@ -39,8 +39,7 @@ public interface ScoringFunction extends Function<Match, Score> {
      * @return the scoring function for Simple Average
      */
     static ScoringFunction getSimpleAverageScore() {
-        return match -> {
-            List<Score> childScores = match.getChildScores();
+        return (match, childScores) -> {
             double numerator = getSumOfResult(childScores);
             double denominator = getChildCount(match);
             return new Score(numerator / denominator, match);
@@ -54,13 +53,12 @@ public interface ScoringFunction extends Function<Match, Score> {
      * @return the scoring function for WeightedAverage
      */
     static ScoringFunction getWeightedAverageScore() {
-        return match -> {
-            List<Score> childScoreList = match.getChildScores();
-            double numerator = getSumOfWeightedResult(childScoreList)
+        return (match, childScores) -> {
+            double numerator = getSumOfWeightedResult(childScores)
                     + getUnmatchedChildScore(match);
-            double denominator = getSumOfWeights(childScoreList)
+            double denominator = getSumOfWeights(childScores)
                     + getChildCount(match)
-                    - childScoreList.size();
+                    - childScores.size();
             return new Score(numerator / denominator, match);
         };
     }
@@ -72,13 +70,12 @@ public interface ScoringFunction extends Function<Match, Score> {
      * @return the scoring function for ExponentialAverage
      */
     static ScoringFunction getExponentialAverageScore() {
-        return match -> {
-            List<Score> childScoreList = match.getChildScores();
-            List<Score> perfectMatchedElements = getPerfectMatchedElement(childScoreList);
+        return (match, childScores) -> {
+            List<Score> perfectMatchedElements = getPerfectMatchedElement(childScores);
 
             if (perfectMatchedElements.size() > 1 && getSumOfResult(perfectMatchedElements) > 1) {
                 double numerator = getExponentiallyIncreasedValue(getSumOfResult(perfectMatchedElements))
-                        + getSumOfResult(getNonPerfectMatchedElement(childScoreList))
+                        + getSumOfResult(getNonPerfectMatchedElement(childScores))
                         + getUnmatchedChildScore(match);
 
                 double denominator = getExponentiallyIncreasedValue(perfectMatchedElements.size())
@@ -86,7 +83,7 @@ public interface ScoringFunction extends Function<Match, Score> {
                         - perfectMatchedElements.size();
                 return new Score(numerator / denominator, match);
             } else
-                return getAverageScore().apply(match);
+                return getAverageScore().apply(match, childScores);
         };
     }
 
@@ -97,13 +94,12 @@ public interface ScoringFunction extends Function<Match, Score> {
      * @return the scoring function for ExponentialWeightedAverage
      */
     static ScoringFunction getExponentialWeightedAverageScore() {
-        return match -> {
-            List<Score> childScoreList = match.getChildScores();
-            List<Score> perfectMatchedElements = getPerfectMatchedElement(childScoreList);
+        return (match, childScores) -> {
+            List<Score> perfectMatchedElements = getPerfectMatchedElement(childScores);
 
             // Apply Exponent if match elements > 1
             if (perfectMatchedElements.size() > 1 && getSumOfWeightedResult(perfectMatchedElements) > 1) {
-                List<Score> notPerfectMachedElements = getNonPerfectMatchedElement(childScoreList);
+                List<Score> notPerfectMachedElements = getNonPerfectMatchedElement(childScores);
                 double numerator = getExponentiallyIncreasedValue(getSumOfWeightedResult(perfectMatchedElements))
                         + getSumOfWeightedResult(notPerfectMachedElements)
                         + getUnmatchedChildScore(match);
@@ -111,10 +107,10 @@ public interface ScoringFunction extends Function<Match, Score> {
                 double denominator = getExponentiallyIncreasedValue(getSumOfWeights(perfectMatchedElements))
                         + getSumOfWeights(notPerfectMachedElements)
                         + getChildCount(match)
-                        - childScoreList.size();
+                        - childScores.size();
                 return new Score(numerator / denominator, match);
             } else
-                return getWeightedAverageScore().apply(match);
+                return getWeightedAverageScore().apply(match, childScores);
         };
     }
 
@@ -125,8 +121,8 @@ public interface ScoringFunction extends Function<Match, Score> {
      * @return the scoring function for Jaccard
      */
     static ScoringFunction getJaccardScore() {
-        return match ->
-                new Score((double) match.getChildScores().size() /
+        return (match, childScores) ->
+                new Score((double) childScores.size() /
                         ((match.getData().getChildCount(match.getMatchedWith()))), match);
     }
 
