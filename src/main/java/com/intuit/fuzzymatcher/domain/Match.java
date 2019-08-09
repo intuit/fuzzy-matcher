@@ -16,15 +16,19 @@ import java.util.stream.Collectors;
  */
 public class Match<T extends Matchable> {
 
-    public Match(T t, T matchedWith, List<Score> childScores) {
+
+    public Match(T t, T matchedWith) {
         this.data = t;
         this.matchedWith = matchedWith;
-        this.childScores = childScores;
+    }
+    public Match(T t, T matchedWith, List<Score> childScores) {
+        this(t, matchedWith);
+        List<Score> maxDistinctChildScores = getMaxDistinctScores(childScores);
+        setScore(maxDistinctChildScores);
     }
 
     public Match(T t, T matchedWith, double result) {
-        this.data = t;
-        this.matchedWith = matchedWith;
+        this(t, matchedWith);
         this.score = new Score(result, this);
     }
 
@@ -34,8 +38,6 @@ public class Match<T extends Matchable> {
 
     private Score score;
 
-    private List<Score> childScores;
-
     public T getData() {
         return this.data;
     }
@@ -44,23 +46,18 @@ public class Match<T extends Matchable> {
         return matchedWith;
     }
 
-    public void setMatchedWith(T matchedWith) {
-        this.matchedWith = matchedWith;
-    }
-
     public double getResult() {
-        return this.getScore().getResult();
+        return this.score.getResult();
     }
 
     public Score getScore() {
-        if (this.score == null) {
-            this.score = this.data.getScoringFunction().apply(this);
-        }
         return this.score;
     }
 
-    public List<Score> getChildScores() {
-        return getMaxDistinctScores(this.childScores);
+    public void setScore(List<Score> childScores) {
+        if (this.score == null) {
+            this.score = this.data.getScoringFunction().apply(this, childScores);
+        }
     }
 
     private List<Score> getMaxDistinctScores(List<Score> scoreList) {

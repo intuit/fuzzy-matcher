@@ -1,6 +1,7 @@
 package com.intuit.fuzzymatcher.domain;
 
-import java.util.function.Function;
+import java.util.List;
+import java.util.function.BiFunction;
 
 /**
  *
@@ -10,7 +11,7 @@ public interface Matchable {
 
     public long getChildCount(Matchable other);
 
-    public Function<Match, Score> getScoringFunction();
+    public BiFunction<Match, List<Score>, Score> getScoringFunction();
 
     public double getWeight();
 

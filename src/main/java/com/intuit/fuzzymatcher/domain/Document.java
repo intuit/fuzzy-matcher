@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -27,7 +28,7 @@ import java.util.stream.Stream;
  * </ul>
  */
 public class Document implements Matchable {
-    private Document(String key, Set<Element> elements, double threshold, Function<Match, Score> scoringFunction) {
+    private Document(String key, Set<Element> elements, double threshold, BiFunction<Match, List<Score>, Score> scoringFunction) {
         this.key = key;
         this.elements = elements;
         this.threshold = threshold;
@@ -38,11 +39,11 @@ public class Document implements Matchable {
     private Set<Element> elements;
     private Set<Element> preProcessedElement;
     private double threshold;
-    private Function<Match, Score> scoringFunction;
+    private BiFunction<Match, List<Score>, Score> scoringFunction;
     private Boolean source;
     private Set<Document> matchedWith = new HashSet<>();
 
-    private static final Function<Match, Score> DEFAULT_DOCUMENT_SCORING = ScoringFunction.getExponentialWeightedAverageScore();
+    private static final BiFunction<Match, List<Score>, Score> DEFAULT_DOCUMENT_SCORING = ScoringFunction.getExponentialWeightedAverageScore();
 
     public String getKey() {
         return key;
@@ -111,7 +112,7 @@ public class Document implements Matchable {
     }
 
     @Override
-    public Function<Match, Score> getScoringFunction() {
+    public BiFunction<Match, List<Score>, Score> getScoringFunction() {
         return this.scoringFunction != null ? this.scoringFunction : DEFAULT_DOCUMENT_SCORING;
     }
 
@@ -140,7 +141,7 @@ public class Document implements Matchable {
         private String key;
         private Set<Element> elements;
         private double threshold = 0.5;
-        private Function<Match, Score> scoringFunction;
+        private BiFunction<Match, List<Score>, Score> scoringFunction;
 
         public Builder(String key) {
             this.key = key;
@@ -159,7 +160,7 @@ public class Document implements Matchable {
             return this;
         }
 
-        public Builder setScoringFunction(Function<Match, Score> scoringFunction) {
+        public Builder setScoringFunction(BiFunction<Match, List<Score>, Score> scoringFunction) {
             this.scoringFunction = scoringFunction;
             return this;
         }

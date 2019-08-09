@@ -40,17 +40,17 @@ public class Element implements Matchable {
     private Function<Object, Object> preProcessFunction;
     private Function<Element, Stream<Token>> tokenizerFunction;
     private BiFunction<Token, Token, Double> similarityMatchFunction;
-    private Function<Match, Score> scoringFunction;
+    private BiFunction<Match, List<Score>, Score> scoringFunction;
     private List<Token> tokens;
 
     private Object preProcessedValue;
 
-    private static final Function<Match, Score> DEFAULT_ELEMENT_SCORING = ScoringFunction.getSimpleAverageScore();
+    private static final BiFunction<Match, List<Score>, Score> DEFAULT_ELEMENT_SCORING = ScoringFunction.getSimpleAverageScore();
 
     public Element(ElementType type, String variance, Object value, double weight, double threshold,
                    Function<Object, Object> preProcessFunction,
                    Function<Element, Stream<Token>> tokenizerFunction,
-                   BiFunction<Token, Token, Double> similarityMatchFunction, Function<Match, Score> scoringFunction,
+                   BiFunction<Token, Token, Double> similarityMatchFunction, BiFunction<Match, List<Score>, Score> scoringFunction,
                    Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction) {
         this.weight = weight;
         this.elementClassification = new ElementClassification(type, variance,
@@ -153,7 +153,7 @@ public class Element implements Matchable {
     }
 
     @Override
-    public Function<Match, Score> getScoringFunction() {
+    public BiFunction<Match, List<Score>, Score> getScoringFunction() {
         return this.scoringFunction;
     }
 
@@ -167,7 +167,7 @@ public class Element implements Matchable {
 
         private Function<Element, Stream<Token>> tokenizerFunction;
         private BiFunction<Token, Token, Double> similarityMatchFunction;
-        private Function<Match, Score> scoringFunction;
+        private BiFunction<Match, List<Score>, Score> scoringFunction;
         private Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction;
 
         public Builder setType(ElementType type) {
@@ -177,6 +177,11 @@ public class Element implements Matchable {
 
         public Builder setVariance(String variance) {
             this.variance = variance;
+            return this;
+        }
+
+        public Builder setValue(Object value) {
+            this.value = value;
             return this;
         }
 
@@ -221,7 +226,7 @@ public class Element implements Matchable {
             return this;
         }
 
-        public Builder setScoringFunction(Function<Match, Score> scoringFunction) {
+        public Builder setScoringFunction(BiFunction<Match, List<Score>, Score> scoringFunction) {
             this.scoringFunction = scoringFunction;
             return this;
         }

@@ -3,6 +3,8 @@ package com.intuit.fuzzymatcher.component;
 import com.intuit.fuzzymatcher.domain.Document;
 import com.intuit.fuzzymatcher.domain.Element;
 import com.intuit.fuzzymatcher.domain.Match;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -11,12 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -46,6 +52,20 @@ public class MatchServicePerfTest {
         applyMatch(getBigDataDocuments().limit(2500).collect(Collectors.toList()));
 
         applyMatch(getBigDataDocuments().limit(3000).collect(Collectors.toList()));
+    }
+
+    @Test
+    /*
+     * 2000 - 1.23 G
+     * 4000 - 2.89 G
+     * 6000 - 4.94 G
+     *
+     */
+    public void itShouldApplyMatchForBigDataForMemoryPerf() throws FileNotFoundException {
+        int docSize = 2000;
+        List<Document> leftDoc = getBigDataDocuments().limit(docSize).collect(Collectors.toList());
+        List<Document> rightDoc = getBigDataDocuments().limit(docSize).collect(Collectors.toList());
+        recordMemoryUsage(() -> applyMatch(leftDoc, rightDoc), 10);
     }
 
     private void applyMatch(List<Document> documentList) {
@@ -80,5 +100,40 @@ public class MatchServicePerfTest {
             address =  StringUtils.trimToEmpty(addressBuilder.toString());
         }
         return address;
+    }
+
+    private void applyMatch(List<Document> left, List<Document> right) {
+        long startTime = System.nanoTime();
+        Map<String, List<Match<Document>>> result = matchService.applyMatchByDocId(left, right);
+
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime) / 1000000;
+        System.out.println("Execution time (ms) for transactions : " + duration);
+    }
+
+    public void recordMemoryUsage(Runnable runnable, int runTimeSecs) {
+        try {
+            CompletableFuture<Void> mainProcessFuture = CompletableFuture.runAsync(runnable);
+            CompletableFuture<Void> memUsageFuture = CompletableFuture.runAsync(() -> {
+
+                long mem = 0;
+                for (int cnt = 0; cnt < runTimeSecs; cnt++) {
+                    long memUsed = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+                    mem = memUsed > mem ? memUsed : mem;
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                ;
+                System.out.println("Max memory used (gb): " + mem/1000000000D);
+            });
+
+            CompletableFuture<Void> allOf = CompletableFuture.allOf(mainProcessFuture, memUsageFuture);
+            allOf.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
