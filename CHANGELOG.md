@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.2 - 2019-08-09
+### Added
+- Element.Builder.setValue overridden to accept Object Type
+### Removed
+- Match.childScores is dropped to reduce memory footprint.
+### Changed
+- ScoringFunction changed to BiFunction from Function. It takes a List<Score> of childScores as the second input. 
+This allows childScores to be stored in function stack when score is evaluated instead of the heap, and reduces the overall memory footprint of the library  
+
 ## 0.4.1 - 2019-07-03
 ### Fixed
 - Reduced memory footprint by removing tokens not meeting match threshold  
