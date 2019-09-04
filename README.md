@@ -67,7 +67,7 @@ Since this library can be used to match elements against a large set of records,
 
 
 This library makes use of Java 8 Stream to run all operations in parallel and makes optimum use of a multi-core cpu.
-Beyond that to find duplicates in a given set of records, this library avoids matching each element with every other 
+Beyond finding duplicates in a given set of records, this library avoids matching each element with every other 
 element, and reduces the complexity which otherwise would be O(N^2)
 
 #### Reducing Complexity to O(N Log N)
