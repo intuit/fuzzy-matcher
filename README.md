@@ -18,9 +18,9 @@
 * [Demo](#demo)
 
 ## Introduction
-A java based library to match and group "similar" elements in a collection of document.
+A java based library to match and group "similar" elements in a collection of documents.
 
-In system with a collection of contacts. If we wanted to match and categorize contacts with similar names, location
+In system with a collection of contacts. If we wanted to match and categorize contacts with similar names, the location
 where they live or with any other attribute. This matching algorithm helps to achieve it using Fuzzy match.
 In fact, you may even try to find out if you have already added duplicate contacts, or you can use this to
 prevent your system from adding one.
