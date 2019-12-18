@@ -1,14 +1,10 @@
 package com.intuit.fuzzymatcher.component;
 
 
-import com.intuit.fuzzymatcher.domain.Document;
-import com.intuit.fuzzymatcher.domain.Element;
-import com.intuit.fuzzymatcher.domain.Match;
-import com.intuit.fuzzymatcher.domain.Score;
+import com.intuit.fuzzymatcher.domain.*;
 import org.apache.commons.lang3.BooleanUtils;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,8 +26,15 @@ public class DocumentMatch {
      */
     public Stream<Match<Document>> matchDocuments(Stream<Document> documents) {
         Stream<Element> elements = documents.flatMap(d -> d.getPreProcessedElement().stream());
-        Stream<Match<Element>> matchedElements = elementMatch.matchElements(elements);
-        return rollupDocumentScore(matchedElements);
+        Map<ElementClassification, List<Element>> elementMap = elements.collect(Collectors.groupingBy(Element::getElementClassification));
+
+        List<Match<Element>> matchedElements = new ArrayList<>();
+        elementMap.forEach((key, value) -> {
+            List<Match<Element>> result = elementMatch.matchElements(key, value.parallelStream()).collect(Collectors.toList());
+            matchedElements.addAll(result);
+        });
+
+        return rollupDocumentScore(matchedElements.stream());
     }
 
     private Stream<Match<Document>> rollupDocumentScore(Stream<Match<Element>> matchElementStream) {

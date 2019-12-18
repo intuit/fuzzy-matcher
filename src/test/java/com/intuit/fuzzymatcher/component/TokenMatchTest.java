@@ -41,7 +41,7 @@ public class TokenMatchTest {
 
         Stream<Token> tokens = Stream.concat(element1.getTokenizerFunction().apply(element1),element2.getTokenizerFunction().apply(element2));
         TokenMatch tokenMatch = new TokenMatch();
-        Stream<Match<Token>> matches = tokenMatch.matchTokens(tokens);
+        Stream<Match<Token>> matches = tokenMatch.matchTokens(element1.getElementClassification(), tokens);
         Assert.assertEquals(3, matches.collect(Collectors.toList()).size());
     }
 
@@ -69,7 +69,7 @@ public class TokenMatchTest {
 
         Stream<Token> tokens = Stream.concat(element1.getTokenizerFunction().apply(element1),element2.getTokenizerFunction().apply(element2));
         TokenMatch tokenMatch = new TokenMatch();
-        Stream<Match<Token>> matches = tokenMatch.matchTokens(tokens);
+        Stream<Match<Token>> matches = tokenMatch.matchTokens(element1.getElementClassification(), tokens);
         Assert.assertTrue(matches.collect(Collectors.toList()).isEmpty());
     }
 
@@ -99,7 +99,7 @@ public class TokenMatchTest {
 
         Stream<Token> tokens = Stream.concat(element1.getTokenizerFunction().apply(element1),element2.getTokenizerFunction().apply(element2));
         TokenMatch tokenMatch = new TokenMatch();
-        Stream<Match<Token>> matches = tokenMatch.matchTokens(tokens);
+        Stream<Match<Token>> matches = tokenMatch.matchTokens(element1.getElementClassification(), tokens);
         Assert.assertFalse(matches.anyMatch(d -> d.getData().getElement().getDocument().getKey().equals(d.getMatchedWith().getElement().getDocument().getKey())));
     }
 
@@ -120,7 +120,7 @@ public class TokenMatchTest {
 
         Stream<Token> tokens = Stream.concat(element1.getTokenizerFunction().apply(element1),element2.getTokenizerFunction().apply(element2));
         TokenMatch tokenMatch = new TokenMatch();
-        List<Match<Token>> matches = tokenMatch.matchTokens(tokens).collect(Collectors.toList());
+        List<Match<Token>> matches = tokenMatch.matchTokens(element1.getElementClassification(), tokens).collect(Collectors.toList());
 
         Assert.assertEquals(2, matches.size());
     }

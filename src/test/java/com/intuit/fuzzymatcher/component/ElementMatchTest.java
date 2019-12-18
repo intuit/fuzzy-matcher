@@ -12,14 +12,16 @@ public class ElementMatchTest {
 
     @Test
     public void itShouldMatchElements() {
-
         Stream<Document> documentStream = Stream.of(
                 getDocWithName("1", "Rodrigue Rodrigues"),
                 getDocWithName("2", "Rodrigues, Rodrigue"));
 
         Stream<Element> elements = documentStream.flatMap(d -> d.getDistinctNonEmptyElements());
 
-        Stream<Match<Element>> matchResults = elementMatch.matchElements(elements);
+        ElementClassification elementClassification = new ElementClassification(ElementType.NAME, "",
+                ElementType.NAME.getMatchOptimizerFunction());
+
+        Stream<Match<Element>> matchResults = elementMatch.matchElements(elementClassification, elements);
         matchResults.forEach(match -> {
             System.out.println(match.getResult());
             Assert.assertTrue("Match less than 1.0", match.getResult() <= 1.0);

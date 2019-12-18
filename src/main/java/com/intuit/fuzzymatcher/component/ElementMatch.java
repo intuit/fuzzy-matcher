@@ -1,9 +1,6 @@
 package com.intuit.fuzzymatcher.component;
 
-import com.intuit.fuzzymatcher.domain.Element;
-import com.intuit.fuzzymatcher.domain.Match;
-import com.intuit.fuzzymatcher.domain.Score;
-import com.intuit.fuzzymatcher.domain.Token;
+import com.intuit.fuzzymatcher.domain.*;
 
 import java.util.List;
 import java.util.Map;
@@ -18,9 +15,9 @@ public class ElementMatch {
 
     private static TokenMatch tokenMatch = new TokenMatch();
 
-    public Stream<Match<Element>> matchElements(Stream<Element> elements) {
+    public Stream<Match<Element>> matchElements(ElementClassification elementClassification, Stream<Element> elements) {
         Stream<Token> tokenStream = elements.flatMap(Element::getTokens);
-        Stream<Match<Token>> matchedTokens = tokenMatch.matchTokens(tokenStream);
+        Stream<Match<Token>> matchedTokens = tokenMatch.matchTokens(elementClassification, tokenStream);
         return rollupElementScore(matchedTokens);
     }
 

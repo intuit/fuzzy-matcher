@@ -1,15 +1,9 @@
 package com.intuit.fuzzymatcher.component;
 
-import com.intuit.fuzzymatcher.domain.*;
-import com.intuit.fuzzymatcher.function.SimilarityMatchFunction;
-import org.apache.commons.lang3.BooleanUtils;
+import com.intuit.fuzzymatcher.domain.ElementClassification;
+import com.intuit.fuzzymatcher.domain.Match;
+import com.intuit.fuzzymatcher.domain.Token;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -19,11 +13,9 @@ import java.util.stream.Stream;
  */
 public class TokenMatch {
 
-    public Stream<Match<Token>> matchTokens(Stream<Token> input) {
-        Map<ElementClassification, List<Token>> tokenClassMap = input.collect(Collectors
-                .groupingBy(token -> token.getElement().getElementClassification()));
-        return tokenClassMap.entrySet().parallelStream().
-                flatMap(entry -> entry.getKey().getMatchOptimizerFunction().apply(entry.getValue()))
+    public Stream<Match<Token>> matchTokens(ElementClassification elementClassification, Stream<Token> input) {
+
+        return elementClassification.getMatchOptimizerFunction().apply(input.collect(Collectors.toList()))
                 .filter(tokenMatch -> tokenMatch.getResult() >= tokenMatch.getData().getElement().getThreshold());
     }
 }
