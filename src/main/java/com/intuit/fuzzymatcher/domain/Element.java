@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.AbstractMap;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -60,7 +59,7 @@ public class Element implements Matchable {
         this.preProcessFunction = preProcessFunction == null ? type.getPreProcessFunction() : preProcessFunction;
         this.tokenizerFunction = tokenizerFunction == null ? type.getTokenizerFunction() : tokenizerFunction;
         this.similarityMatchFunction = similarityMatchFunction == null ? type.getSimilarityMatchFunction() : similarityMatchFunction;
-        this.scoringFunction = scoringFunction != null ? this.scoringFunction : DEFAULT_ELEMENT_SCORING;
+        this.scoringFunction = scoringFunction != null ? scoringFunction : DEFAULT_ELEMENT_SCORING;
     }
 
     public ElementClassification getElementClassification() {
