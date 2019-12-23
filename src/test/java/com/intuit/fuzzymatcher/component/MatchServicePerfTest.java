@@ -3,26 +3,20 @@ package com.intuit.fuzzymatcher.component;
 import com.intuit.fuzzymatcher.domain.Document;
 import com.intuit.fuzzymatcher.domain.Element;
 import com.intuit.fuzzymatcher.domain.Match;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -56,9 +50,9 @@ public class MatchServicePerfTest {
 
     @Test
     /*
-     * 2000 - 1.23 G
-     * 4000 - 2.89 G
-     * 6000 - 4.94 G
+     * 2000 - 1.41 G
+     * 4000 - 2.45 G
+     * 6000 - 4.01 G
      *
      */
     public void itShouldApplyMatchForBigDataForMemoryPerf() throws FileNotFoundException {

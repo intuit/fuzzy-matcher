@@ -34,7 +34,7 @@ public class DocumentMatch {
             matchedElements.addAll(result);
         });
 
-        return rollupDocumentScore(matchedElements.stream());
+        return rollupDocumentScore(matchedElements.parallelStream());
     }
 
     private Stream<Match<Document>> rollupDocumentScore(Stream<Match<Element>> matchElementStream) {
