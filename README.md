@@ -114,7 +114,7 @@ The library is published to maven central
 <dependency>
     <groupId>com.intuit.fuzzymatcher</groupId>
     <artifactId>fuzzy-matcher</artifactId>
-    <version>0.4.2</version>
+    <version>0.4.4</version>
 </dependency>
 ```
 

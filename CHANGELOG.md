@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.4.4 - 2019-12-23
+### Fixed
+- Ability to configure scoring function in Element https://github.com/intuit/fuzzy-matcher/issues/19
+### Changed
+- Improved memory utilization by processing all elements by it's type or classification. 
+This allows jvm to run gc to free heap space after each element type is processed 
+
 ## 0.4.2 - 2019-08-09
 ### Added
 - Element.Builder.setValue overridden to accept Object Type
