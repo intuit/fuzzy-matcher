@@ -34,6 +34,11 @@ public class MatchService {
                 .collect(Collectors.groupingBy(Match::getData));
     }
 
+    public Map<Document, List<Match<Document>>> applyMatchLinear(List<Document> documents) {
+        return documentMatch.matchDocumentsLinear(documents.stream())
+                .collect(Collectors.groupingBy(Match::getData));
+    }
+
     /**
      * Use this to check duplicates for bulk inserts, where a list of new Documents is checked against existing list
      * Data is aggregated by a given Document
@@ -54,6 +59,18 @@ public class MatchService {
                 .collect(Collectors.groupingBy(Match::getData));
     }
 
+    public Map<Document, List<Match<Document>>> applyMatchLinear(List<Document> documents, List<Document> matchWith) {
+        return documentMatch.matchDocumentsLinear(Stream.concat(
+                documents.stream().map(document -> {
+                    document.setSource(true);
+                    return document;
+                }), matchWith.stream().map(document -> {
+                    document.setSource(false);
+                    return document;
+                })))
+                .collect(Collectors.groupingBy(Match::getData));
+    }
+
     /**
      * Use this to check duplicate for a new record, where it checks whether a new Document is a duplicate in existing list
      * Data is aggregated by a given Document
@@ -64,6 +81,10 @@ public class MatchService {
      */
     public Map<Document, List<Match<Document>>> applyMatch(Document document, List<Document> matchWith) {
         return applyMatch(Arrays.asList(document), matchWith);
+    }
+
+    public Map<Document, List<Match<Document>>> applyMatchLinear(Document document, List<Document> matchWith) {
+        return applyMatchLinear(Arrays.asList(document), matchWith);
     }
 
     /**
@@ -78,6 +99,10 @@ public class MatchService {
         return applyMatchByDocId(Arrays.asList(document), matchWith);
     }
 
+    public Map<String, List<Match<Document>>> applyMatchByDocIdLinear(Document document, List<Document> matchWith) {
+        return applyMatchByDocIdLinear(Arrays.asList(document), matchWith);
+    }
+
     /**
      * Use this for De-duplication of data, where for a given list of documents it finds duplicates
      * Data is aggregated by a given Document Id
@@ -87,6 +112,11 @@ public class MatchService {
      */
     public Map<String, List<Match<Document>>> applyMatchByDocId(List<Document> documents) {
         return documentMatch.matchDocuments(documents.parallelStream())
+                .collect(Collectors.groupingBy(match -> match.getData().getKey()));
+    }
+
+    public Map<String, List<Match<Document>>> applyMatchByDocIdLinear(List<Document> documents) {
+        return documentMatch.matchDocumentsLinear(documents.stream())
                 .collect(Collectors.groupingBy(match -> match.getData().getKey()));
     }
 
@@ -104,6 +134,18 @@ public class MatchService {
                     document.setSource(true);
                     return document;
                 }), matchWith.parallelStream().map(document -> {
+                    document.setSource(false);
+                    return document;
+                })))
+                .collect(Collectors.groupingBy(match -> match.getData().getKey()));
+    }
+
+    public Map<String, List<Match<Document>>> applyMatchByDocIdLinear(List<Document> documents, List<Document> matchWith) {
+        return documentMatch.matchDocumentsLinear(Stream.concat(
+                documents.stream().map(document -> {
+                    document.setSource(true);
+                    return document;
+                }), matchWith.stream().map(document -> {
                     document.setSource(false);
                     return document;
                 })))
