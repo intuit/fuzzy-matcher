@@ -2,7 +2,6 @@ package com.intuit.fuzzymatcher.component;
 
 
 import com.intuit.fuzzymatcher.domain.*;
-import org.apache.commons.codec.language.Soundex;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.*;
@@ -27,7 +26,7 @@ public class DocumentMatch {
      * @param documents Stream of Document objects
      * @return Stream of Match of Document type objects
      */
-    public Stream<Match<Document>> matchDocuments(Stream<Document> documents) {
+    public Stream<Match<Document>> matchDocumentsOld(Stream<Document> documents) {
         Stream<Element> elements = documents.flatMap(d -> d.getPreProcessedElement().stream());
         Map<ElementClassification, List<Element>> elementMap = elements.collect(Collectors.groupingBy(Element::getElementClassification));
 
@@ -54,6 +53,7 @@ public class DocumentMatch {
                                     .stream()
                                     .map(d -> d.getScore())
                                     .collect(Collectors.toList());
+                            // System.out.println(Arrays.toString(childScoreList.toArray()));
                             Match<Document> leftMatch = new Match<Document>(leftDocumentEntry.getKey(), rightDocumentEntry.getKey(), childScoreList);
                             if (BooleanUtils.isNotFalse(rightDocumentEntry.getKey().isSource())) {
                                 Match<Document> rightMatch = new Match<Document>(rightDocumentEntry.getKey(), leftDocumentEntry.getKey(), childScoreList);
@@ -65,84 +65,64 @@ public class DocumentMatch {
     }
 
 
-    UniqueTokenRepo uniqueTokenRepo = new UniqueTokenRepo();
 
-    public Stream<Match<Document>> matchDocumentsLinear(Stream<Document> documents) {
+    public Stream<Match<Document>> matchDocuments(Stream<Document> documents) {
         System.out.println("Starting Linear Match");
-
+        TokenRepo tokenRepo = new TokenRepo();
         List<Match<Element>> elementMatches = new ArrayList<>();
 
         documents.forEach(document -> {
-
             Set<Element> elements = document.getPreProcessedElement();
-
-            elements.forEach(element -> {
-                List<Token> tokens = element.getTokens().collect(Collectors.toList());
-
-                RepoScore repoScore = new RepoScore();
-                tokens.forEach(token -> {
-                    String encodedValue = getEncodedToken((String) token.getValue());
-
-                    // duplicate token found, create match
-                    if (uniqueTokenRepo.contains(element.getElementClassification(), encodedValue)) {
-                        Set<Element> matchElements = uniqueTokenRepo.get(element.getElementClassification(), encodedValue);
-                        matchElements.forEach(matchElement -> {
-                            String key = matchElement.getDocument().getKey();
-                            repoScore.increament(key, 1.0);
-                            // Element Score above threshold
-                            double elementScore = elementScore(repoScore.get(key), element.getChildCount(matchElement));
-
-                            if (elementScore > element.getThreshold()) {
-                                elementMatches.add(new Match<>(element, matchElement, elementScore));
-                            }
-
-                        });
-                    }
-                    uniqueTokenRepo.add(element.getElementClassification(), element, encodedValue);
-
-                });
-            });
+            elements.forEach(element -> findElementMatches(elementMatches, tokenRepo, element));
 
         });
         return rollupDocumentScore(elementMatches.parallelStream());
     }
 
-    Soundex soundex = new Soundex();
+    private void findElementMatches(List<Match<Element>> elementMatches, TokenRepo tokenRepo, Element element ) {
+        List<Token> tokens = element.getTokens().collect(Collectors.toList());
 
-    private String getEncodedToken(String value) {
-        String code = soundex.encode(value);
-        if (code.equals("")) {
-            code = value;
-        }
-        //System.out.println(value + " -> " + code);
-        return code;
+        ElementMatchCounter elementMatchCounter = new ElementMatchCounter();
+        tokens.forEach(token -> {
+
+            // duplicate token found, create match
+            if (BooleanUtils.isNotFalse(element.getDocument().isSource()) && tokenRepo.contains(token)) {
+                Set<Element> matchElements = tokenRepo.get(token);
+                matchElements.forEach(matchElement -> {
+                    elementMatchCounter.put(matchElement);
+                    // Element Score above threshold
+                    double elementScore = element.getScore(elementMatchCounter.get(matchElement), matchElement);
+
+                    if (elementScore > element.getThreshold()) {
+                        // TODO: Remove multiple matches for same Element pair
+                        elementMatches.add(new Match<>(element, matchElement, elementScore));
+                    }
+
+                });
+            }
+            tokenRepo.put(token);
+        });
     }
 
-    private double elementScore(double matchTokens, double totalTokens) {
-        return matchTokens / totalTokens;
-    }
 
+    private class ElementMatchCounter {
+        private Map<String, Integer> elementMatches = new ConcurrentHashMap<>();
 
-    private class RepoScore {
-        private Map<String, Double> repoScore = new ConcurrentHashMap<>();
-
-        public void increament(String key, double value) {
-            Double prevScore = repoScore.getOrDefault(key, 0.0);
-            repoScore.put(key, prevScore + value);
+        public void put(Element matchElement) {
+            String key = matchElement.getDocument().getKey();
+            Integer count = elementMatches.getOrDefault(key, 0);
+            elementMatches.put(key, ++count);
         }
 
-        public void put(String key, double value) {
-            repoScore.put(key, value);
-        }
-
-        public Double get(String key) {
-            return repoScore.get(key);
+        public Integer get(Element matchElement) {
+            String key = matchElement.getDocument().getKey();
+            return elementMatches.get(key);
         }
 
         @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            repoScore.forEach((key, value) -> {
+            elementMatches.forEach((key, value) -> {
                 builder.append(key + "->" + value);
                 builder.append("\t");
             });
@@ -151,35 +131,12 @@ public class DocumentMatch {
 
     }
 
-    private class UniqueTokenRepo {
-        private Map<ElementClassification, Map<String, Set<Element>>> uniqueTokenRepo = new ConcurrentHashMap<>();
-
-        public void add(ElementClassification elementClassification, Element element, String value) {
-            Map<String, Set<Element>> uniqueValues = uniqueTokenRepo.getOrDefault(elementClassification, new ConcurrentHashMap<>());
-            Set<Element> keys = uniqueValues.getOrDefault(value, new HashSet<>());
-            keys.add(element);
-            uniqueValues.put(value, keys);
-            uniqueTokenRepo.put(elementClassification, uniqueValues);
-
-        }
-
-        public boolean contains(ElementClassification elementClassification, String value) {
-            Map<String, Set<Element>> uniqueValues = uniqueTokenRepo.get(elementClassification);
-            return (uniqueValues != null && uniqueValues.containsKey(value));
-        }
-
-        public Set<Element> get(ElementClassification elementClassification, String value) {
-            Map<String, Set<Element>> uniqueValues = uniqueTokenRepo.get(elementClassification);
-            if (uniqueValues != null) {
-                return uniqueValues.get(value);
-            }
-            return null;
-        }
-    }
-
     public static void main(String[] args) {
         System.out.println("test start");
+        testLocal();
+    }
 
+    private static void testLocal() {
         List<Document> sourceData = new ArrayList<>();
 
         sourceData.add(new Document.Builder("S1")
@@ -203,7 +160,7 @@ public class DocumentMatch {
                 .createDocument());
 
         DocumentMatch documentMatch = new DocumentMatch();
-        Stream<Match<Document>> matches =  documentMatch.matchDocumentsLinear(sourceData.stream());
+        Stream<Match<Document>> matches =  documentMatch.matchDocuments(sourceData.stream());
 
         Map<Document, List<Match<Document>>> result = matches.collect(Collectors.groupingBy(Match::getData));
         result.entrySet().forEach(entry -> {
@@ -211,7 +168,6 @@ public class DocumentMatch {
                 System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
             });
         });
-
     }
 
 }

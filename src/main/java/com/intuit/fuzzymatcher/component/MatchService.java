@@ -29,13 +29,13 @@ public class MatchService {
      * @param documents the list of documents to match against
      * @return a map containing the grouping of each document and its corresponding matches
      */
-    public Map<Document, List<Match<Document>>> applyMatch(List<Document> documents) {
-        return documentMatch.matchDocuments(documents.parallelStream())
+    public Map<Document, List<Match<Document>>> applyMatchOld(List<Document> documents) {
+        return documentMatch.matchDocumentsOld(documents.parallelStream())
                 .collect(Collectors.groupingBy(Match::getData));
     }
 
-    public Map<Document, List<Match<Document>>> applyMatchLinear(List<Document> documents) {
-        return documentMatch.matchDocumentsLinear(documents.stream())
+    public Map<Document, List<Match<Document>>> applyMatch(List<Document> documents) {
+        return documentMatch.matchDocuments(documents.stream())
                 .collect(Collectors.groupingBy(Match::getData));
     }
 
@@ -47,8 +47,8 @@ public class MatchService {
      * @param matchWith the list of documents to match against
      * @return a map containing the grouping of each document and its corresponding matches
      */
-    public Map<Document, List<Match<Document>>> applyMatch(List<Document> documents, List<Document> matchWith) {
-        return documentMatch.matchDocuments(Stream.concat(
+    public Map<Document, List<Match<Document>>> applyMatchOld(List<Document> documents, List<Document> matchWith) {
+        return documentMatch.matchDocumentsOld(Stream.concat(
                 documents.parallelStream().map(document -> {
                     document.setSource(true);
                     return document;
@@ -59,13 +59,14 @@ public class MatchService {
                 .collect(Collectors.groupingBy(Match::getData));
     }
 
-    public Map<Document, List<Match<Document>>> applyMatchLinear(List<Document> documents, List<Document> matchWith) {
-        return documentMatch.matchDocumentsLinear(Stream.concat(
+    public Map<Document, List<Match<Document>>> applyMatch(List<Document> documents, List<Document> matchWith) {
+        return documentMatch.matchDocuments(Stream.concat(
+                matchWith.stream().map(document -> {
+                    document.setSource(false);
+                    return document;
+                }),
                 documents.stream().map(document -> {
                     document.setSource(true);
-                    return document;
-                }), matchWith.stream().map(document -> {
-                    document.setSource(false);
                     return document;
                 })))
                 .collect(Collectors.groupingBy(Match::getData));
@@ -75,32 +76,32 @@ public class MatchService {
      * Use this to check duplicate for a new record, where it checks whether a new Document is a duplicate in existing list
      * Data is aggregated by a given Document
      *
-     * @param document the document to match
+     * @param document  the document to match
      * @param matchWith the list of documents to match against
      * @return a map containing the grouping of each document and its corresponding matches
      */
-    public Map<Document, List<Match<Document>>> applyMatch(Document document, List<Document> matchWith) {
-        return applyMatch(Arrays.asList(document), matchWith);
+    public Map<Document, List<Match<Document>>> applyMatchOld(Document document, List<Document> matchWith) {
+        return applyMatchOld(Arrays.asList(document), matchWith);
     }
 
-    public Map<Document, List<Match<Document>>> applyMatchLinear(Document document, List<Document> matchWith) {
-        return applyMatchLinear(Arrays.asList(document), matchWith);
+    public Map<Document, List<Match<Document>>> applyMatch(Document document, List<Document> matchWith) {
+        return applyMatch(Arrays.asList(document), matchWith);
     }
 
     /**
      * Use this to check duplicate for a new record, where it checks whether a new Document is a duplicate in existing list
      * Data is aggregated by a given Document Id
      *
-     * @param document the document to match
+     * @param document  the document to match
      * @param matchWith the list of documents to match against
      * @return a map containing the grouping of each document id and its corresponding matches
      */
-    public Map<String, List<Match<Document>>> applyMatchByDocId(Document document, List<Document> matchWith) {
-        return applyMatchByDocId(Arrays.asList(document), matchWith);
+    public Map<String, List<Match<Document>>> applyMatchByDocIdOld(Document document, List<Document> matchWith) {
+        return applyMatchByDocIdOld(Arrays.asList(document), matchWith);
     }
 
-    public Map<String, List<Match<Document>>> applyMatchByDocIdLinear(Document document, List<Document> matchWith) {
-        return applyMatchByDocIdLinear(Arrays.asList(document), matchWith);
+    public Map<String, List<Match<Document>>> applyMatchByDocId(Document document, List<Document> matchWith) {
+        return applyMatchByDocId(Arrays.asList(document), matchWith);
     }
 
     /**
@@ -110,13 +111,13 @@ public class MatchService {
      * @param documents the list of documents to match against
      * @return a map containing the grouping of each document id and its corresponding matches
      */
-    public Map<String, List<Match<Document>>> applyMatchByDocId(List<Document> documents) {
-        return documentMatch.matchDocuments(documents.parallelStream())
+    public Map<String, List<Match<Document>>> applyMatchByDocIdOld(List<Document> documents) {
+        return documentMatch.matchDocumentsOld(documents.parallelStream())
                 .collect(Collectors.groupingBy(match -> match.getData().getKey()));
     }
 
-    public Map<String, List<Match<Document>>> applyMatchByDocIdLinear(List<Document> documents) {
-        return documentMatch.matchDocumentsLinear(documents.stream())
+    public Map<String, List<Match<Document>>> applyMatchByDocId(List<Document> documents) {
+        return documentMatch.matchDocuments(documents.stream())
                 .collect(Collectors.groupingBy(match -> match.getData().getKey()));
     }
 
@@ -128,8 +129,8 @@ public class MatchService {
      * @param matchWith the list of documents to match against
      * @return a map containing the grouping of each document id and its corresponding matches
      */
-    public Map<String, List<Match<Document>>> applyMatchByDocId(List<Document> documents, List<Document> matchWith) {
-        return documentMatch.matchDocuments(Stream.concat(
+    public Map<String, List<Match<Document>>> applyMatchByDocIdOld(List<Document> documents, List<Document> matchWith) {
+        return documentMatch.matchDocumentsOld(Stream.concat(
                 documents.parallelStream().map(document -> {
                     document.setSource(true);
                     return document;
@@ -140,13 +141,13 @@ public class MatchService {
                 .collect(Collectors.groupingBy(match -> match.getData().getKey()));
     }
 
-    public Map<String, List<Match<Document>>> applyMatchByDocIdLinear(List<Document> documents, List<Document> matchWith) {
-        return documentMatch.matchDocumentsLinear(Stream.concat(
-                documents.stream().map(document -> {
-                    document.setSource(true);
-                    return document;
-                }), matchWith.stream().map(document -> {
+    public Map<String, List<Match<Document>>> applyMatchByDocId(List<Document> documents, List<Document> matchWith) {
+        return documentMatch.matchDocuments(Stream.concat(
+                matchWith.stream().map(document -> {
                     document.setSource(false);
+                    return document;
+                }), documents.stream().map(document -> {
+                    document.setSource(true);
                     return document;
                 })))
                 .collect(Collectors.groupingBy(match -> match.getData().getKey()));

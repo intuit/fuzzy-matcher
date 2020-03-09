@@ -29,4 +29,12 @@ public class Score {
     public void setMatch(Match match) {
         this.match = match;
     }
+
+    @Override
+    public String toString() {
+        return "Score{" +
+                "result=" + result +
+                ", match=" + match +
+                '}';
+    }
 }

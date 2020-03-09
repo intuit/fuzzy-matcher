@@ -127,6 +127,11 @@ public class Element implements Matchable {
     }
 
 
+    public double getScore(Integer matchingCount, Element other) {
+        return ((double)matchingCount / (double) getChildCount(other));
+    }
+
+
     /**
      * This gets the Max number of tokens present between matching Elements.
      * For Elements that do not have a balanced set of tokens, it can push the score down.

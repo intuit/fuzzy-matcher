@@ -3,5 +3,5 @@ package com.intuit.fuzzymatcher.domain;
 public enum MatchType {
     SOUNDEX,
     EQUALITY,
-    NEIGHBOURS
+    NEAREST_NEIGHBOURS
 }
