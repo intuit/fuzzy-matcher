@@ -20,6 +20,12 @@ public class DocumentMatch {
 
     private static ElementMatch elementMatch = new ElementMatch();
 
+    private final TokenRepo tokenRepo;
+
+    public DocumentMatch() {
+        tokenRepo = new TokenRepo();
+    }
+
     /**
      * Executes matching of a document stream
      *
@@ -68,18 +74,17 @@ public class DocumentMatch {
 
     public Stream<Match<Document>> matchDocuments(Stream<Document> documents) {
         System.out.println("Starting Linear Match");
-        TokenRepo tokenRepo = new TokenRepo();
         List<Match<Element>> elementMatches = new ArrayList<>();
 
         documents.forEach(document -> {
             Set<Element> elements = document.getPreProcessedElement();
-            elements.forEach(element -> findElementMatches(elementMatches, tokenRepo, element));
+            elements.forEach(element -> findElementMatches(elementMatches, element));
 
         });
         return rollupDocumentScore(elementMatches.parallelStream());
     }
 
-    private void findElementMatches(List<Match<Element>> elementMatches, TokenRepo tokenRepo, Element element ) {
+    private void findElementMatches(List<Match<Element>> elementMatches, Element element ) {
         List<Token> tokens = element.getTokens().collect(Collectors.toList());
 
         ElementMatchCounter elementMatchCounter = new ElementMatchCounter();

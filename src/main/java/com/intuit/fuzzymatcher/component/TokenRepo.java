@@ -29,19 +29,19 @@ public class TokenRepo {
             repo = new Repo(elementClassification);
             repoMap.put(elementClassification, repo);
         }
-        repo.put(token.getEncodedValue(), token.getElement());
+        repo.put(token.getValue(), token.getElement());
     }
 
 
     public boolean contains(Token token) {
         Repo repo = repoMap.get(token.getElement().getElementClassification());
-        return (repo != null && repo.containsKey(token.getEncodedValue()));
+        return (repo != null && repo.containsKey(token.getValue()));
     }
 
     public Set<Element> get(Token token) {
         Repo repo = repoMap.get(token.getElement().getElementClassification());
         if (repo != null) {
-            return repo.get(token.getEncodedValue());
+            return repo.get(token.getValue());
         }
         return null;
     }
