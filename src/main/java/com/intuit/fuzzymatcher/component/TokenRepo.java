@@ -58,7 +58,6 @@ public class TokenRepo {
         Repo(ElementClassification elementClassification) {
             this.matchType = elementClassification.getElementType().getMatchType();
             switch (matchType) {
-                case SOUNDEX:
                 case EQUALITY:
                     tokenElementSet = new ConcurrentHashMap<>();
                     break;
@@ -70,7 +69,6 @@ public class TokenRepo {
 
         void put(T tokenValue, Element element) {
             switch (matchType) {
-                case SOUNDEX:
                 case EQUALITY:
                     Set<Element> elements = tokenElementSet.getOrDefault(tokenValue, new HashSet<>());
                     elements.add(element);
@@ -84,7 +82,6 @@ public class TokenRepo {
 
         boolean containsKey(T tokenValue) {
             switch (matchType) {
-                case SOUNDEX:
                 case EQUALITY:
                     return tokenElementSet.containsKey(tokenValue);
                 case NEAREST_NEIGHBOURS:
@@ -96,7 +93,6 @@ public class TokenRepo {
 
         Set<Element> get(T tokenValue) {
             switch (matchType) {
-                case SOUNDEX:
                 case EQUALITY:
                     return tokenElementSet.get(tokenValue);
                 case NEAREST_NEIGHBOURS:

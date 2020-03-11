@@ -17,9 +17,9 @@ import static com.intuit.fuzzymatcher.function.TokenizerFunction.*;
  * The functions, can be overridden from Element class using the appropriate setters at the time of creation.
  */
 public enum ElementType {
-    NAME(namePreprocessing(), wordSoundexEncodeTokenizer(), soundex(), searchGroupOptimizer(), SOUNDEX),
-    TEXT(removeSpecialChars(), wordSoundexEncodeTokenizer(), soundex(), searchGroupOptimizer(), SOUNDEX),
-    ADDRESS(addressPreprocessing(), wordSoundexEncodeTokenizer(), soundex(), searchGroupOptimizer(), SOUNDEX),
+    NAME(namePreprocessing(), wordSoundexEncodeTokenizer(), soundex(), searchGroupOptimizer(), EQUALITY),
+    TEXT(removeSpecialChars(), wordSoundexEncodeTokenizer(), soundex(), searchGroupOptimizer(), EQUALITY),
+    ADDRESS(addressPreprocessing(), wordSoundexEncodeTokenizer(), soundex(), searchGroupOptimizer(), EQUALITY),
     EMAIL(removeDomain(), triGramTokenizer(), equality(), searchGroupOptimizer(), EQUALITY),
     PHONE(usPhoneNormalization(), decaGramTokenizer(), equality(), searchGroupOptimizer(), EQUALITY),
     NUMBER(numberPreprocessing(), valueTokenizer(), numberDifferenceRate(), numberSortOptimizer(), NEAREST_NEIGHBOURS),
