@@ -194,7 +194,7 @@ public class Element implements Matchable {
             return this;
         }
 
-        public Builder setValue(Double value) {
+        public Builder setValue(Number value) {
             this.value = value;
             return this;
         }

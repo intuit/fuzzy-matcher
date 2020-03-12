@@ -87,54 +87,16 @@ public class DocumentMatch {
     private void findElementMatches(List<Match<Element>> elementMatches, Element element ) {
         List<Token> tokens = element.getTokens().collect(Collectors.toList());
 
-        ElementMatchCounter elementMatchCounter = new ElementMatchCounter();
+        tokenRepo.initializeElementScore(element);
         tokens.forEach(token -> {
 
-            // duplicate token found, create match
-            if (BooleanUtils.isNotFalse(element.getDocument().isSource()) && tokenRepo.contains(token)) {
-                Set<Element> matchElements = tokenRepo.get(token);
-                matchElements.forEach(matchElement -> {
-                    elementMatchCounter.put(matchElement);
-                    // Element Score above threshold
-                    double elementScore = element.getScore(elementMatchCounter.get(matchElement), matchElement);
-
-                    if (elementScore > element.getThreshold()) {
-                        // TODO: Remove multiple matches for same Element pair
-                        elementMatches.add(new Match<>(element, matchElement, elementScore));
-                    }
-
-                });
+            if (BooleanUtils.isNotFalse(element.getDocument().isSource())) {
+                elementMatches.addAll(tokenRepo.getThresholdMatching(token));
             }
             tokenRepo.put(token);
         });
     }
 
-
-    private class ElementMatchCounter {
-        private Map<String, Integer> elementMatches = new ConcurrentHashMap<>();
-
-        public void put(Element matchElement) {
-            String key = matchElement.getDocument().getKey();
-            Integer count = elementMatches.getOrDefault(key, 0);
-            elementMatches.put(key, ++count);
-        }
-
-        public Integer get(Element matchElement) {
-            String key = matchElement.getDocument().getKey();
-            return elementMatches.get(key);
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            elementMatches.forEach((key, value) -> {
-                builder.append(key + "->" + value);
-                builder.append("\t");
-            });
-            return builder.toString();
-        }
-
-    }
 
     public static void main(String[] args) {
         System.out.println("test start");

@@ -484,12 +484,12 @@ public class MatchServiceTest {
     }
 
     @Test
-    public void itShouldApplyMatchWithNumber() {
-        List<String> numbers = Arrays.asList("23", "22", "10", "5", "str", "9", "11", "10.5", "23.5", "str");
+    public void itShouldApplyMatchWithInteger() {
+        List<Integer> numbers = Arrays.asList(91, 100, 200, 152, 11, 15, 10, 200);
         AtomicInteger ai = new AtomicInteger(0);
         List<Document> documentList = numbers.stream().map(num -> {
             return new Document.Builder(Integer.toString(ai.incrementAndGet()))
-                    .addElement(new Element.Builder().setType(NUMBER).setValue(num).setThreshold(0.95).createElement())
+                    .addElement(new Element.Builder().setType(NUMBER).setValue(num).setThreshold(0.90).createElement())
                     .createDocument();
         }).collect(Collectors.toList());
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);

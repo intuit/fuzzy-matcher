@@ -2,7 +2,11 @@ package com.intuit.fuzzymatcher.domain;
 
 import com.intuit.fuzzymatcher.function.ScoringFunction;
 import com.intuit.fuzzymatcher.util.Utils;
+import org.apache.commons.lang3.math.NumberUtils;
 
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -81,7 +85,7 @@ public class Token implements Matchable {
     @Override
     public String toString() {
         return "{" +
-                value + '\'' +
+                value +
                 '}';
     }
 
@@ -99,4 +103,18 @@ public class Token implements Matchable {
 
         return Objects.hash(value, element);
     }
+
+    public static Comparator<Token> byValue = (Token t1, Token t2) -> {
+        if (t2 == null) {
+            return -1;
+        }
+        if(t1 == null) {
+            return 1;
+        }
+
+        if (t1.getValue() instanceof Comparable) {
+            return ((Comparable) t1.getValue()).compareTo((Comparable) t2.getValue());
+        }
+        return  -1;
+    };
 }
