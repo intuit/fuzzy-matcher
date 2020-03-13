@@ -18,8 +18,6 @@ import static com.intuit.fuzzymatcher.domain.ElementType.*;
  */
 public class DocumentMatch {
 
-    private static ElementMatch elementMatch = new ElementMatch();
-
     private final TokenRepo tokenRepo;
 
     public DocumentMatch() {
@@ -32,17 +30,15 @@ public class DocumentMatch {
      * @param documents Stream of Document objects
      * @return Stream of Match of Document type objects
      */
-    public Stream<Match<Document>> matchDocumentsOld(Stream<Document> documents) {
-        Stream<Element> elements = documents.flatMap(d -> d.getPreProcessedElement().stream());
-        Map<ElementClassification, List<Element>> elementMap = elements.collect(Collectors.groupingBy(Element::getElementClassification));
+    public Stream<Match<Document>> matchDocuments(Stream<Document> documents) {
+        List<Match<Element>> elementMatches = new ArrayList<>();
 
-        List<Match<Element>> matchedElements = new ArrayList<>();
-        elementMap.forEach((key, value) -> {
-            List<Match<Element>> result = elementMatch.matchElements(key, value.parallelStream()).collect(Collectors.toList());
-            matchedElements.addAll(result);
+        documents.forEach(document -> {
+            Set<Element> elements = document.getPreProcessedElement();
+            elements.forEach(element -> findElementMatches(elementMatches, element));
+
         });
-
-        return rollupDocumentScore(matchedElements.parallelStream());
+        return rollupDocumentScore(elementMatches.parallelStream());
     }
 
     private Stream<Match<Document>> rollupDocumentScore(Stream<Match<Element>> matchElementStream) {
@@ -68,20 +64,6 @@ public class DocumentMatch {
                             return Stream.of(leftMatch);
                         }))
                 .filter(match -> match.getResult() > match.getData().getThreshold());
-    }
-
-
-
-    public Stream<Match<Document>> matchDocuments(Stream<Document> documents) {
-        System.out.println("Starting Linear Match");
-        List<Match<Element>> elementMatches = new ArrayList<>();
-
-        documents.forEach(document -> {
-            Set<Element> elements = document.getPreProcessedElement();
-            elements.forEach(element -> findElementMatches(elementMatches, element));
-
-        });
-        return rollupDocumentScore(elementMatches.parallelStream());
     }
 
     private void findElementMatches(List<Match<Element>> elementMatches, Element element ) {

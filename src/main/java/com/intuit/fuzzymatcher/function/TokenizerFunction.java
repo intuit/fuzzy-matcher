@@ -17,12 +17,12 @@ public interface TokenizerFunction extends Function<Element, Stream<Token>> {
     final Soundex soundex = new Soundex();
 
     static TokenizerFunction valueTokenizer() {
-        return (element -> Stream.of(getToken(element, element.getPreProcessedValue(), false)));
+        return (element -> Stream.of(getToken(element, element.getPreProcessedValue())));
     }
 
     static TokenizerFunction wordTokenizer() {
         return (element) -> Arrays.stream(element.getPreProcessedValue().toString().split("\\s+"))
-                .map(token -> getToken(element, token, false));
+                .map(token -> getToken(element, token));
     }
 
     static TokenizerFunction wordSoundexEncodeTokenizer() {
@@ -38,7 +38,7 @@ public interface TokenizerFunction extends Function<Element, Stream<Token>> {
                     }
                     // System.out.println(val +"->" + code);
                     return code;
-                }).map(token -> getToken(element, token, false));
+                }).map(token -> getToken(element, token));
     }
 
     static TokenizerFunction triGramTokenizer() {
@@ -53,11 +53,11 @@ public interface TokenizerFunction extends Function<Element, Stream<Token>> {
     static Stream<Token> getTokens(int size, Element element) {
         Object elementValue = element.getPreProcessedValue();
         return Utils.getNGrams(elementValue, size)
-                .map(str -> getToken(element, str, true));
+                .map(str -> getToken(element, str));
 
     }
 
-    static Token getToken(Element element, Object token, boolean nGramTokenized) {
-        return new Token(token, element, nGramTokenized);
+    static Token getToken(Element element, Object token) {
+        return new Token(token, element);
     }
 }

@@ -23,10 +23,8 @@ import static com.intuit.fuzzymatcher.function.PreProcessFunction.trim;
  * <li>type - The ElementType for the value. This determines the functions applied at different steps of the match</li>
  * <li>weight - Used in scoring function to increase the Document score for an Element. Default is 1.0 for all elements</li>
  * <li>threshold - Value above which elements are considered a match, default 0.3</li>
- * <li>scoringFunction - Function used to aggregate scores of matching elements, default ExponentialWeightedAverageScore</li>
  * <li>preProcessFunction - Function to pre-process the value. If this is not set, the function defined in ElementType is used </li>
  * <li>tokenizerFunction - Function to break values into tokens. If this is not set, the function defined in ElementType is used </li>
- * <li>similarityMatchFunction - Function to compare tokens. If this is not set, the function defined in ElementType is used </li>
  * </ul>
  */
 public class Element implements Matchable {
@@ -38,28 +36,19 @@ public class Element implements Matchable {
     private Document document;
     private Function<Object, Object> preProcessFunction;
     private Function<Element, Stream<Token>> tokenizerFunction;
-    private BiFunction<Token, Token, Double> similarityMatchFunction;
-    private BiFunction<Match, List<Score>, Score> scoringFunction;
     private List<Token> tokens;
 
     private Object preProcessedValue;
 
-    private static final BiFunction<Match, List<Score>, Score> DEFAULT_ELEMENT_SCORING = ScoringFunction.getSimpleAverageScore();
-
     public Element(ElementType type, String variance, Object value, double weight, double threshold,
                    Function<Object, Object> preProcessFunction,
-                   Function<Element, Stream<Token>> tokenizerFunction,
-                   BiFunction<Token, Token, Double> similarityMatchFunction, BiFunction<Match, List<Score>, Score> scoringFunction,
-                   Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction) {
+                   Function<Element, Stream<Token>> tokenizerFunction) {
         this.weight = weight;
-        this.elementClassification = new ElementClassification(type, variance,
-                matchOptimizerFunction == null ? type.getMatchOptimizerFunction() : matchOptimizerFunction);
+        this.elementClassification = new ElementClassification(type, variance);
         this.value = value;
         this.threshold = threshold;
         this.preProcessFunction = preProcessFunction == null ? type.getPreProcessFunction() : preProcessFunction;
         this.tokenizerFunction = tokenizerFunction == null ? type.getTokenizerFunction() : tokenizerFunction;
-        this.similarityMatchFunction = similarityMatchFunction == null ? type.getSimilarityMatchFunction() : similarityMatchFunction;
-        this.scoringFunction = scoringFunction != null ? scoringFunction : DEFAULT_ELEMENT_SCORING;
     }
 
     public ElementClassification getElementClassification() {
@@ -122,11 +111,6 @@ public class Element implements Matchable {
         return this.tokens.stream();
     }
 
-    public BiFunction<Token, Token, Double> getSimilarityMatchFunction() {
-        return this.similarityMatchFunction;
-    }
-
-
     public double getScore(Integer matchingCount, Element other) {
         return ((double)matchingCount / (double) getChildCount(other));
     }
@@ -158,7 +142,7 @@ public class Element implements Matchable {
 
     @Override
     public BiFunction<Match, List<Score>, Score> getScoringFunction() {
-        return this.scoringFunction;
+        return null;
     }
 
     public static class Builder {
@@ -171,8 +155,6 @@ public class Element implements Matchable {
 
         private Function<Element, Stream<Token>> tokenizerFunction;
         private BiFunction<Token, Token, Double> similarityMatchFunction;
-        private BiFunction<Match, List<Score>, Score> scoringFunction;
-        private Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction;
 
         public Builder setType(ElementType type) {
             this.type = type;
@@ -225,24 +207,9 @@ public class Element implements Matchable {
             return this;
         }
 
-        public Builder setSimilarityMatchFunction(BiFunction<Token, Token, Double> similarityMatchFunction) {
-            this.similarityMatchFunction = similarityMatchFunction;
-            return this;
-        }
-
-        public Builder setScoringFunction(BiFunction<Match, List<Score>, Score> scoringFunction) {
-            this.scoringFunction = scoringFunction;
-            return this;
-        }
-
-        public Builder setMatchOptimizerFunction(Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction) {
-            this.matchOptimizerFunction = matchOptimizerFunction;
-            return this;
-        }
 
         public Element createElement() {
-            return new Element(type, variance, value, weight, threshold, preProcessFunction, tokenizerFunction,
-                    similarityMatchFunction, scoringFunction, matchOptimizerFunction);
+            return new Element(type, variance, value, weight, threshold, preProcessFunction, tokenizerFunction);
         }
     }
 

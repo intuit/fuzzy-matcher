@@ -56,7 +56,7 @@ public class MatchServicePerfTest {
      *
      */
     public void itShouldApplyMatchForBigDataForMemoryPerf() throws FileNotFoundException {
-        int docSize = 2000;
+        int docSize = 6000;
         List<Document> leftDoc = getBigDataDocuments().limit(docSize).collect(Collectors.toList());
         List<Document> rightDoc = getBigDataDocuments().limit(docSize).collect(Collectors.toList());
         recordMemoryUsage(() -> applyMatch(leftDoc, rightDoc), 10);
