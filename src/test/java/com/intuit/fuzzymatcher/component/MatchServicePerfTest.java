@@ -46,6 +46,18 @@ public class MatchServicePerfTest {
         applyMatch(getBigDataDocuments().limit(2500).collect(Collectors.toList()));
 
         applyMatch(getBigDataDocuments().limit(3000).collect(Collectors.toList()));
+
+        applyMatch(getBigDataDocuments().limit(3500).collect(Collectors.toList()));
+
+        applyMatch(getBigDataDocuments().limit(4000).collect(Collectors.toList()));
+
+        applyMatch(getBigDataDocuments().limit(4500).collect(Collectors.toList()));
+
+        applyMatch(getBigDataDocuments().limit(5000).collect(Collectors.toList()));
+
+        applyMatch(getBigDataDocuments().limit(5500).collect(Collectors.toList()));
+
+        applyMatch(getBigDataDocuments().limit(6000).collect(Collectors.toList()));
     }
 
     @Test
@@ -69,6 +81,7 @@ public class MatchServicePerfTest {
         //Assert.assertEquals(116, result.size());
         long duration = (endTime - startTime) / 1000000;
         System.out.println("Execution time (ms) for + " + documentList.size() * ELEM_PER_DOC + " count : " + duration);
+        System.out.println();
     }
 
     public Stream<Document> getBigDataDocuments() throws FileNotFoundException {

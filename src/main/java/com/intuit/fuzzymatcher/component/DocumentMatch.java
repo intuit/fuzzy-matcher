@@ -5,11 +5,8 @@ import com.intuit.fuzzymatcher.domain.*;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.intuit.fuzzymatcher.domain.ElementType.*;
 
 /**
  * <p>
@@ -31,92 +28,80 @@ public class DocumentMatch {
      * @return Stream of Match of Document type objects
      */
     public Stream<Match<Document>> matchDocuments(Stream<Document> documents) {
-        List<Match<Element>> elementMatches = new ArrayList<>();
 
-        documents.forEach(document -> {
+        Stream<Match<Document>> documentMatch =  documents.flatMap(document -> {
             Set<Element> elements = document.getPreProcessedElement();
-            elements.forEach(element -> findElementMatches(elementMatches, element));
-
+            Set<Match<Element>> eleMatches =   elements.stream().flatMap(element -> findElementMatches(element).stream()).collect(Collectors.toSet());
+            return documentThresholdMatching(document, eleMatches);
         });
-        return rollupDocumentScore(elementMatches.parallelStream());
+
+        return documentMatch;
     }
 
-    private Stream<Match<Document>> rollupDocumentScore(Stream<Match<Element>> matchElementStream) {
+    private Stream<Match<Document>> documentThresholdMatching(Document document, Set<Match<Element>> matchingElements) {
+        Map<Document, List<Match<Element>>> mathes =  matchingElements.stream()
+                .collect(Collectors.groupingBy(matchElement -> matchElement.getMatchedWith().getDocument()));
 
-        Map<Document, Map<Document, List<Match<Element>>>> groupBy = matchElementStream
-                .collect(Collectors.groupingBy(matchElement -> matchElement.getData().getDocument(),
-                        Collectors.groupingBy(matchElement -> matchElement.getMatchedWith().getDocument())));
+        Stream<Match<Document>> result = mathes.entrySet().stream().flatMap(matchEntry -> {
 
-        return groupBy.entrySet().parallelStream().flatMap(leftDocumentEntry ->
-                leftDocumentEntry.getValue().entrySet()
-                        .parallelStream()
-                        .flatMap(rightDocumentEntry -> {
-                            List<Score> childScoreList = rightDocumentEntry.getValue()
-                                    .stream()
-                                    .map(d -> d.getScore())
-                                    .collect(Collectors.toList());
-                            // System.out.println(Arrays.toString(childScoreList.toArray()));
-                            Match<Document> leftMatch = new Match<Document>(leftDocumentEntry.getKey(), rightDocumentEntry.getKey(), childScoreList);
-                            if (BooleanUtils.isNotFalse(rightDocumentEntry.getKey().isSource())) {
-                                Match<Document> rightMatch = new Match<Document>(rightDocumentEntry.getKey(), leftDocumentEntry.getKey(), childScoreList);
-                                return Stream.of(leftMatch, rightMatch);
-                            }
-                            return Stream.of(leftMatch);
-                        }))
-                .filter(match -> match.getResult() > match.getData().getThreshold());
-    }
+            List<Score> childScoreList = matchEntry.getValue()
+                    .stream()
+                    .map(d -> d.getScore())
+                    .collect(Collectors.toList());
+            //System.out.println(Arrays.toString(childScoreList.toArray()));
+            Match<Document> leftMatch = new Match<Document>(document, matchEntry.getKey(), childScoreList);
 
-    private void findElementMatches(List<Match<Element>> elementMatches, Element element ) {
-        List<Token> tokens = element.getTokens().collect(Collectors.toList());
+            // Document match Found
+            if (leftMatch.getScore().getResult() > leftMatch.getData().getThreshold()) {
 
-        tokenRepo.initializeElementScore(element);
-        tokens.forEach(token -> {
-
-            if (BooleanUtils.isNotFalse(element.getDocument().isSource())) {
-                elementMatches.addAll(tokenRepo.getThresholdMatching(token));
+                if (BooleanUtils.isNotFalse(matchEntry.getKey().isSource())) {
+                    Match<Document> rightMatch = new Match<Document>(matchEntry.getKey(), document, childScoreList);
+                    return Stream.of(leftMatch, rightMatch);
+                }
+                return Stream.of(leftMatch);
+            } else {
+                return Stream.empty();
             }
-            tokenRepo.put(token);
         });
+
+        return result;
     }
 
+    private Set<Match<Element>> findElementMatches(Element element ) {
+        Set<Match<Element>> matchElements = new HashSet<>();
+        Map<Element, Integer> elementTokenScore = new HashMap<>();
 
-    public static void main(String[] args) {
-        System.out.println("test start");
-        testLocal();
+        element.getTokens()
+                .filter(token -> BooleanUtils.isNotFalse(element.getDocument().isSource()))
+                .forEach(token -> {
+                    elementThresholdMatching(token, elementTokenScore, matchElements);
+                });
+
+        element.getTokens().forEach(token -> tokenRepo.put(token));
+
+        return matchElements;
     }
 
-    private static void testLocal() {
-        List<Document> sourceData = new ArrayList<>();
+    private void elementThresholdMatching(Token token,  Map<Element, Integer> elementTokenScore, Set<Match<Element>> matchingElements) {
+        Set<Element> matchElements = tokenRepo.get(token);
+        Element element  = token.getElement();
 
-        sourceData.add(new Document.Builder("S1")
-                .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
-                .addElement(new Element.Builder().setType(ADDRESS).setValue("123 new st. Minneapolis MN").createElement())
-                .createDocument());
+        // Token Match Found
+        if (matchElements != null) {
+            matchElements.forEach(matchElement -> {
+                int score = elementTokenScore.getOrDefault(matchElement, 0) + 1;
+                elementTokenScore.put(matchElement, score);
+                // Element Score above threshold
+                double elementScore = element.getScore(score, matchElement);
 
-        sourceData.add(new Document.Builder("S3")
-                .addElement(new Element.Builder().setType(NAME).setValue("Bond").createElement())
-                .addElement(new Element.Builder().setType(ADDRESS).setValue("546 Stevens ave, sarasota fl").createElement())
-                .createDocument());
-
-        sourceData.add(new Document.Builder("S4")
-                .addElement(new Element.Builder().setType(NAME).setValue("William").createElement())
-                .addElement(new Element.Builder().setType(ADDRESS).setValue("123 niger Street, dallas tx").createElement())
-                .createDocument());
-
-        sourceData.add(new Document.Builder("S2")
-                .addElement(new Element.Builder().setType(NAME).setValue("James").createElement())
-                .addElement(new Element.Builder().setType(ADDRESS).setValue("123 new Street, minneapolis blah").createElement())
-                .createDocument());
-
-        DocumentMatch documentMatch = new DocumentMatch();
-        Stream<Match<Document>> matches =  documentMatch.matchDocuments(sourceData.stream());
-
-        Map<Document, List<Match<Document>>> result = matches.collect(Collectors.groupingBy(Match::getData));
-        result.entrySet().forEach(entry -> {
-            entry.getValue().forEach(match -> {
-                System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
+                // Element match Found
+                if (elementScore > element.getThreshold()) {
+                    Match<Element> elementMatch = new Match<>(element, matchElement, elementScore);
+                    matchingElements.remove(elementMatch);
+                    matchingElements.add(elementMatch);
+                }
             });
-        });
+        }
     }
 
 }

@@ -1,6 +1,9 @@
 package com.intuit.fuzzymatcher.component;
 
-import com.intuit.fuzzymatcher.domain.*;
+import com.intuit.fuzzymatcher.domain.Element;
+import com.intuit.fuzzymatcher.domain.ElementClassification;
+import com.intuit.fuzzymatcher.domain.MatchType;
+import com.intuit.fuzzymatcher.domain.Token;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,19 +13,8 @@ public class TokenRepo {
 
     private Map<ElementClassification, Repo> repoMap;
 
-    private Map<Element, Integer> elementTokenScore;
-    private Element element;
-    private Set<Match<Element>> matchingElements;
-
-
     public TokenRepo() {
         this.repoMap = new ConcurrentHashMap<>();
-    }
-
-    public void initializeElementScore(Element element) {
-        elementTokenScore = new ConcurrentHashMap<>();
-        this.element = element;
-        this.matchingElements = new HashSet<>();
     }
 
     public void put(Token token) {
@@ -45,33 +37,13 @@ public class TokenRepo {
         return null;
     }
 
-    public Set<Match<Element>> getThresholdMatching(Token token) {
-        Set<Element> matchElements = this.get(token);
-        if (matchElements != null) {
-            matchElements.forEach(matchElement -> {
-                int score = elementTokenScore.getOrDefault(matchElement, 0) + 1;
-                elementTokenScore.put(matchElement, score);
-                // Element Score above threshold
-                double elementScore = element.getScore(score, matchElement);
-
-                if (elementScore > element.getThreshold()) {
-                    // TODO: Remove multiple matches for same Element pair
-                    matchingElements.add(new Match<>(element, matchElement, elementScore));
-                }
-
-            });
-        }
-        return matchingElements;
-    }
-
-
     private class Repo {
 
         MatchType matchType;
 
         Map<Object, Set<Element>> tokenElementSet;
 
-        TreeSet<Token> tokenBT;
+        TreeSet<Token> tokenBinaryTree;
 
         Repo(ElementClassification elementClassification) {
             this.matchType = elementClassification.getElementType().getMatchType();
@@ -80,7 +52,7 @@ public class TokenRepo {
                     tokenElementSet = new ConcurrentHashMap<>();
                     break;
                 case NEAREST_NEIGHBOURS:
-                    tokenBT = new TreeSet<>(Token.byValue);
+                    tokenBinaryTree = new TreeSet<>(Token.byValue);
                     break;
             }
         }
@@ -93,7 +65,7 @@ public class TokenRepo {
                     tokenElementSet.put(token.getValue(), elements);
                     break;
                 case NEAREST_NEIGHBOURS:
-                    tokenBT.add(token);
+                    tokenBinaryTree.add(token);
 
             }
         }
@@ -104,7 +76,7 @@ public class TokenRepo {
                     return tokenElementSet.get(token.getValue());
                 case NEAREST_NEIGHBOURS:
                     TokenRange tokenRange = new TokenRange(token, token.getElement().getThreshold());
-                    return tokenBT.subSet(tokenRange.lower, true, tokenRange.higher, true)
+                    return tokenBinaryTree.subSet(tokenRange.lower, true, tokenRange.higher, true)
                             .stream()
                             .map(Token::getElement).collect(Collectors.toSet());
 
