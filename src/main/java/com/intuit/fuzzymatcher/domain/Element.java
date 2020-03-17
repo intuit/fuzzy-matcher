@@ -37,18 +37,20 @@ public class Element implements Matchable {
     private Function<Object, Object> preProcessFunction;
     private Function<Element, Stream<Token>> tokenizerFunction;
     private List<Token> tokens;
+    private MatchType matchType;
 
     private Object preProcessedValue;
 
     public Element(ElementType type, String variance, Object value, double weight, double threshold,
                    Function<Object, Object> preProcessFunction,
-                   Function<Element, Stream<Token>> tokenizerFunction) {
+                   Function<Element, Stream<Token>> tokenizerFunction, MatchType matchType) {
         this.weight = weight;
         this.elementClassification = new ElementClassification(type, variance);
         this.value = value;
         this.threshold = threshold;
         this.preProcessFunction = preProcessFunction == null ? type.getPreProcessFunction() : preProcessFunction;
         this.tokenizerFunction = tokenizerFunction == null ? type.getTokenizerFunction() : tokenizerFunction;
+        this.matchType = matchType == null ? type.getMatchType() : matchType;
     }
 
     public ElementClassification getElementClassification() {
@@ -104,6 +106,10 @@ public class Element implements Matchable {
         return this.tokenizerFunction;
     }
 
+    public MatchType getMatchType() {
+        return this.matchType;
+    }
+
     public Stream<Token> getTokens() {
         if (this.tokens == null) {
             this.tokens = getTokenizerFunction().apply(this).distinct().collect(Collectors.toList());
@@ -152,9 +158,9 @@ public class Element implements Matchable {
         private double weight = 1.0;
         private double threshold = 0.3;
         private Function<Object, Object> preProcessFunction;
+        private MatchType matchType;
 
         private Function<Element, Stream<Token>> tokenizerFunction;
-        private BiFunction<Token, Token, Double> similarityMatchFunction;
 
         public Builder setType(ElementType type) {
             this.type = type;
@@ -207,9 +213,14 @@ public class Element implements Matchable {
             return this;
         }
 
+        public Builder setMatchType(MatchType matchType) {
+            this.matchType = matchType;
+            return this;
+        }
+
 
         public Element createElement() {
-            return new Element(type, variance, value, weight, threshold, preProcessFunction, tokenizerFunction);
+            return new Element(type, variance, value, weight, threshold, preProcessFunction, tokenizerFunction, matchType);
         }
     }
 

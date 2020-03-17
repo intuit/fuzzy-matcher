@@ -4,6 +4,7 @@ import com.intuit.fuzzymatcher.domain.Element;
 import com.intuit.fuzzymatcher.domain.ElementClassification;
 import com.intuit.fuzzymatcher.domain.MatchType;
 import com.intuit.fuzzymatcher.domain.Token;
+import com.intuit.fuzzymatcher.exception.MatchException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,7 +24,7 @@ public class TokenRepo {
         Repo repo = repoMap.get(elementClassification);
 
         if (repo == null) {
-            repo = new Repo(elementClassification);
+            repo = new Repo(token.getElement().getMatchType());
             repoMap.put(elementClassification, repo);
         }
         repo.put(token, token.getElement());
@@ -45,8 +46,8 @@ public class TokenRepo {
 
         TreeSet<Token> tokenBinaryTree;
 
-        Repo(ElementClassification elementClassification) {
-            this.matchType = elementClassification.getElementType().getMatchType();
+        Repo(MatchType matchType) {
+            this.matchType = matchType;
             switch (matchType) {
                 case EQUALITY:
                     tokenElementSet = new ConcurrentHashMap<>();
@@ -110,7 +111,7 @@ public class TokenRepo {
                 this.lower = getDateToken(getLower(((Date) value).getTime(), pct * DATE_SCALE_FACTOR), token);
                 this.higher = getDateToken(getHigher(((Date) value).getTime(), pct * DATE_SCALE_FACTOR), token);
             } else {
-                throw new RuntimeException("Data Type not supported");
+                throw new MatchException("Data Type not supported");
             }
         }
 

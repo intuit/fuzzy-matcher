@@ -36,15 +36,15 @@ public enum ElementType {
         this.matchType = matchType;
     }
 
-    public Function<Object, Object> getPreProcessFunction() {
+    protected Function<Object, Object> getPreProcessFunction() {
         return preProcessFunction;
     }
 
-    public Function<Element, Stream<Token>> getTokenizerFunction() {
+    protected Function<Element, Stream<Token>> getTokenizerFunction() {
         return tokenizerFunction;
     }
 
-    public MatchType getMatchType() {
+    protected MatchType getMatchType() {
         return this.matchType;
     }
 }
