@@ -29,9 +29,9 @@ public class DocumentMatch {
      */
     public Stream<Match<Document>> matchDocuments(Stream<Document> documents) {
 
-        Stream<Match<Document>> documentMatch =  documents.flatMap(document -> {
+        Stream<Match<Document>> documentMatch = documents.flatMap(document -> {
             Set<Element> elements = document.getPreProcessedElement();
-            Set<Match<Element>> eleMatches =   elements.stream().flatMap(element -> findElementMatches(element).stream()).collect(Collectors.toSet());
+            Set<Match<Element>> eleMatches = elements.stream().flatMap(element -> findElementMatches(element).stream()).collect(Collectors.toSet());
             return documentThresholdMatching(document, eleMatches);
         });
 
@@ -39,7 +39,7 @@ public class DocumentMatch {
     }
 
     private Stream<Match<Document>> documentThresholdMatching(Document document, Set<Match<Element>> matchingElements) {
-        Map<Document, List<Match<Element>>> mathes =  matchingElements.stream()
+        Map<Document, List<Match<Element>>> mathes = matchingElements.stream()
                 .collect(Collectors.groupingBy(matchElement -> matchElement.getMatchedWith().getDocument()));
 
         Stream<Match<Document>> result = mathes.entrySet().stream().flatMap(matchEntry -> {
@@ -67,24 +67,25 @@ public class DocumentMatch {
         return result;
     }
 
-    private Set<Match<Element>> findElementMatches(Element element ) {
+    private Set<Match<Element>> findElementMatches(Element element) {
         Set<Match<Element>> matchElements = new HashSet<>();
         Map<Element, Integer> elementTokenScore = new HashMap<>();
 
-        element.getTokens()
+        List<Token> tokens = element.getTokens();
+        tokens.stream()
                 .filter(token -> BooleanUtils.isNotFalse(element.getDocument().isSource()))
                 .forEach(token -> {
                     elementThresholdMatching(token, elementTokenScore, matchElements);
                 });
 
-        element.getTokens().forEach(token -> tokenRepo.put(token));
+        tokens.forEach(token -> tokenRepo.put(token));
 
         return matchElements;
     }
 
-    private void elementThresholdMatching(Token token,  Map<Element, Integer> elementTokenScore, Set<Match<Element>> matchingElements) {
+    private void elementThresholdMatching(Token token, Map<Element, Integer> elementTokenScore, Set<Match<Element>> matchingElements) {
         Set<Element> matchElements = tokenRepo.get(token);
-        Element element  = token.getElement();
+        Element element = token.getElement();
 
         // Token Match Found
         if (matchElements != null) {

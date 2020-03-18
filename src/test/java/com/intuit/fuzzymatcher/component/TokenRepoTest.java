@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public class TokenRepoTest {
@@ -26,18 +25,18 @@ public class TokenRepoTest {
         TokenRepo tokenRepo = new TokenRepo();
 
         elements.forEach(element -> {
-            Stream<Token> tokenStream = element.getTokens();
+            List<Token> tokenStream = element.getTokens();
             tokenStream.forEach(token -> tokenRepo.put(token));
         });
 
-        Element testElement1 = new Element.Builder().setType(ElementType.NAME).setValue("Amy").createElement();
-        Token token1 = testElement1.getTokens().findFirst().get();
+        Element<String> testElement1 = new Element.Builder<String>().setType(ElementType.NAME).setValue("Amy").createElement();
+        Token token1 = testElement1.getTokens().get(0);
         Set<Element> matchingElements1 = tokenRepo.get(token1);
         Assert.assertTrue(matchingElements1.contains(elements.get(0)));
         Assert.assertTrue(matchingElements1.contains(elements.get(2)));
 
-        Element testElement2 = new Element.Builder().setType(ElementType.NAME).setValue("Doe").createElement();
-        Token token2 = testElement2.getTokens().findFirst().get();
+        Element<String> testElement2 = new Element.Builder<String>().setType(ElementType.NAME).setValue("Doe").createElement();
+        Token token2 = testElement2.getTokens().get(0);
         Set<Element> matchingElements2 = tokenRepo.get(token2);
         Assert.assertTrue(matchingElements2.contains(elements.get(0)));
         Assert.assertTrue(matchingElements2.contains(elements.get(1)));
@@ -52,18 +51,18 @@ public class TokenRepoTest {
         TokenRepo tokenRepo = new TokenRepo();
 
         elements.forEach(element -> {
-            Stream<Token> tokenStream = element.getTokens();
+            List<Token> tokenStream = element.getTokens();
             tokenStream.forEach(token -> tokenRepo.put(token));
         });
 
-        Element testElement1 = new Element.Builder().setType(ElementType.NUMBER).setValue(101).createElement();
-        Token token1 = testElement1.getTokens().findFirst().get();
+        Element<Number> testElement1 = new Element.Builder().setType(ElementType.NUMBER).setValue(101).createElement();
+        Token token1 = testElement1.getTokens().get(0);
         Set<Element> matchingElements1 = tokenRepo.get(token1);
         Assert.assertTrue(matchingElements1.contains(elements.get(0)));
         Assert.assertTrue(matchingElements1.contains(elements.get(5)));
 
-        Element testElement2 = new Element.Builder().setType(ElementType.NUMBER).setValue(205).createElement();
-        Token token2 = testElement2.getTokens().findFirst().get();
+        Element<Number> testElement2 = new Element.Builder().setType(ElementType.NUMBER).setValue(205).createElement();
+        Token token2 = testElement2.getTokens().get(0);
         Set<Element> matchingElements2 = tokenRepo.get(token2);
         Assert.assertTrue(matchingElements2.contains(elements.get(1)));
         Assert.assertTrue(matchingElements2.contains(elements.get(6)));
@@ -78,17 +77,17 @@ public class TokenRepoTest {
         TokenRepo tokenRepo = new TokenRepo();
 
         elements.forEach(element -> {
-            Stream<Token> tokenStream = element.getTokens();
+            List<Token> tokenStream = element.getTokens();
             tokenStream.forEach(token -> tokenRepo.put(token));
         });
 
-        Element testElement1 = new Element.Builder().setType(ElementType.NUMBER).setValue(100).createElement();
-        Token token1 = testElement1.getTokens().findFirst().get();
+        Element<Number> testElement1 = new Element.Builder().setType(ElementType.NUMBER).setValue(100).createElement();
+        Token token1 = testElement1.getTokens().get(0);
         Set<Element> matchingElements1 = tokenRepo.get(token1);
         Assert.assertTrue(matchingElements1.contains(elements.get(0)));
 
-        Element testElement2 = new Element.Builder().setType(ElementType.NUMBER).setValue(200).createElement();
-        Token token2 = testElement2.getTokens().findFirst().get();
+        Element<Number> testElement2 = new Element.Builder().setType(ElementType.NUMBER).setValue(200).createElement();
+        Token token2 = testElement2.getTokens().get(0);
         Set<Element> matchingElements2 = tokenRepo.get(token2);
         Assert.assertTrue(matchingElements2.contains(elements.get(1)));
     }
@@ -102,12 +101,12 @@ public class TokenRepoTest {
         TokenRepo tokenRepo = new TokenRepo();
 
         elements.forEach(element -> {
-            Stream<Token> tokenStream = element.getTokens();
+            List<Token> tokenStream = element.getTokens();
             tokenStream.forEach(token -> tokenRepo.put(token));
         });
 
-        Element testElement1 = new Element.Builder().setType(ElementType.TEXT).setValue("101").createElement();
-        Token token1 = testElement1.getTokens().findFirst().get();
+        Element<String> testElement1 = new Element.Builder().setType(ElementType.TEXT).setValue("101").createElement();
+        Token token1 = testElement1.getTokens().get(0);
         tokenRepo.get(token1);
     }
 

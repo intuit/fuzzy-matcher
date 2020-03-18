@@ -27,9 +27,9 @@ import static com.intuit.fuzzymatcher.function.PreProcessFunction.trim;
  * <li>tokenizerFunction - Function to break values into tokens. If this is not set, the function defined in ElementType is used </li>
  * </ul>
  */
-public class Element implements Matchable {
+public class Element<T> implements Matchable {
 
-    private Object value;
+    private T value;
     private double weight;
     private double threshold;
     private ElementClassification elementClassification;
@@ -41,7 +41,7 @@ public class Element implements Matchable {
 
     private Object preProcessedValue;
 
-    public Element(ElementType type, String variance, Object value, double weight, double threshold,
+    public Element(ElementType type, String variance, T value, double weight, double threshold,
                    Function<Object, Object> preProcessFunction,
                    Function<Element, Stream<Token>> tokenizerFunction, MatchType matchType) {
         this.weight = weight;
@@ -57,7 +57,7 @@ public class Element implements Matchable {
         return elementClassification;
     }
 
-    public Object getValue() {
+    public T getValue() {
         return value;
     }
 
@@ -110,11 +110,11 @@ public class Element implements Matchable {
         return this.matchType;
     }
 
-    public Stream<Token> getTokens() {
+    public List<Token> getTokens() {
         if (this.tokens == null) {
             this.tokens = getTokenizerFunction().apply(this).distinct().collect(Collectors.toList());
         }
-        return this.tokens.stream();
+        return this.tokens;
     }
 
     public double getScore(Integer matchingCount, Element other) {
@@ -129,8 +129,8 @@ public class Element implements Matchable {
     @Override
     public long getChildCount(Matchable other) {
         if (other instanceof Element) {
-            Element o = (Element) other;
-            return Math.max(this.getTokens().count(), o.getTokens().count());
+            Element<T> o = (Element<T>) other;
+            return Math.max(this.getTokens().size(), o.getTokens().size());
         }
         return 0;
     }
@@ -138,9 +138,13 @@ public class Element implements Matchable {
     @Override
     public long getUnmatchedChildCount(Matchable other) {
         if (other instanceof Element) {
-            Element o = (Element) other;
-            long emptyChildren = this.getTokens().filter(token -> token == null || StringUtils.isEmpty(token.getValue().toString())).count();
-            long oEmptyChildren = o.getTokens().filter(token -> token == null || StringUtils.isEmpty(token.getValue().toString())).count();
+            Element<T> o = (Element<T>) other;
+            long emptyChildren = this.getTokens().stream()
+                    .filter(token -> token == null || StringUtils.isEmpty(token.getValue().toString()))
+                    .count();
+            long oEmptyChildren = o.getTokens().stream()
+                    .filter(token -> token == null || StringUtils.isEmpty(token.getValue().toString()))
+                    .count();
             return Math.max(emptyChildren, oEmptyChildren);
         }
         return 0;
@@ -151,10 +155,10 @@ public class Element implements Matchable {
         return null;
     }
 
-    public static class Builder {
+    public static class Builder<T> {
         private ElementType type;
         private String variance;
-        private Object value;
+        private T value;
         private double weight = 1.0;
         private double threshold = 0.3;
         private Function<Object, Object> preProcessFunction;
@@ -172,22 +176,7 @@ public class Element implements Matchable {
             return this;
         }
 
-        public Builder setValue(Object value) {
-            this.value = value;
-            return this;
-        }
-
-        public Builder setValue(String value) {
-            this.value = value;
-            return this;
-        }
-
-        public Builder setValue(Number value) {
-            this.value = value;
-            return this;
-        }
-
-        public Builder setValue(Date value) {
+        public Builder setValue(T value) {
             this.value = value;
             return this;
         }
@@ -220,7 +209,7 @@ public class Element implements Matchable {
 
 
         public Element createElement() {
-            return new Element(type, variance, value, weight, threshold, preProcessFunction, tokenizerFunction, matchType);
+            return new Element<T>(type, variance, value, weight, threshold, preProcessFunction, tokenizerFunction, matchType);
         }
     }
 

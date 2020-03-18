@@ -22,8 +22,8 @@ public class TokenMatchTest {
     @Test
     @Ignore
     public void itShouldMatchTokens_Success(){
-        Element element1 = new Element.Builder().setType(ADDRESS).setValue("123 new st.").createElement();
-        Element element2 = new Element.Builder().setType(ADDRESS).setValue("123 new street. Minneapolis MN").createElement();
+        Element<String> element1 = new Element.Builder().setType(ADDRESS).setValue("123 new st.").createElement();
+        Element<String> element2 = new Element.Builder().setType(ADDRESS).setValue("123 new street. Minneapolis MN").createElement();
 
         Document document1 = new Document.Builder("1")
                 .addElement(new Element.Builder().setType(NAME).setValue("James P").createElement())
@@ -51,8 +51,8 @@ public class TokenMatchTest {
     @Test
     @Ignore
     public void itShouldMatchTokens_Fail(){
-        Element element1 = new Element.Builder().setType(ADDRESS).setValue("456 college raod, Ohio").createElement();
-        Element element2 = new Element.Builder().setType(ADDRESS).setValue("123 new street. Minneapolis MN").createElement();
+        Element<String> element1 = new Element.Builder().setType(ADDRESS).setValue("456 college raod, Ohio").createElement();
+        Element<String> element2 = new Element.Builder().setType(ADDRESS).setValue("123 new street. Minneapolis MN").createElement();
 
         Document document1 = new Document.Builder("1")
                 .addElement(new Element.Builder().setType(NAME).setValue("James P").createElement())
@@ -82,8 +82,8 @@ public class TokenMatchTest {
     @Test
     @Ignore
     public void itShouldNotMatchTokensWithSameKey_Success() {
-        Element element1 = new Element.Builder().setType(ADDRESS).setValue("123 new Street new street").createElement();
-        Element element2 = new Element.Builder().setType(ADDRESS).setValue("123 new Street").createElement();
+        Element<String> element1 = new Element.Builder().setType(ADDRESS).setValue("123 new Street new street").createElement();
+        Element<String> element2 = new Element.Builder().setType(ADDRESS).setValue("123 new Street").createElement();
 
         Document document1 = new Document.Builder("1")
                 .addElement(new Element.Builder().setType(NAME).setValue("James P").createElement())

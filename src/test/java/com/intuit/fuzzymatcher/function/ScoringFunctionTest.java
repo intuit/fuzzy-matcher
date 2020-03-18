@@ -128,8 +128,8 @@ public class ScoringFunctionTest {
     @Test
     @Ignore
     public void itShouldNotScoreMoreThanOne_Success() {
-        Element element1 = new Element.Builder().setType(ADDRESS).setValue("325 NS 3rd Street Ste 567 Miami FL 33192").createElement();
-        Element element2 = new Element.Builder().setType(ADDRESS).setValue("325 NS 3rd Street Ste 567 Miami FL 33192").createElement();
+        Element<String> element1 = new Element.Builder().setType(ADDRESS).setValue("325 NS 3rd Street Ste 567 Miami FL 33192").createElement();
+        Element<String> element2 = new Element.Builder().setType(ADDRESS).setValue("325 NS 3rd Street Ste 567 Miami FL 33192").createElement();
 
         Document document1 = new Document.Builder("1")
                 .addElement(new Element.Builder().setType(NAME).setValue("James P").createElement())
@@ -167,7 +167,7 @@ public class ScoringFunctionTest {
     private Element getMockElement(double weight, long childCount) {
         Element element = mock(Element.class);
         when(element.getWeight()).thenReturn(weight);
-        Stream<Token> tokens =  LongStream.range(0, childCount).mapToObj(l -> getMockToken());
+        List<Token> tokens =  LongStream.range(0, childCount).mapToObj(l -> getMockToken()).collect(Collectors.toList());
         when(element.getTokens()).thenReturn(tokens);
         return element;
     }
@@ -182,7 +182,7 @@ public class ScoringFunctionTest {
     }
 
     private Match getMockMatch(Element elem1, Element elem2) {
-        long max = Math.max(elem1.getTokens().count(), elem2.getTokens().count());
+        long max = Math.max(elem1.getTokens().size(), elem2.getTokens().size());
         when(elem1.getChildCount(any())).thenReturn(max);
         return new Match<>(elem1, elem2);
     }

@@ -312,7 +312,7 @@ public class MatchServiceTest {
         AtomicInteger index = new AtomicInteger();
         return StreamSupport.stream(getCSVReader("demo.csv").spliterator(), false).map(csv -> {
             return new Document.Builder(index.incrementAndGet() + "")
-                    .addElement(new Element.Builder().setType(NAME).setValue(csv[0]).createElement())
+                    .addElement(new Element.Builder<String>().setType(NAME).setValue(csv[0]).createElement())
                     .createDocument();
         }).collect(Collectors.toList());
     }
@@ -515,7 +515,7 @@ public class MatchServiceTest {
         AtomicInteger ai = new AtomicInteger(0);
         List<Document> documentList = numbers.stream().map(num -> {
             return new Document.Builder(Integer.toString(ai.incrementAndGet()))
-                    .addElement(new Element.Builder().setType(DATE).setValue(num).setThreshold(0.90).createElement())
+                    .addElement(new Element.Builder<Date>().setType(DATE).setValue(num).setThreshold(0.90).createElement())
                     .createDocument();
         }).collect(Collectors.toList());
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
