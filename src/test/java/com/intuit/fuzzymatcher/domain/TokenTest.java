@@ -2,9 +2,10 @@ package com.intuit.fuzzymatcher.domain;
 
 import org.junit.Test;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import static com.intuit.fuzzymatcher.domain.ElementType.DATE;
 import static com.intuit.fuzzymatcher.domain.ElementType.NUMBER;

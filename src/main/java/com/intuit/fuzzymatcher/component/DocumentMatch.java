@@ -15,10 +15,10 @@ import java.util.stream.Stream;
  */
 public class DocumentMatch {
 
-    private final TokenRepo tokenRepo;
+    private final ElementMatch elementMatch;
 
     public DocumentMatch() {
-        tokenRepo = new TokenRepo();
+        this.elementMatch = new ElementMatch();
     }
 
     /**
@@ -31,7 +31,9 @@ public class DocumentMatch {
 
         Stream<Match<Document>> documentMatch = documents.flatMap(document -> {
             Set<Element> elements = document.getPreProcessedElement();
-            Set<Match<Element>> eleMatches = elements.stream().flatMap(element -> findElementMatches(element).stream()).collect(Collectors.toSet());
+            Set<Match<Element>> eleMatches = elements.stream()
+                    .flatMap(element -> elementMatch.matchElement(element).stream())
+                    .collect(Collectors.toSet());
             return documentThresholdMatching(document, eleMatches);
         });
 
@@ -65,44 +67,6 @@ public class DocumentMatch {
         });
 
         return result;
-    }
-
-    private Set<Match<Element>> findElementMatches(Element element) {
-        Set<Match<Element>> matchElements = new HashSet<>();
-        Map<Element, Integer> elementTokenScore = new HashMap<>();
-
-        List<Token> tokens = element.getTokens();
-        tokens.stream()
-                .filter(token -> BooleanUtils.isNotFalse(element.getDocument().isSource()))
-                .forEach(token -> {
-                    elementThresholdMatching(token, elementTokenScore, matchElements);
-                });
-
-        tokens.forEach(token -> tokenRepo.put(token));
-
-        return matchElements;
-    }
-
-    private void elementThresholdMatching(Token token, Map<Element, Integer> elementTokenScore, Set<Match<Element>> matchingElements) {
-        Set<Element> matchElements = tokenRepo.get(token);
-        Element element = token.getElement();
-
-        // Token Match Found
-        if (matchElements != null) {
-            matchElements.forEach(matchElement -> {
-                int score = elementTokenScore.getOrDefault(matchElement, 0) + 1;
-                elementTokenScore.put(matchElement, score);
-                // Element Score above threshold
-                double elementScore = element.getScore(score, matchElement);
-
-                // Element match Found
-                if (elementScore > element.getThreshold()) {
-                    Match<Element> elementMatch = new Match<>(element, matchElement, elementScore);
-                    matchingElements.remove(elementMatch);
-                    matchingElements.add(elementMatch);
-                }
-            });
-        }
     }
 
 }

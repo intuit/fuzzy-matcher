@@ -1,69 +1,118 @@
 package com.intuit.fuzzymatcher.component;
 
-import com.intuit.fuzzymatcher.domain.*;
+import com.intuit.fuzzymatcher.domain.Document;
+import com.intuit.fuzzymatcher.domain.Element;
+import com.intuit.fuzzymatcher.domain.ElementType;
+import com.intuit.fuzzymatcher.domain.Match;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.stream.Stream;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.intuit.fuzzymatcher.domain.ElementType.ADDRESS;
+import static com.intuit.fuzzymatcher.domain.ElementType.NAME;
 
 public class ElementMatchTest {
 
-    //private ElementMatch elementMatch = new ElementMatch();
+    private ElementMatch elementMatch = new ElementMatch();
+    AtomicInteger atomicInteger = new AtomicInteger();
 
     @Test
-    @Ignore
-    public void itShouldMatchElements() {
-        Stream<Document> documentStream = Stream.of(
-                getDocWithName("1", "Rodrigue Rodrigues"),
-                getDocWithName("2", "Rodrigues, Rodrigue"));
+    public void itShouldNotScoreMoreThanOneForName() {
+        Element<String> element1 = getElement(NAME,"Rodrigue Rodrigues");
+        Element<String> element2 = getElement(NAME,"Rodrigues, Rodrigue");
 
-        Stream<Element> elements = documentStream.flatMap(d -> d.getDistinctNonEmptyElements());
+        Set<Match<Element>> matchSet1 = elementMatch.matchElement(element1);
+        Assert.assertEquals(0, matchSet1.size());
 
-//        ElementClassification elementClassification = new ElementClassification(ElementType.NAME, "",
-//                ElementType.NAME.getMatchOptimizerFunction());
-//
-//        Stream<Match<Element>> matchResults = elementMatch.matchElements(elementClassification, elements);
-//        matchResults.forEach(match -> {
-//            System.out.println(match.getResult());
-//            Assert.assertTrue("Match less than 1.0", match.getResult() <= 1.0);
-//        });
-
-
-    }
-
-    private Document getDocWithName(String DocKey, String value) {
-        return new Document.Builder(DocKey)
-                .addElement(new Element.Builder()
-                        .setType(ElementType.NAME)
-                        .setValue(value)
-                        .createElement())
-                .createDocument();
+        Set<Match<Element>> matchSet2 = elementMatch.matchElement(element2);
+        Assert.assertEquals(1, matchSet2.size());
+        Assert.assertEquals(1.0, matchSet2.iterator().next().getResult(), 0.0);
     }
 
 
-    public void testMatch() {
-        Token t1 = new Token("Rodrigue", null);
-        Token t2 = new Token("Rodrigues", null);
-        Token t3 = new Token("Rodri", null);
-        Token t4 = new Token("Rod", null);
+    @Test
+    public void itShouldNotScoreMoreThanOneForAddress() {
+        Element<String> element1 = getElement(ADDRESS,"325 NS 3rd Street Ste 567 Miami FL 33192");
+        Element<String> element2 = getElement(ADDRESS,"325 NS 3rd Street Ste 567 Miami FL 33192");
 
-//        Stream<Match> mathStream = Stream.of(
-//                new Match(t1, t2, 0.9),
-//                new Match(t1, t3, 0.5),
-//                new Match(t1, t4, 0.4),
-//                new Match(t2, t1, 0.9),
-//                new Match(t2, t3, 0.5),
-//                new Match(t2, t4, 0.2),
-//                new Match(t3, t1, 0.5),
-//                new Match(t3, t2, 0.5),
-//                new Match(t3, t4, 0.8),
-//                new Match(t4, t1, 0.4),
-//                new Match(t4, t2, 0.2),
-//                new Match(t4, t3, 0.8)
-//        );
+        elementMatch.matchElement(element1);
+        Set<Match<Element>> matchSet = elementMatch.matchElement(element2);
+        Assert.assertEquals(1, matchSet.size());
+        Assert.assertEquals(1.0, matchSet.iterator().next().getResult(), 0.0);
+    }
+
+    @Test
+    public void itShouldGiveAverageScoreWithBalancedElements(){
+        // 2 match strings out of 5 max - score 0.4
+        Element element1 = getElement(ADDRESS, "54th Street 546th avenue florida ");
+        Element element2 = getElement(ADDRESS, "95th Street 765th avenue Texas");
+
+        elementMatch.matchElement(element1);
+        Set<Match<Element>> matchSet = elementMatch.matchElement(element2);
+        Assert.assertEquals(1, matchSet.size());
+        Assert.assertEquals(0.4, matchSet.iterator().next().getResult(), 0.0);
 
     }
 
+    @Test
+    public void itShouldGiveAverageScoreWithUnbalancedElements() {
+        // 3 out of 5 - Score 0.6
+        Element element1 = getElement(ADDRESS, "123 new st. ");
+        Element element2 = getElement(ADDRESS, "123 new street. Minneapolis MN");
+
+        elementMatch.matchElement(element1);
+        Set<Match<Element>> matchSet = elementMatch.matchElement(element2);
+        Assert.assertEquals(1, matchSet.size());
+        Assert.assertEquals(0.6, matchSet.iterator().next().getResult(), 0.0);
+
+    }
+
+
+    @Test
+    public void itShouldNotMatch() {
+        Element element1 = getElement(ADDRESS, "456 college raod, Ohio");
+        Element element2 = getElement(ADDRESS, "123 new street. Minneapolis MN");
+
+        elementMatch.matchElement(element1);
+        Set<Match<Element>> matchSet = elementMatch.matchElement(element2);
+
+        Assert.assertEquals(0, matchSet.size());
+    }
+
+
+    @Test
+    public void itShouldMatchElementsWithRepeatingTokens() {
+        Element element1 = getElement(ADDRESS, "123 new Street new street");
+        Element element2 = getElement(ADDRESS, "123 new Street");
+
+        Set<Match<Element>> matchSet1 =  elementMatch.matchElement(element1);
+        Assert.assertEquals(0, matchSet1.size());
+
+        Set<Match<Element>> matchSet2  = elementMatch.matchElement(element2);
+        Assert.assertEquals(1, matchSet2.size());
+        Assert.assertEquals(1.0, matchSet2.iterator().next().getResult(), 0.0);
+        Assert.assertTrue(matchSet2.iterator().next().getData().equals(element2));
+        Assert.assertTrue(matchSet2.iterator().next().getMatchedWith().equals(element1));
+    }
+
+    @Test
+    public void itShouldMatchUnorderedTokens() {
+        Element element1 = getElement(ADDRESS, "James Parker");
+        Element element2 = getElement(ADDRESS, "Parker Jamies");
+
+        elementMatch.matchElement(element1);
+        Set<Match<Element>> matchSet = elementMatch.matchElement(element2);
+        Assert.assertEquals(1, matchSet.size());
+        Assert.assertEquals(1.0, matchSet.iterator().next().getResult(), 0.0);
+    }
+
+    private Element getElement(ElementType elementType, String value) {
+        Element<String> element = new Element.Builder().setType(elementType)
+                .setValue(value).createElement();
+        new Document.Builder(atomicInteger.incrementAndGet()+"").addElement(element).createDocument();
+        return element;
+    }
 
 }

@@ -113,18 +113,6 @@ public interface ScoringFunction extends BiFunction<Match, List<Score>, Score> {
         };
     }
 
-    /**
-     * This scoring assumes the child scores are binary (1.0 or 0.0).
-     * Uses the jaccard method finding exact matches divided by total number of common children
-     *
-     * @return the scoring function for Jaccard
-     */
-    static ScoringFunction getJaccardScore() {
-        return (match, childScores) ->
-                new Score((double) childScores.size() /
-                        ((match.getData().getChildCount(match.getMatchedWith()))), match);
-    }
-
     static double getSumOfWeightedResult(List<Score> childScoreList) {
         return (childScoreList.stream().mapToDouble(d -> d.getResult() * d.getMatch().getWeight())).sum();
     }

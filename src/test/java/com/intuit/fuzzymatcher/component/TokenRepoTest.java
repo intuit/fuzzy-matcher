@@ -112,12 +112,14 @@ public class TokenRepoTest {
 
     private List<Element> getElements(List<Object> values, ElementType elementType, MatchType matchType) {
         return values.stream()
-                .map(value -> {
-                    Element.Builder elementBuilder = new Element.Builder().setType(elementType).setValue(value);
-                    if (matchType != null) {
-                        elementBuilder.setMatchType(matchType);
-                    }
-                    return elementBuilder.createElement();
-                }).collect(Collectors.toList());
+                .map(value -> getElement(value, elementType, matchType)).collect(Collectors.toList());
+    }
+
+    private Element getElement(Object value, ElementType elementType, MatchType matchType) {
+        Element.Builder elementBuilder = new Element.Builder().setType(elementType).setValue(value);
+        if (matchType != null) {
+            elementBuilder.setMatchType(matchType);
+        }
+        return elementBuilder.createElement();
     }
 }

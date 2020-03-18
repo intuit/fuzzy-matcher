@@ -1,14 +1,12 @@
 package com.intuit.fuzzymatcher.domain;
 
-import com.intuit.fuzzymatcher.function.ScoringFunction;
-
 import java.util.Comparator;
 import java.util.Objects;
 
 /**
  * Elements are broken down into Token class using the TokenizerFunction
  */
-public class Token implements Matchable {
+public class Token {
 
     public Token(Object value, Element element) {
         this.value = value;
@@ -28,26 +26,6 @@ public class Token implements Matchable {
 
     public void setElement(Element element) {
         this.element = element;
-    }
-
-    @Override
-    public long getChildCount(Matchable other) {
-        return 0;
-    }
-
-    @Override
-    public long getUnmatchedChildCount(Matchable other) {
-        return 0;
-    }
-
-    @Override
-    public ScoringFunction getScoringFunction() {
-        return null;
-    }
-
-    @Override
-    public double getWeight() {
-        return 1.0;
     }
 
     @Override
