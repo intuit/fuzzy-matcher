@@ -20,36 +20,102 @@
 ## Introduction
 A java-based library to match and group "similar" elements in a collection of documents.
 
-Imagine working in a system with a collection of contacts and wanting to match and categorize contacts with similar names, addresses or other attributes. The Fuzzy Match matching algorithm can help you do this. The Fuzzy Match algorithm can even help you find duplicate contacts, or prevent your system from adding duplicates.
+Imagine working in a system with a collection of contacts and wanting to match and categorize contacts with similar 
+names, addresses or other attributes. The Fuzzy Match matching algorithm can help you do this. 
+The Fuzzy Match algorithm can even help you find duplicate contacts, or prevent your system from adding duplicates.
 
-This library can act on any domain object, like contact, and find similarity for various use cases. It dives deep into each character and finds out the probability that 2 or more objects are similar.
+This library can act on any domain object, like contact, and find similarity for various use cases. 
+It dives deep into each character and finds out the probability that 2 or more objects are similar.
+
+
+### What's Fuzzy
+The contacts `"Steven Wilson" living at "45th Avenue 5th st."` and `"Stephen Wilkson" living at "45th Ave 5th Street"` 
+might look like belonging to the same person. It's easy for humans to ignore the small variance in spelling in names,
+or ignore abbreviation used in address. But for a computer program they are not the same. The string `Steven` does not 
+equals `Stephen` and neither does `Street` equals `st.`
+If our trusted computers can start looking at each character and the sequence in which they appear, it might look similar.
+Fuzzy matching algorithms is all about providing this level of magnification to our myopic machines.
 
 ## How does this work
-![Fuzzy Match](fuzzy-match.png?raw=true "Fuzzy Match")
+### Breaking down your data
+This algorithm accepts data in a list of entities called `Document` (like a contact entity in your system), which can contain 1 
+or more `Element` (like names, address, emails, etc). Internally each element is further broken down into 1 or more `Token` 
+which are then matched using configurable `MatchType`
+
+This combination to tokenize and matching can figure out similarity in a wide variety of data types
+#### Exact word match
+Consider these Element's in different Document's
+ * Wayne Grace Jr.
+ * Grace Hilton Wayne
+
+Each word is considered a token, and if another element has the exact match they are scored on the number of matching tokens. 
+In this example the words `Wayne` and `Grace` match 2 words out of 3 total in each elements.
+A scoring mechanism will match them with a result of 0.67
+
+#### Soundex word match
+Consider these Element's in different Document's
+ * Steven Wilson
+ * Stephen Wilkson
+
+Here we do not just look at each word, but encode it using Soundex which gives a unique code for the phonetic spelling of the name. 
+So in this example words `Steven` & `Stephen` will encode to `S315` whereas the words `Wilson` & `Wilkson` encode to `W425`.
+
+This allows both the elements to match exactly, and score at 1.0
+
+#### NGram token match
+In cases where breaking down the Element's in words is not feasible, we split it using NGrams. Take for examples email's
+ * parker.james@gmail.com
+ * james_parker@yahoo.com
+ 
+Here if we ignore the domain name and take 3 character sequence (tri-gram) of the data, token's will look like this
+
+* parker.james -> [par, ark, rke, ker, er., r.j, .ja, jam, ame, mes]
+* james_parker -> [jam, ame, mes, es_, s_p, _pa, par, ark, rke, ker] 
+
+Comparing these NGrams we have 7 out of the total 10 tokens match exactly which gives a score of 0.7
+
+#### Nearest Neighbours match
+In certain cases breaking down elements into tokens and comparing tokens is not an option. 
+For example numeric values, like dollar amounts in a list of transactions
+
+* 100.54
+* 200.00
+* 100.00
+
+Here the first and third could belong to the same transaction, where the third is only missing some precession. 
+The match is done not on tokens being equal but on the closeness (the neighborhood range) in which the values appear.
+This closeness is again configurable where a 99% closeness, will match them with a score of 1.0
+
+A similar example can be thought of with Dates, where dates that are near to each other might point to the same event.             
 
 ### Four Stages of Fuzzy Match
-The input provided goes through 4 stages to come up with a match result. These 4 stages are functions defined which can
-be easily configured by passing a lambda expression.
+![Fuzzy Match](fuzzy-match.png?raw=true "Fuzzy Match")
 
-* __Pre-Processing__ : Expects a ```Function<String, String>``` which a simple transformation from a String to another.
+We spoke in detail on `Token` and `MatchType` which is the core of fuzzy matching, and touched upon `Scoring` which gives 
+the measure of matching similar data. `PreProcessing` your data is a simple yet powerful mechanism that can help in staring 
+with a clean data before running a match. These 4 stages which are highly customizable can be used to tune and match a wide variety of data types   
+
+
+* __Pre-Processing__ : This accepts a java `Function`. Which allows you to externally code it and pass it to the library. 
+Some examples of pre-processing that are available in the library are.
     * _Trim_: Removes leading and trailing spaces (applied by default)
     * _Lower Case_: Converts all characters to lowercase (applied by default)
     * _Remove Special Chars_ : Removes all characters except alpha and numeric characters and spaces. (default for _TEXT_ type)
     * _Numeric_: Strips all non-numeric characters. Useful for numeric values like phone or ssn (default for _PHONE_ type)
     * _Email_: Strips away domain from an email. This prevents common domains like gmail.com, yahoo.com to be considered in match (default for _EMAIL_ type)
 
-* __Tokenization__ : Expects a ```Function<Element, Stream<Token>>``` which will break down each Element into Token object used for comparison.
+* __Tokenization__ : This again accepts a `Function` so can be externally defined and fed to the library. 
+But a host of commonly used are already defined. Examples
     * _Word_ : Breaks down an element into words (anything delimited by space " ").
-            e.g. ```"123 some street" -> ["123" "some" "street"]```
     * _N-Gram_ : Breaks down an element into 3 letter grams.
-            e.g. ```"jparker" -> ["jpa","par","ark","rke","ker"]```
+    * _Word-Soundex_ : Breaks down in words (space delimited) and gets Soundex encode using the Apache Soundex library
+    * _Value_ : Nothing to break down here, just uses the element value as token. Useful for Nearest Neighbour matches
 
-* __Similarity Match__ : Expects a ```BiFunction<Token, Token, Double>```, which gives a match probability (0.0 to 1.0) between 2 tokens
-    * _Soundex_: Compares 2 token strings soundex values. Uses apache commons codec library to get soundex values. The result of this match is a binary, either 0.0 or 1.0
-    * _Equality_: Does a string equals of 2 token strings. Again the result is either 0.0 or 1.0
-    * _Levenshtein_: Gets the Levenshtein distance score using apache commons similarity library
-    * _Jaccard_: Gets the Jaccard score using apache commons similarity library
-
+* __Match Type__ : Allows 2 types of matches
+    * _Equality_: Uses exact matches with token values. 
+    * _Nearest Neighbor_: Finds tokens that are contained in the neighborhood range, that can be specified as a 
+    probability (0.0 - 1.0) for each element. It defaults to 0.9 
+    
 * __Scoring__ : Expects a ```BiFunction<Match, List<Score>, Double>```, this defines functions on how to accumulate scores 
     from Tokens into Elements and from Elements into Documents.
     * _Simple Average_: Adds up total scores of each child matches / total children. This is the default scoring for Elements

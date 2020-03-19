@@ -24,10 +24,6 @@ public class Token {
         return element;
     }
 
-    public void setElement(Element element) {
-        this.element = element;
-    }
-
     @Override
     public String toString() {
         return "{" +

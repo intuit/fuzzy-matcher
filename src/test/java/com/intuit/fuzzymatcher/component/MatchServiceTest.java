@@ -2,6 +2,7 @@ package com.intuit.fuzzymatcher.component;
 
 import com.intuit.fuzzymatcher.domain.Document;
 import com.intuit.fuzzymatcher.domain.Element;
+import com.intuit.fuzzymatcher.domain.ElementType;
 import com.intuit.fuzzymatcher.domain.Match;
 import com.intuit.fuzzymatcher.function.PreProcessFunction;
 import com.opencsv.CSVReader;
@@ -485,41 +486,49 @@ public class MatchServiceTest {
 
     @Test
     public void itShouldApplyMatchWithInteger() {
-        List<Integer> numbers = Arrays.asList(91, 100, 200, 152, 11, 15, 10, 200);
-        AtomicInteger ai = new AtomicInteger(0);
-        List<Document> documentList = numbers.stream().map(num -> {
-            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
-                    .addElement(new Element.Builder().setType(NUMBER).setValue(num).setThreshold(0.90).createElement())
-                    .createDocument();
-        }).collect(Collectors.toList());
-        Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
-        Assert.assertEquals(6, result.size());
+        List<Object> numbers = Arrays.asList(91, 100, 200, 152, 11, 15, 10, 200);
+        List<Document> documentList1 = getTestDocuments(numbers, NUMBER, null);
+        Map<Document, List<Match<Document>>> result1 = matchService.applyMatch(documentList1);
+        Assert.assertEquals(6, result1.size());
+
+        List<Document> documentList2 = getTestDocuments(numbers, NUMBER, 0.99);
+        Map<Document, List<Match<Document>>> result2 = matchService.applyMatch(documentList2);
+        Assert.assertEquals(2, result2.size());
     }
 
     @Test
     public void itShouldApplyMatchWithDoubleType() {
-        List<Double> numbers = Arrays.asList(23D, 22D, 10D, 5D, 9D, 11D, 10.5, 23.5);
-        AtomicInteger ai = new AtomicInteger(0);
-        List<Document> documentList = numbers.stream().map(num -> {
-            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
-                    .addElement(new Element.Builder().setType(NUMBER).setValue(num).setThreshold(0.95).createElement())
-                    .createDocument();
-        }).collect(Collectors.toList());
-        Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
-        Assert.assertEquals(6, result.size());
+        List<Object> numbers = Arrays.asList(23D, 22D, 10D, 5D, 9D, 11D, 10.5, 23.2);
+
+        List<Document> documentList1 = getTestDocuments(numbers, NUMBER, null);
+        Map<Document, List<Match<Document>>> result1 = matchService.applyMatch(documentList1);
+        Assert.assertEquals(6, result1.size());
+
+        List<Document> documentList2 = getTestDocuments(numbers, NUMBER, 0.99);
+        Map<Document, List<Match<Document>>> result2 = matchService.applyMatch(documentList2);
+        Assert.assertEquals(2, result2.size());
     }
 
     @Test
     public void itShouldApplyMatchWithDate() {
-        List<Date> numbers = Arrays.asList(getDate("01/01/2020"), getDate("12/01/2020"), getDate("02/01/2020"));
-        AtomicInteger ai = new AtomicInteger(0);
-        List<Document> documentList = numbers.stream().map(num -> {
-            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
-                    .addElement(new Element.Builder<Date>().setType(DATE).setValue(num).setThreshold(0.90).createElement())
-                    .createDocument();
-        }).collect(Collectors.toList());
+        List<Object> dates = Arrays.asList(getDate("01/01/2020"), getDate("12/01/2020"), getDate("02/01/2020"));
+        List<Document> documentList = getTestDocuments(dates, DATE, null);
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
         Assert.assertEquals(2, result.size());
+    }
+
+
+    private List<Document> getTestDocuments(List<Object> values, ElementType elementType, Double neighborhoodRange) {
+        AtomicInteger ai = new AtomicInteger(0);
+        return values.stream().map(num -> {
+            Element.Builder elementBuilder = new Element.Builder().setType(elementType).setValue(num);
+            if (neighborhoodRange != null) {
+                elementBuilder.setNeighborhoodRange(neighborhoodRange);
+            }
+            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
+                    .addElement(elementBuilder.createElement())
+                    .createDocument();
+        }).collect(Collectors.toList());
     }
 
     private Date getDate(String val) {

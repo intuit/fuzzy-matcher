@@ -76,7 +76,7 @@ public class TokenRepo {
                 case EQUALITY:
                     return tokenElementSet.get(token.getValue());
                 case NEAREST_NEIGHBOURS:
-                    TokenRange tokenRange = new TokenRange(token, token.getElement().getThreshold());
+                    TokenRange tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange());
                     return tokenBinaryTree.subSet(tokenRange.lower, true, tokenRange.higher, true)
                             .stream()
                             .map(Token::getElement).collect(Collectors.toSet());

@@ -32,6 +32,7 @@ public class Element<T> implements Matchable {
     private T value;
     private double weight;
     private double threshold;
+    private double neighborhoodRange;
     private ElementClassification elementClassification;
     private Document document;
     private Function<Object, Object> preProcessFunction;
@@ -42,7 +43,7 @@ public class Element<T> implements Matchable {
     private Object preProcessedValue;
 
     public Element(ElementType type, String variance, T value, double weight, double threshold,
-                   Function<Object, Object> preProcessFunction,
+                   double neighborhoodRange, Function<Object, Object> preProcessFunction,
                    Function<Element, Stream<Token>> tokenizerFunction, MatchType matchType) {
         this.weight = weight;
         this.elementClassification = new ElementClassification(type, variance);
@@ -51,6 +52,7 @@ public class Element<T> implements Matchable {
         this.preProcessFunction = preProcessFunction == null ? type.getPreProcessFunction() : preProcessFunction;
         this.tokenizerFunction = tokenizerFunction == null ? type.getTokenizerFunction() : tokenizerFunction;
         this.matchType = matchType == null ? type.getMatchType() : matchType;
+        this.neighborhoodRange = neighborhoodRange;
     }
 
     public ElementClassification getElementClassification() {
@@ -68,6 +70,10 @@ public class Element<T> implements Matchable {
 
     public double getThreshold() {
         return threshold;
+    }
+
+    public double getNeighborhoodRange() {
+        return neighborhoodRange;
     }
 
     public Document getDocument() {
@@ -161,6 +167,7 @@ public class Element<T> implements Matchable {
         private T value;
         private double weight = 1.0;
         private double threshold = 0.3;
+        private double neighborhoodRange = 0.9;
         private Function<Object, Object> preProcessFunction;
         private MatchType matchType;
 
@@ -191,6 +198,11 @@ public class Element<T> implements Matchable {
             return this;
         }
 
+        public Builder setNeighborhoodRange(double neighborhoodRange) {
+            this.neighborhoodRange = neighborhoodRange;
+            return this;
+        }
+
         public Builder setPreProcessingFunction(Function<Object, Object> preProcessingFunction) {
             this.preProcessFunction = preProcessingFunction;
             return this;
@@ -209,7 +221,7 @@ public class Element<T> implements Matchable {
 
 
         public Element createElement() {
-            return new Element<T>(type, variance, value, weight, threshold, preProcessFunction, tokenizerFunction, matchType);
+            return new Element<T>(type, variance, value, weight, threshold, neighborhoodRange, preProcessFunction, tokenizerFunction, matchType);
         }
     }
 
