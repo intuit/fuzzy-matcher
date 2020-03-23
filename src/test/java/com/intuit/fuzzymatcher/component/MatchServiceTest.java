@@ -51,6 +51,29 @@ public class MatchServiceTest {
     }
 
     @Test
+    public void itShouldApplyMatchArray() {
+        String[][] input = {
+                {"1", "Steven Wilson", "45th Avenue 5th st."},
+                {"2", "John Doe", "546 freeman ave"},
+                {"3", "Stephen Wilkson", "45th Ave 5th Street"}
+        };
+        List<Document> documentList = Arrays.asList(input).stream().map(contact -> {
+            return new Document.Builder(contact[0])
+                    .addElement(new Element.Builder<String>().setValue(contact[1]).setType(NAME).createElement())
+                    .addElement(new Element.Builder<String>().setValue(contact[2]).setType(ADDRESS).createElement())
+                    .createDocument();
+        }).collect(Collectors.toList());
+
+        Map<String, List<Match<Document>>> result = matchService.applyMatchByDocId(documentList);
+        result.entrySet().forEach(entry -> {
+            entry.getValue().forEach(match -> {
+                System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
+            });
+        });
+        Assert.assertEquals(2, result.size());
+    }
+
+    @Test
     public void itShouldApplyMatchByDocIdForSingleDoc() throws IOException {
         Document doc = new Document.Builder("TestMatch")
                 .addElement(new Element.Builder().setType(NAME).setValue("john doe").createElement())
@@ -365,7 +388,7 @@ public class MatchServiceTest {
     }
 
     @Test
-    public void itShouldApplyMatchWithScoreNotMoreThanOne(){
+    public void itShouldApplyMatchWithScoreNotMoreThanOne() {
         List<Document> inputData = new ArrayList<>();
         Document doc1 = new Document.Builder("1")
                 .addElement(new Element.Builder().setType(NAME).setValue("Kapa Limited").createElement())
@@ -383,12 +406,12 @@ public class MatchServiceTest {
                 .addElement(new Element.Builder().setType(PHONE).setValue("").setWeight(2).setThreshold(0.5).createElement())
                 .addElement(new Element.Builder().setType(EMAIL).setValue("kirit@nekoproductions.com").setThreshold(0.5).createElement())
                 .createDocument();
-        inputData.addAll(Arrays.asList(doc1,doc2));
+        inputData.addAll(Arrays.asList(doc1, doc2));
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(inputData);
         Assert.assertEquals(2, result.size());
         Assert.assertThat(result.entrySet().stream()
                         .map(entry -> entry.getKey().getKey()).collect(Collectors.toList()),
-                CoreMatchers.hasItems("1","2"));
+                CoreMatchers.hasItems("1", "2"));
         Assert.assertTrue(result.get(doc1).get(0).getResult() <= 1);
     }
 
@@ -547,21 +570,21 @@ public class MatchServiceTest {
 
         result.entrySet().stream().sorted(Map.Entry.<String, List<Match<Document>>>comparingByKey())
                 .forEach(entry -> {
-            String[] keyArrs = Stream.concat(Stream.of(entry.getKey(), entry.getKey(), ""),
-                    getOrderedElements(entry.getValue().stream()
-                            .map(match -> match.getData())
-                            .findFirst().get()
-                            .getElements()).map(e -> e.getValue())).toArray(String[]::new);
-            writer.writeNext(keyArrs);
+                    String[] keyArrs = Stream.concat(Stream.of(entry.getKey(), entry.getKey(), ""),
+                            getOrderedElements(entry.getValue().stream()
+                                    .map(match -> match.getData())
+                                    .findFirst().get()
+                                    .getElements()).map(e -> e.getValue())).toArray(String[]::new);
+                    writer.writeNext(keyArrs);
 
-            entry.getValue().stream().forEach(match -> {
-                Document md = match.getMatchedWith();
-                String[] matchArrs = Stream.concat(Stream.of("", md.getKey(), Double.toString(match.getResult())),
-                        getOrderedElements(md.getElements()).map(e -> e.getValue())).toArray(String[]::new);
-                writer.writeNext(matchArrs);
-                LOGGER.info("        " + match);
-            });
-        });
+                    entry.getValue().stream().forEach(match -> {
+                        Document md = match.getMatchedWith();
+                        String[] matchArrs = Stream.concat(Stream.of("", md.getKey(), Double.toString(match.getResult())),
+                                getOrderedElements(md.getElements()).map(e -> e.getValue())).toArray(String[]::new);
+                        writer.writeNext(matchArrs);
+                        LOGGER.info("        " + match);
+                    });
+                });
         writer.close();
     }
 

@@ -15,7 +15,7 @@ import static com.intuit.fuzzymatcher.function.TokenizerFunction.*;
  */
 public enum ElementType {
     NAME(namePreprocessing(), wordSoundexEncodeTokenizer(), EQUALITY),
-    TEXT(removeSpecialChars(), wordSoundexEncodeTokenizer(), EQUALITY),
+    TEXT(removeSpecialChars(), wordTokenizer(), EQUALITY),
     ADDRESS(addressPreprocessing(), wordSoundexEncodeTokenizer(), EQUALITY),
     EMAIL(removeDomain(), triGramTokenizer(), EQUALITY),
     PHONE(usPhoneNormalization(), decaGramTokenizer(), EQUALITY),
