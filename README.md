@@ -14,7 +14,7 @@
     * [Input](#input)
     * [Applying the Match](#applying-the-match)
     * [Output](#output)
-* [Performance](#end-user-configuration)
+* [Performance](#performance)
 
 
 ## Introduction
@@ -41,18 +41,19 @@ This algorithm accepts data in a list of entities called `Document` (like a cont
 or more `Element` (like names, address, emails, etc). Internally each element is further broken down into 1 or more `Token` 
 which are then matched using configurable `MatchType`
 
-This combination to tokenize and matching can figure out similarity in a wide variety of data types
+This combination to tokenize the data and then to match them can extract similarity in a wide variety of data types
+
 #### Exact word match
-Consider these Element's in different Document's
+Consider these Elements defined in two different Documents
  * Wayne Grace Jr.
  * Grace Hilton Wayne
 
-Each word is considered a token, and if another element has the exact match they are scored on the number of matching tokens. 
-In this example the words `Wayne` and `Grace` match 2 words out of 3 total in each elements.
-A scoring mechanism will match them with a result of 0.67
+With a simple tokenization process each word here can be considered a token, and if another element has the same word 
+they are scored on the number of matching tokens.  In this example the words `Wayne` and `Grace` match 2 words out of 
+3 total in each elements. A scoring mechanism will match them with a result of 0.67
 
 #### Soundex word match
-Consider these Element's in different Document's
+Consider these Elements in two different Documents
  * Steven Wilson
  * Stephen Wilkson
 
@@ -62,11 +63,11 @@ So in this example words `Steven` & `Stephen` will encode to `S315` whereas the 
 This allows both the elements to match exactly, and score at 1.0
 
 #### NGram token match
-In cases where breaking down the Element's in words is not feasible, we split it using NGrams. Take for examples email's
+In cases where breaking down the Elements in words is not feasible, we split it using NGrams. Take for examples emails
  * parker.james@gmail.com
  * james_parker@yahoo.com
  
-Here if we ignore the domain name and take 3 character sequence (tri-gram) of the data, token's will look like this
+Here if we ignore the domain name and take 3 character sequence (tri-gram) of the data, tokens will look like this
 
 * parker.james -> [par, ark, rke, ker, er., r.j, .ja, jam, ame, mes]
 * james_parker -> [jam, ame, mes, es_, s_p, _pa, par, ark, rke, ker] 

@@ -23,8 +23,10 @@ import static com.intuit.fuzzymatcher.function.PreProcessFunction.trim;
  * <li>type - The ElementType for the value. This determines the functions applied at different steps of the match</li>
  * <li>weight - Used in scoring function to increase the Document score for an Element. Default is 1.0 for all elements</li>
  * <li>threshold - Value above which elements are considered a match, default 0.3</li>
+ * <li>neighborhoodRange - Relevant for NEAREST_NEIGHBORS MatchType. Defines how close should the value be, to be considered a match (default 0.9) </li>
  * <li>preProcessFunction - Function to pre-process the value. If this is not set, the function defined in ElementType is used </li>
  * <li>tokenizerFunction - Function to break values into tokens. If this is not set, the function defined in ElementType is used </li>
+ * <li>matchType - MatchType used. If this is not set, the type defined in ElementType is used </li>
  * </ul>
  */
 public class Element<T> implements Matchable {
