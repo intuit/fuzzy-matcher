@@ -74,7 +74,7 @@ Here if we ignore the domain name and take 3 character sequence (tri-gram) of th
 
 Comparing these NGrams we have 7 out of the total 10 tokens match exactly which gives a score of 0.7
 
-#### Nearest Neighbours match
+#### Nearest Neighbors match
 In certain cases breaking down elements into tokens and comparing tokens is not an option. 
 For example numeric values, like dollar amounts in a list of transactions
 
@@ -92,35 +92,35 @@ A similar example can be thought of with Dates, where dates that are near to eac
 ![Fuzzy Match](fuzzy-match.png?raw=true "Fuzzy Match")
 
 We spoke in detail on `Token` and `MatchType` which is the core of fuzzy matching, and touched upon `Scoring` which gives 
-the measure of matching similar data. `PreProcessing` your data is a simple yet powerful mechanism that can help in staring 
-with a clean data before running a match. These 4 stages which are highly customizable can be used to tune and match a wide variety of data types   
+the measure of matching similar data. `PreProcessing` your data is a simple yet powerful mechanism that can help in starting 
+with clean data before running a match. These 4 stages which are highly customizable can be used to tune and match a wide variety of data types   
 
 
-* __Pre-Processing__ : This accepts a java `Function`. Which allows you to externally code it and pass it to the library. 
-Some examples of pre-processing that are available in the library are.
+* __Pre-Processing__ : This accepts a java `Function`. Which allows you to externally develop the pre-processing functionality and pass it to the library. 
+Or use some of the existing ones. These are a few examples that are already available
     * _Trim_: Removes leading and trailing spaces (applied by default)
     * _Lower Case_: Converts all characters to lowercase (applied by default)
     * _Remove Special Chars_ : Removes all characters except alpha and numeric characters and spaces. (default for _TEXT_ type)
-    * _Numeric_: Strips all non-numeric characters. Useful for numeric values like phone or ssn (default for _PHONE_ type)
+    * _Numeric_: Strips all non-numeric characters. Useful for numeric values like phone or ssn (default for _NUMBER_ type)
     * _Email_: Strips away domain from an email. This prevents common domains like gmail.com, yahoo.com to be considered in match (default for _EMAIL_ type)
 
 * __Tokenization__ : This again accepts a `Function` so can be externally defined and fed to the library. 
-But a host of commonly used are already defined. Examples
+Some commonly used are already available.
     * _Word_ : Breaks down an element into words (anything delimited by space " ").
     * _N-Gram_ : Breaks down an element into 3 letter grams.
     * _Word-Soundex_ : Breaks down in words (space delimited) and gets Soundex encode using the Apache Soundex library
-    * _Value_ : Nothing to break down here, just uses the element value as token. Useful for Nearest Neighbour matches
+    * _Value_ : Nothing to break down here, just uses the element value as token. Useful for Nearest Neighbor matches
 
 * __Match Type__ : Allows 2 types of matches, which can be applied to each `Element`
     * _Equality_: Uses exact matches with token values. 
     * _Nearest Neighbor_: Finds tokens that are contained in the neighborhood range, that can be specified as a 
     probability (0.0 - 1.0) for each element. It defaults to 0.9 
     
-* __Scoring__ : These are defined for differently for `Element` and `Document` 
+* __Scoring__ : These are defined for `Element` and `Document` matches
     * _Element scoring_: Uses a simple average, where for each element the matching token is divided by the total tokens. 
     A configurable `threshold` can be set for each element beyond which elements are considered to match (default set at 0.3)
     * _Document scoring_: A similar approach where number of matching elements are compared with total element. 
-    In addition, each element can be give a `weight`, for elements that are considered more significant in a document than other. 
+    In addition, each element can be give a `weight`. This is useful when some elements in a document are considered more significant than others. 
     A `threshold` can also be specified at a document level (defaults to 0.5) beyond which documents are considered to match
 
 ## End User Configuration
@@ -137,8 +137,8 @@ Below is the list of predefined _Element Types_ available with sensible defaults
 | ___ADDRESS___ | addressPreprocessing() | wordSoundexEncodeTokenizer() |     EQUALITY       |
 | ___EMAIL___   | removeDomain()         | triGramTokenizer()           |     EQUALITY       |
 | ___PHONE___   | numericValue()         | decaGramTokenizer()          |     EQUALITY       |
-| ___NUMBER___  | numberPreprocessing()  | valueTokenizer()             | NEAREST_NEIGHBOURS |
-| ___DATE___    | none()                 | valueTokenizer()             | NEAREST_NEIGHBOURS |
+| ___NUMBER___  | numberPreprocessing()  | valueTokenizer()             | NEAREST_NEIGHBORS |
+| ___DATE___    | none()                 | valueTokenizer()             | NEAREST_NEIGHBORS |
 
 _Note: Since each element is unique in the way it should match, if you need to match a different element type than
  what is supported, please open a new [GitHub Issue](https://github.com/intuit/fuzzy-matcher/issues) and the community 
@@ -159,7 +159,7 @@ _Note: Since each element is unique in the way it should match, if you need to m
 * __PreProcessingFunction__: Override The _PreProcessingFunction_ function defined by Type
 * __TokenizerFunction__: Override The _TokenizerFunction_ function defined by Type
 * __MatchType__: Override the MatchType defined by Type
-* __NeighborhoodRange__: Relevant only for `NEAREST_NEIGHBOURS` MatchType. Defines how close should the `Value` be, to be considered a match. 
+* __NeighborhoodRange__: Relevant only for `NEAREST_NEIGHBORS` MatchType. Defines how close should the `Value` be, to be considered a match. 
 Accepted values between 0.0 - 1.0 (defaults to 0.9) 
 
 ### Match Service
@@ -262,7 +262,7 @@ The performance characteristics varies primarily on MatchType being used
 * EQUALITY - For equality match, which is the default for most Element Types, the performance is linear O(N). 
 Where N is the number of `Element` in all the document.
 
-* NEAREST_NEIGHBOUR - The default for Numeric and Date Element Types the performance O(N logN). 
+* NEAREST_NEIGHBOR - The default for Numeric and Date Element Types the performance is O(N logN). 
 This also depends on the `NeighborhoodRange` setting , the higher the value the better it will perform. 
 It is advisable to not use 1.0 as a `NeighborhoodRange` and instead over-ride the `MatchType` to be `EQUALITY`, 
 that way it guarantees a linear performance.
