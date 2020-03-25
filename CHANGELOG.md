@@ -8,12 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - In Element ability to set MatchType (this replaces similarityMatchFunction)
 - In Element ability to  set NeighborhoodRange for NEAREST_NEIGHBOR MatchType
+- New classes added - TokenRepo (replaces the TokenMatch) and MatchType (replaces SimilariyyMatchFunction) 
 
 ### Removed
-- Document and Element does not allow to externally define a ScoringFunction. This is now set to defaults as 
+- Document and Element classes does not allow to externally define a ScoringFunction. This is now set to defaults as 
 SimpleAverage (in Element) and ExponentialWeightedAverage (in Document)
 - Element does not allow to externally define similarityMatchFunction. This is replaced by MatchType
 - Element does not allow to externally define matchOptimizerFunction. All these changes allow a guaranteed performance of the library
+- These classes are removed - TokenMatch, NGram, MatchOptimizerFunction, SimilarityMatchFunction
 
 ### Changed
 - Significant performance improvements along with reduced memory utilization
