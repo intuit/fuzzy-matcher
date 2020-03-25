@@ -10,7 +10,6 @@ import java.util.stream.Stream;
  * <ul>
  * <li>ElementType is an enum which gives a template on all the functions that should be applied during match</li>
  * <li>Variance is a user defined String, that allows multiple ElementType to be defined in a Document</li>
- * <li>matchOptimizerFunction is a configurable function for match performance that minimizes complexity.</li>
  * </ul>
  */
 public class ElementClassification {
@@ -19,12 +18,9 @@ public class ElementClassification {
 
     private String variance;
 
-    Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction;
-
-    public ElementClassification(ElementType elementType, String variance, Function<List<Token>, Stream<Match<Token>>> matchOptimizerFunction) {
+    public ElementClassification(ElementType elementType, String variance) {
         this.elementType = elementType;
         this.variance = variance;
-        this.matchOptimizerFunction = matchOptimizerFunction;
     }
 
     public ElementType getElementType() {
@@ -33,10 +29,6 @@ public class ElementClassification {
 
     public String getVariance() {
         return variance;
-    }
-
-    public Function<List<Token>, Stream<Match<Token>>> getMatchOptimizerFunction() {
-        return matchOptimizerFunction;
     }
 
     @Override

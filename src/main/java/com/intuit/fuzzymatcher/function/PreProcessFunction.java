@@ -128,7 +128,7 @@ public interface PreProcessFunction extends Function<Object, Object> {
      */
     static PreProcessFunction numberPreprocessing() {
         return (obj) ->  {
-            if (obj instanceof Double) {
+            if (obj instanceof Number) {
                 return obj;
             }
             String str = obj.toString();

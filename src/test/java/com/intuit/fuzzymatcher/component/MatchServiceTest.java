@@ -2,6 +2,7 @@ package com.intuit.fuzzymatcher.component;
 
 import com.intuit.fuzzymatcher.domain.Document;
 import com.intuit.fuzzymatcher.domain.Element;
+import com.intuit.fuzzymatcher.domain.ElementType;
 import com.intuit.fuzzymatcher.domain.Match;
 import com.intuit.fuzzymatcher.function.PreProcessFunction;
 import com.opencsv.CSVReader;
@@ -47,6 +48,29 @@ public class MatchServiceTest {
             });
         });
         Assert.assertEquals(5, result.size());
+    }
+
+    @Test
+    public void itShouldApplyMatchArray() {
+        String[][] input = {
+                {"1", "Steven Wilson", "45th Avenue 5th st."},
+                {"2", "John Doe", "546 freeman ave"},
+                {"3", "Stephen Wilkson", "45th Ave 5th Street"}
+        };
+        List<Document> documentList = Arrays.asList(input).stream().map(contact -> {
+            return new Document.Builder(contact[0])
+                    .addElement(new Element.Builder<String>().setValue(contact[1]).setType(NAME).createElement())
+                    .addElement(new Element.Builder<String>().setValue(contact[2]).setType(ADDRESS).createElement())
+                    .createDocument();
+        }).collect(Collectors.toList());
+
+        Map<String, List<Match<Document>>> result = matchService.applyMatchByDocId(documentList);
+        result.entrySet().forEach(entry -> {
+            entry.getValue().forEach(match -> {
+                System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
+            });
+        });
+        Assert.assertEquals(2, result.size());
     }
 
     @Test
@@ -312,7 +336,7 @@ public class MatchServiceTest {
         AtomicInteger index = new AtomicInteger();
         return StreamSupport.stream(getCSVReader("demo.csv").spliterator(), false).map(csv -> {
             return new Document.Builder(index.incrementAndGet() + "")
-                    .addElement(new Element.Builder().setType(NAME).setValue(csv[0]).createElement())
+                    .addElement(new Element.Builder<String>().setType(NAME).setValue(csv[0]).createElement())
                     .createDocument();
         }).collect(Collectors.toList());
     }
@@ -364,7 +388,7 @@ public class MatchServiceTest {
     }
 
     @Test
-    public void itShouldApplyMatchWithScoreNotMoreThanOne(){
+    public void itShouldApplyMatchWithScoreNotMoreThanOne() {
         List<Document> inputData = new ArrayList<>();
         Document doc1 = new Document.Builder("1")
                 .addElement(new Element.Builder().setType(NAME).setValue("Kapa Limited").createElement())
@@ -382,12 +406,12 @@ public class MatchServiceTest {
                 .addElement(new Element.Builder().setType(PHONE).setValue("").setWeight(2).setThreshold(0.5).createElement())
                 .addElement(new Element.Builder().setType(EMAIL).setValue("kirit@nekoproductions.com").setThreshold(0.5).createElement())
                 .createDocument();
-        inputData.addAll(Arrays.asList(doc1,doc2));
+        inputData.addAll(Arrays.asList(doc1, doc2));
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(inputData);
         Assert.assertEquals(2, result.size());
         Assert.assertThat(result.entrySet().stream()
                         .map(entry -> entry.getKey().getKey()).collect(Collectors.toList()),
-                CoreMatchers.hasItems("1","2"));
+                CoreMatchers.hasItems("1", "2"));
         Assert.assertTrue(result.get(doc1).get(0).getResult() <= 1);
     }
 
@@ -484,42 +508,50 @@ public class MatchServiceTest {
     }
 
     @Test
-    public void itShouldApplyMatchWithNumber() {
-        List<String> numbers = Arrays.asList("23", "22", "10", "5", "str", "9", "11", "10.5", "23.5", "str");
-        AtomicInteger ai = new AtomicInteger(0);
-        List<Document> documentList = numbers.stream().map(num -> {
-            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
-                    .addElement(new Element.Builder().setType(NUMBER).setValue(num).setThreshold(0.95).createElement())
-                    .createDocument();
-        }).collect(Collectors.toList());
-        Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
-        Assert.assertEquals(6, result.size());
+    public void itShouldApplyMatchWithInteger() {
+        List<Object> numbers = Arrays.asList(91, 100, 200, 152, 11, 15, 10, 200);
+        List<Document> documentList1 = getTestDocuments(numbers, NUMBER, null);
+        Map<Document, List<Match<Document>>> result1 = matchService.applyMatch(documentList1);
+        Assert.assertEquals(6, result1.size());
+
+        List<Document> documentList2 = getTestDocuments(numbers, NUMBER, 0.99);
+        Map<Document, List<Match<Document>>> result2 = matchService.applyMatch(documentList2);
+        Assert.assertEquals(2, result2.size());
     }
 
     @Test
     public void itShouldApplyMatchWithDoubleType() {
-        List<Double> numbers = Arrays.asList(23D, 22D, 10D, 5D, 9D, 11D, 10.5, 23.5);
-        AtomicInteger ai = new AtomicInteger(0);
-        List<Document> documentList = numbers.stream().map(num -> {
-            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
-                    .addElement(new Element.Builder().setType(NUMBER).setValue(num).setThreshold(0.95).createElement())
-                    .createDocument();
-        }).collect(Collectors.toList());
-        Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
-        Assert.assertEquals(6, result.size());
+        List<Object> numbers = Arrays.asList(23D, 22D, 10D, 5D, 9D, 11D, 10.5, 23.2);
+
+        List<Document> documentList1 = getTestDocuments(numbers, NUMBER, null);
+        Map<Document, List<Match<Document>>> result1 = matchService.applyMatch(documentList1);
+        Assert.assertEquals(6, result1.size());
+
+        List<Document> documentList2 = getTestDocuments(numbers, NUMBER, 0.99);
+        Map<Document, List<Match<Document>>> result2 = matchService.applyMatch(documentList2);
+        Assert.assertEquals(2, result2.size());
     }
 
     @Test
     public void itShouldApplyMatchWithDate() {
-        List<Date> numbers = Arrays.asList(getDate("01/01/2020"), getDate("12/01/2020"), getDate("02/01/2020"));
-        AtomicInteger ai = new AtomicInteger(0);
-        List<Document> documentList = numbers.stream().map(num -> {
-            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
-                    .addElement(new Element.Builder().setType(DATE).setValue(num).setThreshold(0.90).createElement())
-                    .createDocument();
-        }).collect(Collectors.toList());
+        List<Object> dates = Arrays.asList(getDate("01/01/2020"), getDate("12/01/2020"), getDate("02/01/2020"));
+        List<Document> documentList = getTestDocuments(dates, DATE, null);
         Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
         Assert.assertEquals(2, result.size());
+    }
+
+
+    private List<Document> getTestDocuments(List<Object> values, ElementType elementType, Double neighborhoodRange) {
+        AtomicInteger ai = new AtomicInteger(0);
+        return values.stream().map(num -> {
+            Element.Builder elementBuilder = new Element.Builder().setType(elementType).setValue(num);
+            if (neighborhoodRange != null) {
+                elementBuilder.setNeighborhoodRange(neighborhoodRange);
+            }
+            return new Document.Builder(Integer.toString(ai.incrementAndGet()))
+                    .addElement(elementBuilder.createElement())
+                    .createDocument();
+        }).collect(Collectors.toList());
     }
 
     private Date getDate(String val) {
@@ -538,21 +570,21 @@ public class MatchServiceTest {
 
         result.entrySet().stream().sorted(Map.Entry.<String, List<Match<Document>>>comparingByKey())
                 .forEach(entry -> {
-            String[] keyArrs = Stream.concat(Stream.of(entry.getKey(), entry.getKey(), ""),
-                    getOrderedElements(entry.getValue().stream()
-                            .map(match -> match.getData())
-                            .findFirst().get()
-                            .getElements()).map(e -> e.getValue())).toArray(String[]::new);
-            writer.writeNext(keyArrs);
+                    String[] keyArrs = Stream.concat(Stream.of(entry.getKey(), entry.getKey(), ""),
+                            getOrderedElements(entry.getValue().stream()
+                                    .map(match -> match.getData())
+                                    .findFirst().get()
+                                    .getElements()).map(e -> e.getValue())).toArray(String[]::new);
+                    writer.writeNext(keyArrs);
 
-            entry.getValue().stream().forEach(match -> {
-                Document md = match.getMatchedWith();
-                String[] matchArrs = Stream.concat(Stream.of("", md.getKey(), Double.toString(match.getResult())),
-                        getOrderedElements(md.getElements()).map(e -> e.getValue())).toArray(String[]::new);
-                writer.writeNext(matchArrs);
-                LOGGER.info("        " + match);
-            });
-        });
+                    entry.getValue().stream().forEach(match -> {
+                        Document md = match.getMatchedWith();
+                        String[] matchArrs = Stream.concat(Stream.of("", md.getKey(), Double.toString(match.getResult())),
+                                getOrderedElements(md.getElements()).map(e -> e.getValue())).toArray(String[]::new);
+                        writer.writeNext(matchArrs);
+                        LOGGER.info("        " + match);
+                    });
+                });
         writer.close();
     }
 

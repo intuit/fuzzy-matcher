@@ -3,6 +3,7 @@ package com.intuit.fuzzymatcher.function;
 import com.intuit.fuzzymatcher.domain.Element;
 import com.intuit.fuzzymatcher.domain.Token;
 import com.intuit.fuzzymatcher.util.Utils;
+import org.apache.commons.codec.language.Soundex;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -13,13 +14,31 @@ import java.util.stream.Stream;
  */
 public interface TokenizerFunction extends Function<Element, Stream<Token>> {
 
+    final Soundex soundex = new Soundex();
+
     static TokenizerFunction valueTokenizer() {
-        return (element -> Stream.of(getToken(element, element.getPreProcessedValue(), false)));
+        return (element -> Stream.of(getToken(element, element.getPreProcessedValue())));
     }
 
     static TokenizerFunction wordTokenizer() {
         return (element) -> Arrays.stream(element.getPreProcessedValue().toString().split("\\s+"))
-                .map(token -> getToken(element, token, false));
+                .map(token -> getToken(element, token));
+    }
+
+    static TokenizerFunction wordSoundexEncodeTokenizer() {
+        return (element) -> Arrays.stream(element.getPreProcessedValue().toString().split("\\s+"))
+                .map(val -> {
+                    String code = val;
+                    if (!Utils.isNumeric(val)) {
+
+                        code = soundex.encode(val);
+                        if (code.equals("")) {
+                            code = val;
+                        }
+                    }
+                    // System.out.println(val +"->" + code);
+                    return code;
+                }).map(token -> getToken(element, token));
     }
 
     static TokenizerFunction triGramTokenizer() {
@@ -34,11 +53,11 @@ public interface TokenizerFunction extends Function<Element, Stream<Token>> {
     static Stream<Token> getTokens(int size, Element element) {
         Object elementValue = element.getPreProcessedValue();
         return Utils.getNGrams(elementValue, size)
-                .map(str -> getToken(element, str, true));
+                .map(str -> getToken(element, str));
 
     }
 
-    static Token getToken(Element element, Object token, boolean nGramTokenized) {
-        return new Token(token, element, nGramTokenized);
+    static Token getToken(Element element, Object token) {
+        return new Token(token, element);
     }
 }

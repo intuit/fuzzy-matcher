@@ -18,15 +18,16 @@ public class Score {
         return result;
     }
 
-    public void setResult(double result) {
-        this.result = result;
-    }
 
     public Match getMatch() {
         return match;
     }
 
-    public void setMatch(Match match) {
-        this.match = match;
+    @Override
+    public String toString() {
+        return "Score{" +
+                "result=" + result +
+                ", match=" + match +
+                '}';
     }
 }

@@ -5,7 +5,6 @@ import com.intuit.fuzzymatcher.domain.Score;
 
 import java.util.List;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -112,18 +111,6 @@ public interface ScoringFunction extends BiFunction<Match, List<Score>, Score> {
             } else
                 return getWeightedAverageScore().apply(match, childScores);
         };
-    }
-
-    /**
-     * This scoring assumes the child scores are binary (1.0 or 0.0).
-     * Uses the jaccard method finding exact matches divided by total number of common children
-     *
-     * @return the scoring function for Jaccard
-     */
-    static ScoringFunction getJaccardScore() {
-        return (match, childScores) ->
-                new Score((double) childScores.size() /
-                        ((match.getData().getChildCount(match.getMatchedWith()))), match);
     }
 
     static double getSumOfWeightedResult(List<Score> childScoreList) {

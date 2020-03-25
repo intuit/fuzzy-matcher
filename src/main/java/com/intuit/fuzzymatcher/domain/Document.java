@@ -4,7 +4,6 @@ import com.intuit.fuzzymatcher.function.ScoringFunction;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -24,24 +23,20 @@ import java.util.stream.Stream;
  * <ul>
  * <li>elements - A set of Element object to match against</li>
  * <li>threshold - Value above which documents are considered a match, default 0.5</li>
- * <li>scoringFunction - Function used to aggregate scores of matching elements, default ExponentialWeightedAverageScore</li>
  * </ul>
  */
 public class Document implements Matchable {
-    private Document(String key, Set<Element> elements, double threshold, BiFunction<Match, List<Score>, Score> scoringFunction) {
+    private Document(String key, Set<Element> elements, double threshold) {
         this.key = key;
         this.elements = elements;
         this.threshold = threshold;
-        this.scoringFunction = scoringFunction;
     }
 
     private String key;
     private Set<Element> elements;
     private Set<Element> preProcessedElement;
     private double threshold;
-    private BiFunction<Match, List<Score>, Score> scoringFunction;
     private Boolean source;
-    private Set<Document> matchedWith = new HashSet<>();
 
     private static final BiFunction<Match, List<Score>, Score> DEFAULT_DOCUMENT_SCORING = ScoringFunction.getExponentialWeightedAverageScore();
 
@@ -75,7 +70,7 @@ public class Document implements Matchable {
                     if (m.getPreProcessedValue() instanceof String) {
                         return !StringUtils.isEmpty(m.getPreProcessedValue().toString());
                     } else
-                    return m.getPreProcessedValue() != null;
+                        return m.getPreProcessedValue() != null;
                 });
     }
 
@@ -88,9 +83,9 @@ public class Document implements Matchable {
     public long getChildCount(Matchable other) {
         if (other instanceof Document) {
             Document o = (Document) other;
-            List<ElementClassification> childrenType =  this.getPreProcessedElement().stream()
+            List<ElementClassification> childrenType = this.getPreProcessedElement().stream()
                     .map(Element::getElementClassification).collect(Collectors.toList());
-            List<ElementClassification> oChildrenType =  o.getPreProcessedElement().stream()
+            List<ElementClassification> oChildrenType = o.getPreProcessedElement().stream()
                     .map(Element::getElementClassification).collect(Collectors.toList());
             return CollectionUtils.union(childrenType, oChildrenType).size();
         }
@@ -102,9 +97,9 @@ public class Document implements Matchable {
     public long getUnmatchedChildCount(Matchable other) {
         if (other instanceof Document) {
             Document o = (Document) other;
-            List<ElementClassification> childrenType =  this.getPreProcessedElement().stream()
+            List<ElementClassification> childrenType = this.getPreProcessedElement().stream()
                     .map(Element::getElementClassification).collect(Collectors.toList());
-            List<ElementClassification> oChildrenType =  o.getPreProcessedElement().stream()
+            List<ElementClassification> oChildrenType = o.getPreProcessedElement().stream()
                     .map(Element::getElementClassification).collect(Collectors.toList());
             return CollectionUtils.disjunction(childrenType, oChildrenType).size();
         }
@@ -113,7 +108,7 @@ public class Document implements Matchable {
 
     @Override
     public BiFunction<Match, List<Score>, Score> getScoringFunction() {
-        return this.scoringFunction != null ? this.scoringFunction : DEFAULT_DOCUMENT_SCORING;
+        return DEFAULT_DOCUMENT_SCORING;
     }
 
     @Override
@@ -129,19 +124,10 @@ public class Document implements Matchable {
         this.source = source;
     }
 
-    public void addMatchedWith(Document document) {
-        this.matchedWith.add(document);
-    }
-
-    public boolean isMatchedWith(Document document) {
-        return this.matchedWith.contains(document);
-    }
-
     public static class Builder {
         private String key;
         private Set<Element> elements;
         private double threshold = 0.5;
-        private BiFunction<Match, List<Score>, Score> scoringFunction;
 
         public Builder(String key) {
             this.key = key;
@@ -160,13 +146,8 @@ public class Document implements Matchable {
             return this;
         }
 
-        public Builder setScoringFunction(BiFunction<Match, List<Score>, Score> scoringFunction) {
-            this.scoringFunction = scoringFunction;
-            return this;
-        }
-
         public Document createDocument() {
-            Document doc = new Document(key, elements, threshold, scoringFunction);
+            Document doc = new Document(key, elements, threshold);
             doc.elements.stream().forEach(element -> element.setDocument(doc));
             return doc;
         }

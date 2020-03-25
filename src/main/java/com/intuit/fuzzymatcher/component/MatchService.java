@@ -20,8 +20,6 @@ import java.util.stream.Stream;
  */
 public class MatchService {
 
-    private static DocumentMatch documentMatch = new DocumentMatch();
-
     /**
      * Use this for De-duplication of data, where for a given list of documents it finds duplicates
      * Data is aggregated by a given Document
@@ -30,7 +28,8 @@ public class MatchService {
      * @return a map containing the grouping of each document and its corresponding matches
      */
     public Map<Document, List<Match<Document>>> applyMatch(List<Document> documents) {
-        return documentMatch.matchDocuments(documents.parallelStream())
+        DocumentMatch documentMatch = new DocumentMatch();
+        return documentMatch.matchDocuments(documents.stream())
                 .collect(Collectors.groupingBy(Match::getData));
     }
 
@@ -43,12 +42,14 @@ public class MatchService {
      * @return a map containing the grouping of each document and its corresponding matches
      */
     public Map<Document, List<Match<Document>>> applyMatch(List<Document> documents, List<Document> matchWith) {
+        DocumentMatch documentMatch = new DocumentMatch();
         return documentMatch.matchDocuments(Stream.concat(
-                documents.parallelStream().map(document -> {
-                    document.setSource(true);
-                    return document;
-                }), matchWith.parallelStream().map(document -> {
+                matchWith.stream().map(document -> {
                     document.setSource(false);
+                    return document;
+                }),
+                documents.stream().map(document -> {
+                    document.setSource(true);
                     return document;
                 })))
                 .collect(Collectors.groupingBy(Match::getData));
@@ -58,11 +59,12 @@ public class MatchService {
      * Use this to check duplicate for a new record, where it checks whether a new Document is a duplicate in existing list
      * Data is aggregated by a given Document
      *
-     * @param document the document to match
+     * @param document  the document to match
      * @param matchWith the list of documents to match against
      * @return a map containing the grouping of each document and its corresponding matches
      */
     public Map<Document, List<Match<Document>>> applyMatch(Document document, List<Document> matchWith) {
+        DocumentMatch documentMatch = new DocumentMatch();
         return applyMatch(Arrays.asList(document), matchWith);
     }
 
@@ -70,11 +72,12 @@ public class MatchService {
      * Use this to check duplicate for a new record, where it checks whether a new Document is a duplicate in existing list
      * Data is aggregated by a given Document Id
      *
-     * @param document the document to match
+     * @param document  the document to match
      * @param matchWith the list of documents to match against
      * @return a map containing the grouping of each document id and its corresponding matches
      */
     public Map<String, List<Match<Document>>> applyMatchByDocId(Document document, List<Document> matchWith) {
+        DocumentMatch documentMatch = new DocumentMatch();
         return applyMatchByDocId(Arrays.asList(document), matchWith);
     }
 
@@ -86,7 +89,8 @@ public class MatchService {
      * @return a map containing the grouping of each document id and its corresponding matches
      */
     public Map<String, List<Match<Document>>> applyMatchByDocId(List<Document> documents) {
-        return documentMatch.matchDocuments(documents.parallelStream())
+        DocumentMatch documentMatch = new DocumentMatch();
+        return documentMatch.matchDocuments(documents.stream())
                 .collect(Collectors.groupingBy(match -> match.getData().getKey()));
     }
 
@@ -99,12 +103,13 @@ public class MatchService {
      * @return a map containing the grouping of each document id and its corresponding matches
      */
     public Map<String, List<Match<Document>>> applyMatchByDocId(List<Document> documents, List<Document> matchWith) {
+        DocumentMatch documentMatch = new DocumentMatch();
         return documentMatch.matchDocuments(Stream.concat(
-                documents.parallelStream().map(document -> {
-                    document.setSource(true);
-                    return document;
-                }), matchWith.parallelStream().map(document -> {
+                matchWith.stream().map(document -> {
                     document.setSource(false);
+                    return document;
+                }), documents.stream().map(document -> {
+                    document.setSource(true);
                     return document;
                 })))
                 .collect(Collectors.groupingBy(match -> match.getData().getKey()));

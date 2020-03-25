@@ -1,9 +1,6 @@
 package com.intuit.fuzzymatcher.domain;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -74,9 +71,24 @@ public class Match<T extends Matchable> {
 
     @Override
     public String toString() {
-        return "{" +
-                data +
-                ", " + score.getResult() +
+        return "Match{" +
+                "data=" + data +
+                ", matchedWith=" + matchedWith +
+                ", score=" + score.getResult() +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Match<?> match = (Match<?>) o;
+        return Objects.equals(data, match.data) &&
+                Objects.equals(matchedWith, match.matchedWith);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data, matchedWith);
     }
 }

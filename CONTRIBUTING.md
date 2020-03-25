@@ -6,6 +6,24 @@ Thanks for your interest in fuzzy-matcher.
 
 Readme.md file gives a good overview of the architecture. Make sure to review the readme.
 
+## Building the Library
+### Prerequisite
+You need Java SDK v1.8 or higher. Before you begin, you should check your current Java installation by using the following command:
+``` java -version ```
+
+fuzzy-match is compatible with Apache Maven 4.0 or above. If you do not already have Maven installed, you can follow the instructions at maven.apache.org.
+```
+On many operating systems, Maven can be installed with a package manager.
+If you use OSX Homebrew, try brew install maven.
+Ubuntu users can run sudo apt-get install maven.
+Windows users with Chocolatey can run choco install maven from an elevated (administrator) prompt.
+```
+### Compiling and installing locally
+After cloning the project locally, run this command to compile, test and install the project
+```
+mvn clean install
+```
+
 ## Contributions
 
 fuzzy-matcher welcomes contributions from everyone.

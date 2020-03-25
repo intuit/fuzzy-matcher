@@ -49,4 +49,8 @@ public class Utils {
                         : d)
                 .collect(Collectors.joining(" "));
     }
+
+    public static boolean isNumeric(String str) {
+        return str.matches(".*\\d.*");
+    }
 }

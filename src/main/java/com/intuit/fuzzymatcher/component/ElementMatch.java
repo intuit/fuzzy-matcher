@@ -1,41 +1,55 @@
 package com.intuit.fuzzymatcher.component;
 
-import com.intuit.fuzzymatcher.domain.*;
+import com.intuit.fuzzymatcher.domain.Element;
+import com.intuit.fuzzymatcher.domain.Match;
+import com.intuit.fuzzymatcher.domain.Token;
+import org.apache.commons.lang3.BooleanUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.*;
 
-/**
- * Matches at element level with aggregated results from token.
- * This uses the ScoringFunction defined at each element to get the aggregated Element score for matched tokens
- */
 public class ElementMatch {
 
-    private static TokenMatch tokenMatch = new TokenMatch();
+    private final TokenRepo tokenRepo;
 
-    public Stream<Match<Element>> matchElements(ElementClassification elementClassification, Stream<Element> elements) {
-        Stream<Token> tokenStream = elements.flatMap(Element::getTokens);
-        Stream<Match<Token>> matchedTokens = tokenMatch.matchTokens(elementClassification, tokenStream);
-        return rollupElementScore(matchedTokens);
+    public ElementMatch() {
+        this.tokenRepo = new TokenRepo();
     }
 
-    private Stream<Match<Element>> rollupElementScore(Stream<Match<Token>> matchedTokenStream) {
+    public Set<Match<Element>> matchElement(Element element) {
+        Set<Match<Element>> matchElements = new HashSet<>();
+        Map<Element, Integer> elementTokenScore = new HashMap<>();
 
-        Map<Element, Map<Element, List<Match<Token>>>> groupBy = matchedTokenStream
-                .collect(Collectors.groupingBy((matchToken -> matchToken.getData().getElement()),
-                        Collectors.groupingBy(matchToken -> matchToken.getMatchedWith().getElement())));
+        List<Token> tokens = element.getTokens();
+        tokens.stream()
+                .filter(token -> BooleanUtils.isNotFalse(element.getDocument().isSource()))
+                .forEach(token -> {
+                    elementThresholdMatching(token, elementTokenScore, matchElements);
+                });
 
-        return groupBy.entrySet().parallelStream().flatMap(leftElementEntry ->
-                leftElementEntry.getValue().entrySet().parallelStream().map(rightElementEntry -> {
-                    List<Score> childScoreList = rightElementEntry.getValue()
-                            .stream().map(d -> d.getScore())
-                            .collect(Collectors.toList());
+        tokens.forEach(token -> tokenRepo.put(token));
 
-                    return new Match<Element>(leftElementEntry.getKey(), rightElementEntry.getKey(), childScoreList);
-                }).filter(match -> match.getResult() > match.getData().getThreshold()));
+        return matchElements;
     }
 
+    private void elementThresholdMatching(Token token, Map<Element, Integer> elementTokenScore, Set<Match<Element>> matchingElements) {
+        Set<Element> matchElements = tokenRepo.get(token);
+        Element element = token.getElement();
 
+        // Token Match Found
+        if (matchElements != null) {
+            matchElements.forEach(matchElement -> {
+                int score = elementTokenScore.getOrDefault(matchElement, 0) + 1;
+                elementTokenScore.put(matchElement, score);
+                // Element Score above threshold
+                double elementScore = element.getScore(score, matchElement);
+
+                // Element match Found
+                if (elementScore > element.getThreshold()) {
+                    Match<Element> elementMatch = new Match<>(element, matchElement, elementScore);
+                    matchingElements.remove(elementMatch);
+                    matchingElements.add(elementMatch);
+                }
+            });
+        }
+    }
 }

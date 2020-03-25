@@ -1,8 +1,13 @@
 package com.intuit.fuzzymatcher.function;
 
 import com.intuit.fuzzymatcher.domain.Element;
+import com.intuit.fuzzymatcher.domain.Token;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.intuit.fuzzymatcher.domain.ElementType.*;
 import static com.intuit.fuzzymatcher.function.TokenizerFunction.*;
@@ -69,6 +74,34 @@ public class TokenizerFunctionTest {
         String value2 = "thisStringIsUsedForTestingAReallyHumungusExtremlyLongAndLargeString";
         Element elem2 = new Element.Builder().setType(EMAIL).setValue(value2).createElement();
         Assert.assertEquals((value2.length()-2)<0? 1: (value2.length()-2), triGramTokenizer().apply(elem2).count());
+    }
+
+    @Test
+    public void itShouldGetWordSoundexEncodeTokenizerForAddress() {
+        String value = "123 new Street 23rd Ave";
+        Element elem = new Element.Builder().setType(ADDRESS).setValue(value).createElement();
+        List<Token> results = wordSoundexEncodeTokenizer().apply(elem).collect(Collectors.toList());
+        Assert.assertEquals(5, results.size() );
+        Assert.assertEquals("123", results.get(0).getValue());
+        Assert.assertEquals("N000", results.get(1).getValue());
+        Assert.assertEquals("S363", results.get(2).getValue());
+        Assert.assertEquals("23rd", results.get(3).getValue());
+    }
+
+    @Test
+    public void itShouldGetWordSoundexEncodeTokenizerForName() {
+        String value1 = "Stephen Wilkson";
+        Element elem1 = new Element.Builder().setType(NAME).setValue(value1).createElement();
+        List<Token> results1 = wordSoundexEncodeTokenizer().apply(elem1).collect(Collectors.toList());
+        Assert.assertEquals("S315", results1.get(0).getValue());
+        Assert.assertEquals("W425", results1.get(1).getValue());
+
+        String value2 = "Steven Wilson";
+        Element elem2 = new Element.Builder().setType(NAME).setValue(value2).createElement();
+        List<Token> results2 = wordSoundexEncodeTokenizer().apply(elem2).collect(Collectors.toList());
+        Assert.assertEquals("S315", results2.get(0).getValue());
+        Assert.assertEquals("W425", results2.get(1).getValue());
+
     }
 
 

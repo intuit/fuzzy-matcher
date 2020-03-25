@@ -8,7 +8,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-
 /**
  * <p>
  * Starts the Matching process by element level matching and aggregates the results back
@@ -16,7 +15,11 @@ import java.util.stream.Stream;
  */
 public class DocumentMatch {
 
-    private static ElementMatch elementMatch = new ElementMatch();
+    private final ElementMatch elementMatch;
+
+    public DocumentMatch() {
+        this.elementMatch = new ElementMatch();
+    }
 
     /**
      * Executes matching of a document stream
@@ -25,39 +28,45 @@ public class DocumentMatch {
      * @return Stream of Match of Document type objects
      */
     public Stream<Match<Document>> matchDocuments(Stream<Document> documents) {
-        Stream<Element> elements = documents.flatMap(d -> d.getPreProcessedElement().stream());
-        Map<ElementClassification, List<Element>> elementMap = elements.collect(Collectors.groupingBy(Element::getElementClassification));
 
-        List<Match<Element>> matchedElements = new ArrayList<>();
-        elementMap.forEach((key, value) -> {
-            List<Match<Element>> result = elementMatch.matchElements(key, value.parallelStream()).collect(Collectors.toList());
-            matchedElements.addAll(result);
+        Stream<Match<Document>> documentMatch = documents.flatMap(document -> {
+            Set<Element> elements = document.getPreProcessedElement();
+            Set<Match<Element>> eleMatches = elements.stream()
+                    .flatMap(element -> elementMatch.matchElement(element).stream())
+                    .collect(Collectors.toSet());
+            return documentThresholdMatching(document, eleMatches);
         });
 
-        return rollupDocumentScore(matchedElements.parallelStream());
+        return documentMatch;
     }
 
-    private Stream<Match<Document>> rollupDocumentScore(Stream<Match<Element>> matchElementStream) {
+    private Stream<Match<Document>> documentThresholdMatching(Document document, Set<Match<Element>> matchingElements) {
+        Map<Document, List<Match<Element>>> mathes = matchingElements.stream()
+                .collect(Collectors.groupingBy(matchElement -> matchElement.getMatchedWith().getDocument()));
 
-        Map<Document, Map<Document, List<Match<Element>>>> groupBy = matchElementStream
-                .collect(Collectors.groupingBy(matchElement -> matchElement.getData().getDocument(),
-                        Collectors.groupingBy(matchElement -> matchElement.getMatchedWith().getDocument())));
+        Stream<Match<Document>> result = mathes.entrySet().stream().flatMap(matchEntry -> {
 
-        return groupBy.entrySet().parallelStream().flatMap(leftDocumentEntry ->
-                leftDocumentEntry.getValue().entrySet()
-                        .parallelStream()
-                        .flatMap(rightDocumentEntry -> {
-                            List<Score> childScoreList = rightDocumentEntry.getValue()
-                                    .stream()
-                                    .map(d -> d.getScore())
-                                    .collect(Collectors.toList());
-                            Match<Document> leftMatch = new Match<Document>(leftDocumentEntry.getKey(), rightDocumentEntry.getKey(), childScoreList);
-                            if (BooleanUtils.isNotFalse(rightDocumentEntry.getKey().isSource())) {
-                                Match<Document> rightMatch = new Match<Document>(rightDocumentEntry.getKey(), leftDocumentEntry.getKey(), childScoreList);
-                                return Stream.of(leftMatch, rightMatch);
-                            }
-                            return Stream.of(leftMatch);
-                        }))
-                .filter(match -> match.getResult() > match.getData().getThreshold());
+            List<Score> childScoreList = matchEntry.getValue()
+                    .stream()
+                    .map(d -> d.getScore())
+                    .collect(Collectors.toList());
+            //System.out.println(Arrays.toString(childScoreList.toArray()));
+            Match<Document> leftMatch = new Match<Document>(document, matchEntry.getKey(), childScoreList);
+
+            // Document match Found
+            if (leftMatch.getScore().getResult() > leftMatch.getData().getThreshold()) {
+
+                if (BooleanUtils.isNotFalse(matchEntry.getKey().isSource())) {
+                    Match<Document> rightMatch = new Match<Document>(matchEntry.getKey(), document, childScoreList);
+                    return Stream.of(leftMatch, rightMatch);
+                }
+                return Stream.of(leftMatch);
+            } else {
+                return Stream.empty();
+            }
+        });
+
+        return result;
     }
+
 }
