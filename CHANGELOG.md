@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.0 - 2020-03-25
+### Added
+- In Element ability to set MatchType (this replaces similarityMatchFunction)
+- In Element ability to  set NeighborhoodRange for NEAREST_NEIGHBOR MatchType
+
+### Removed
+- Document and Element does not allow to externally define a ScoringFunction. This is now set to defaults as 
+SimpleAverage (in Element) and ExponentialWeightedAverage (in Document)
+- Element does not allow to externally define similarityMatchFunction. This is replaced by MatchType
+- Element does not allow to externally define matchOptimizerFunction. All these changes allow a guaranteed performance of the library
+
+### Changed
+- Significant performance improvements along with reduced memory utilization
+- Soundex match is no longer a Matching function, it is replaced as a tokenization function instead, where encoded soundex token are now used.
+- Element is a generic now. Which replaces the `value` as generic instead of object.
+- ElementType of TEXT is matched by word equality instead of Soundex matching function by default
+- ElementType of NUMBER and DATE are matched using NEAREST_NEIGHBOR MatchType. This gives similar results, but are 
+controlled by NeighborhoodRange attribute defined in Element instead of Threshold   
+
 ## 0.4.4 - 2019-12-23
 ### Fixed
 - Ability to configure scoring function in Element https://github.com/intuit/fuzzy-matcher/issues/19
