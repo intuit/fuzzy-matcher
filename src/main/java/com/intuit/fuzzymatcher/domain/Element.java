@@ -1,10 +1,8 @@
 package com.intuit.fuzzymatcher.domain;
 
-import com.intuit.fuzzymatcher.function.ScoringFunction;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.AbstractMap;
-import java.util.Date;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -98,7 +96,8 @@ public class Element<T> implements Matchable {
         if (this.preProcessedValue == null) {
             if (this.value instanceof String) {
                 // Default String pre-processing
-                setPreProcessedValue((T) getPreProcessFunction().andThen(trim()).andThen(toLowerCase()).apply(this.value));
+                Function<String, String> preProcessingFunc = (Function<String, String>) getPreProcessFunction();
+                setPreProcessedValue((T) preProcessingFunc.andThen(trim()).andThen(toLowerCase()).apply((String) this.value));
             } else {
                 setPreProcessedValue(getPreProcessFunction().apply(this.value));
             }

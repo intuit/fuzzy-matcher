@@ -25,20 +25,20 @@ public enum ElementType {
     DATE(none(), valueTokenizer(), NEAREST_NEIGHBORS);
 
 
-    private final PreProcessFunction preProcessFunction;
+    private final Function preProcessFunction;
 
     private final Function<Element, Stream<Token>> tokenizerFunction;
 
     private final MatchType matchType;
 
-    ElementType(PreProcessFunction preProcessFunction, Function<Element, Stream<Token>> tokenizerFunction,
+    ElementType(Function preProcessFunction, Function<Element, Stream<Token>> tokenizerFunction,
                 MatchType matchType) {
         this.preProcessFunction = preProcessFunction;
         this.tokenizerFunction = tokenizerFunction;
         this.matchType = matchType;
     }
 
-    protected PreProcessFunction getPreProcessFunction() {
+    protected Function getPreProcessFunction() {
         return preProcessFunction;
     }
 
