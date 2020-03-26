@@ -52,7 +52,7 @@ public class TokenRepo {
                 case EQUALITY:
                     tokenElementSet = new ConcurrentHashMap<>();
                     break;
-                case NEAREST_NEIGHBOURS:
+                case NEAREST_NEIGHBORS:
                     tokenBinaryTree = new TreeSet<>(Token.byValue);
                     break;
             }
@@ -65,7 +65,7 @@ public class TokenRepo {
                     elements.add(element);
                     tokenElementSet.put(token.getValue(), elements);
                     break;
-                case NEAREST_NEIGHBOURS:
+                case NEAREST_NEIGHBORS:
                     tokenBinaryTree.add(token);
 
             }
@@ -75,7 +75,7 @@ public class TokenRepo {
             switch (matchType) {
                 case EQUALITY:
                     return tokenElementSet.get(token.getValue());
-                case NEAREST_NEIGHBOURS:
+                case NEAREST_NEIGHBORS:
                     TokenRange tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange());
                     return tokenBinaryTree.subSet(tokenRange.lower, true, tokenRange.higher, true)
                             .stream()

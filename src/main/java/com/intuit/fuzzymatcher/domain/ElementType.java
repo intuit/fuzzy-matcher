@@ -5,7 +5,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.intuit.fuzzymatcher.domain.MatchType.EQUALITY;
-import static com.intuit.fuzzymatcher.domain.MatchType.NEAREST_NEIGHBOURS;
+import static com.intuit.fuzzymatcher.domain.MatchType.NEAREST_NEIGHBORS;
 import static com.intuit.fuzzymatcher.function.PreProcessFunction.*;
 import static com.intuit.fuzzymatcher.function.TokenizerFunction.*;
 /**
@@ -19,8 +19,8 @@ public enum ElementType {
     ADDRESS(addressPreprocessing(), wordSoundexEncodeTokenizer(), EQUALITY),
     EMAIL(removeDomain(), triGramTokenizer(), EQUALITY),
     PHONE(usPhoneNormalization(), decaGramTokenizer(), EQUALITY),
-    NUMBER(numberPreprocessing(), valueTokenizer(), NEAREST_NEIGHBOURS),
-    DATE(none(), valueTokenizer(), NEAREST_NEIGHBOURS);
+    NUMBER(numberPreprocessing(), valueTokenizer(), NEAREST_NEIGHBORS),
+    DATE(none(), valueTokenizer(), NEAREST_NEIGHBORS);
 
 
     private final Function<Object, Object> preProcessFunction;
