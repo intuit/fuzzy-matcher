@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 /**
  * A functional interface to pre-process the elements. These function are applied to element.value String's
  */
-public interface PreProcessFunction extends Function<Object, Object> {
+public interface PreProcessFunction<T> extends Function<T, T> {
 
     /**
      * Uses Apache commons StringUtils trim method

@@ -1,6 +1,8 @@
 package com.intuit.fuzzymatcher.domain;
 
 
+import com.intuit.fuzzymatcher.function.PreProcessFunction;
+
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -23,20 +25,20 @@ public enum ElementType {
     DATE(none(), valueTokenizer(), NEAREST_NEIGHBORS);
 
 
-    private final Function<Object, Object> preProcessFunction;
+    private final PreProcessFunction preProcessFunction;
 
     private final Function<Element, Stream<Token>> tokenizerFunction;
 
     private final MatchType matchType;
 
-    ElementType(Function<Object, Object> preProcessFunction, Function<Element, Stream<Token>> tokenizerFunction,
+    ElementType(PreProcessFunction preProcessFunction, Function<Element, Stream<Token>> tokenizerFunction,
                 MatchType matchType) {
         this.preProcessFunction = preProcessFunction;
         this.tokenizerFunction = tokenizerFunction;
         this.matchType = matchType;
     }
 
-    protected Function<Object, Object> getPreProcessFunction() {
+    protected PreProcessFunction getPreProcessFunction() {
         return preProcessFunction;
     }
 
