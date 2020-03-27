@@ -10,6 +10,7 @@ import static com.intuit.fuzzymatcher.domain.MatchType.EQUALITY;
 import static com.intuit.fuzzymatcher.domain.MatchType.NEAREST_NEIGHBORS;
 import static com.intuit.fuzzymatcher.function.PreProcessFunction.*;
 import static com.intuit.fuzzymatcher.function.TokenizerFunction.*;
+
 /**
  * Enum to define different types of Element.
  * This is used only to categorize the data, and apply functions at different stages of match.
@@ -27,11 +28,11 @@ public enum ElementType {
 
     private final Function preProcessFunction;
 
-    private final Function<Element, Stream<Token>> tokenizerFunction;
+    private final Function tokenizerFunction;
 
     private final MatchType matchType;
 
-    ElementType(Function preProcessFunction, Function<Element, Stream<Token>> tokenizerFunction,
+    ElementType(Function preProcessFunction, Function tokenizerFunction,
                 MatchType matchType) {
         this.preProcessFunction = preProcessFunction;
         this.tokenizerFunction = tokenizerFunction;
@@ -42,7 +43,7 @@ public enum ElementType {
         return preProcessFunction;
     }
 
-    protected Function<Element, Stream<Token>> getTokenizerFunction() {
+    protected Function getTokenizerFunction() {
         return tokenizerFunction;
     }
 

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.intuit.fuzzymatcher.domain.ElementType.NAME;
@@ -36,7 +37,7 @@ public class ElementTest {
 
     }
 
-    private List<Document> getDocuments(List<String> names, TokenizerFunction tokenizerFunction) {
+    private List<Document> getDocuments(List<String> names, Function tokenizerFunction) {
         AtomicInteger counter = new AtomicInteger();
         return names.stream().map(name -> {
             Element.Builder<String> elementBuilder = new Element.Builder<String>().setType(NAME).setValue(name);

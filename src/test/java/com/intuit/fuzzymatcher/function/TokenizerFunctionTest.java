@@ -80,7 +80,8 @@ public class TokenizerFunctionTest {
     public void itShouldGetWordSoundexEncodeTokenizerForAddress() {
         String value = "123 new Street 23rd Ave";
         Element elem = new Element.Builder().setType(ADDRESS).setValue(value).createElement();
-        List<Token> results = wordSoundexEncodeTokenizer().apply(elem).collect(Collectors.toList());
+        Stream<Token> resultStream = wordSoundexEncodeTokenizer().apply(elem);
+        List<Token> results = resultStream.collect(Collectors.toList());
         Assert.assertEquals(5, results.size() );
         Assert.assertEquals("123", results.get(0).getValue());
         Assert.assertEquals("N000", results.get(1).getValue());
@@ -92,13 +93,15 @@ public class TokenizerFunctionTest {
     public void itShouldGetWordSoundexEncodeTokenizerForName() {
         String value1 = "Stephen Wilkson";
         Element elem1 = new Element.Builder().setType(NAME).setValue(value1).createElement();
-        List<Token> results1 = wordSoundexEncodeTokenizer().apply(elem1).collect(Collectors.toList());
+        Stream<Token> tokenStream1 = wordSoundexEncodeTokenizer().apply(elem1);
+        List<Token> results1 = tokenStream1.collect(Collectors.toList());
         Assert.assertEquals("S315", results1.get(0).getValue());
         Assert.assertEquals("W425", results1.get(1).getValue());
 
         String value2 = "Steven Wilson";
         Element elem2 = new Element.Builder().setType(NAME).setValue(value2).createElement();
-        List<Token> results2 = wordSoundexEncodeTokenizer().apply(elem2).collect(Collectors.toList());
+        Stream<Token> tokenStream2 = wordSoundexEncodeTokenizer().apply(elem2);
+        List<Token> results2 = tokenStream2.collect(Collectors.toList());
         Assert.assertEquals("S315", results2.get(0).getValue());
         Assert.assertEquals("W425", results2.get(1).getValue());
 

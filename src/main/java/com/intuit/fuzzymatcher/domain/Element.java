@@ -36,7 +36,7 @@ public class Element<T> implements Matchable {
     private ElementClassification elementClassification;
     private Document document;
     private Function<T, T> preProcessFunction;
-    private Function<Element, Stream<Token>> tokenizerFunction;
+    private Function<Element<T>, Stream<Token>> tokenizerFunction;
     private List<Token> tokens;
     private MatchType matchType;
 
@@ -44,7 +44,7 @@ public class Element<T> implements Matchable {
 
     public Element(ElementType type, String variance, T value, double weight, double threshold,
                    double neighborhoodRange, Function<T, T> preProcessFunction,
-                   Function<Element, Stream<Token>> tokenizerFunction, MatchType matchType) {
+                   Function<Element<T>, Stream<Token>> tokenizerFunction, MatchType matchType) {
         this.weight = weight;
         this.elementClassification = new ElementClassification(type, variance);
         this.value = value;
@@ -109,7 +109,7 @@ public class Element<T> implements Matchable {
         return new AbstractMap.SimpleEntry(this.getElementClassification(), this.getPreProcessedValue());
     }
 
-    public Function<Element, Stream<Token>> getTokenizerFunction() {
+    public Function<Element<T>, Stream<Token>> getTokenizerFunction() {
         return this.tokenizerFunction;
     }
 
@@ -172,7 +172,7 @@ public class Element<T> implements Matchable {
         private Function<T, T> preProcessFunction;
         private MatchType matchType;
 
-        private Function<Element, Stream<Token>> tokenizerFunction;
+        private Function<Element<T>, Stream<Token>> tokenizerFunction;
 
         public Builder setType(ElementType type) {
             this.type = type;
@@ -210,7 +210,7 @@ public class Element<T> implements Matchable {
         }
 
 
-        public Builder setTokenizerFunction(Function<Element, Stream<Token>> tokenizerFunction) {
+        public Builder setTokenizerFunction(Function<Element<T>, Stream<Token>> tokenizerFunction) {
             this.tokenizerFunction = tokenizerFunction;
             return this;
         }
