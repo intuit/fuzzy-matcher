@@ -1,10 +1,7 @@
 package com.intuit.fuzzymatcher.domain;
 
 
-import com.intuit.fuzzymatcher.function.PreProcessFunction;
-
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static com.intuit.fuzzymatcher.domain.MatchType.EQUALITY;
 import static com.intuit.fuzzymatcher.domain.MatchType.NEAREST_NEIGHBORS;
