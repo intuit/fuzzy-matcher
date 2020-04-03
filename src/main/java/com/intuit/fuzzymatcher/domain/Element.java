@@ -179,6 +179,11 @@ public class Element<T> implements Matchable {
             this.type = type;
             return this;
         }
+        
+        public Builder setType(ElemType type) {
+        	this.type = ElementType.values()[type.ordinal()];
+        	return this;
+        }
 
         public Builder setVariance(String variance) {
             this.variance = variance;
