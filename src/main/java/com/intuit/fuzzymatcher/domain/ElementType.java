@@ -14,37 +14,64 @@ import static com.intuit.fuzzymatcher.function.TokenizerFunction.*;
  * The functions, can be overridden from Element class using the appropriate setters at the time of creation.
  */
 public enum ElementType {
-    NAME(namePreprocessing(), wordSoundexEncodeTokenizer(), EQUALITY),
-    TEXT(removeSpecialChars(), wordTokenizer(), EQUALITY),
-    ADDRESS(addressPreprocessing(), wordSoundexEncodeTokenizer(), EQUALITY),
-    EMAIL(removeDomain(), triGramTokenizer(), EQUALITY),
-    PHONE(usPhoneNormalization(), decaGramTokenizer(), EQUALITY),
-    NUMBER(numberPreprocessing(), valueTokenizer(), NEAREST_NEIGHBORS),
-    DATE(none(), valueTokenizer(), NEAREST_NEIGHBORS);
+    NAME,
+    TEXT,
+    ADDRESS,
+    EMAIL,
+    PHONE,
+    NUMBER,
+    DATE;
 
-
-    private final Function preProcessFunction;
-
-    private final Function tokenizerFunction;
-
-    private final MatchType matchType;
-
-    ElementType(Function preProcessFunction, Function tokenizerFunction,
-                MatchType matchType) {
-        this.preProcessFunction = preProcessFunction;
-        this.tokenizerFunction = tokenizerFunction;
-        this.matchType = matchType;
+    protected Function<Object, Object> getPreProcessFunction() {
+        switch (this) {
+            case NAME:
+                return namePreprocessing();
+            case TEXT:
+                return removeSpecialChars();
+            case ADDRESS:
+                return addressPreprocessing();
+            case EMAIL:
+                return removeDomain();
+            case PHONE:
+                return usPhoneNormalization();
+            case NUMBER:
+                return numberPreprocessing();
+            case DATE:
+                return none();
+            default:
+                return none();
+        }
     }
 
-    protected Function getPreProcessFunction() {
-        return preProcessFunction;
-    }
-
-    protected Function getTokenizerFunction() {
-        return tokenizerFunction;
+    protected Function<Element, Stream<Token>> getTokenizerFunction() {
+        switch (this) {
+            case NAME:
+                return wordSoundexEncodeTokenizer();
+            case TEXT:
+                return wordTokenizer();
+            case ADDRESS:
+                return wordSoundexEncodeTokenizer();
+            case EMAIL:
+                return triGramTokenizer();
+            case PHONE:
+                return decaGramTokenizer();
+            case NUMBER:
+                return valueTokenizer();
+            case DATE:
+                return valueTokenizer();
+            default:
+                return valueTokenizer();
+        }
     }
 
     protected MatchType getMatchType() {
-        return this.matchType;
+        switch (this) {
+            case NUMBER:
+                return NEAREST_NEIGHBORS;
+            case DATE:
+                return NEAREST_NEIGHBORS;
+            default:
+                return EQUALITY;
+        }
     }
 }
