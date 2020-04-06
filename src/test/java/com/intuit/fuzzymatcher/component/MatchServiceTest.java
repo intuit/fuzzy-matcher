@@ -588,8 +588,8 @@ public class MatchServiceTest {
         writer.close();
     }
 
-    private List<Document> getTestData(Function<Object, Object> namePreProcessing,
-                                       Function<Object, Object> addressPreProcessing, double docThreshold) throws FileNotFoundException {
+    private List<Document> getTestData(Function namePreProcessing,
+                                       Function addressPreProcessing, double docThreshold) throws FileNotFoundException {
         return StreamSupport.stream(getCSVReader("test-data.csv").spliterator(), false).map(csv -> {
             return new Document.Builder(csv[0])
                     .addElement(new Element.Builder().setType(NAME).setValue(csv[1])

@@ -43,7 +43,7 @@ public class TokenRepoTest {
     }
 
     @Test
-    public void shouldGetForNumberWithNearestNeighbour() {
+    public void shouldGetForNumberWithNearestNeighbor() {
         List<Object> numbers = Arrays.asList(100, 200, 1, 25, 700, 99, 210, 500);
 
         List<Element> elements = getElements(numbers, ElementType.NUMBER, null);
@@ -93,10 +93,10 @@ public class TokenRepoTest {
     }
 
     @Test(expected = MatchException.class)
-    public void shouldGetForNotSupportedWithNearestNeighbour() {
+    public void shouldGetForNotSupportedWithNearestNeighbor() {
         List<Object> numbers = Arrays.asList("100", "200", "1", "25", "700", "99", "210", "500");
 
-        List<Element> elements = getElements(numbers, ElementType.TEXT, MatchType.NEAREST_NEIGHBOURS);
+        List<Element> elements = getElements(numbers, ElementType.TEXT, MatchType.NEAREST_NEIGHBORS);
 
         TokenRepo tokenRepo = new TokenRepo();
 

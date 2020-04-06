@@ -1,10 +1,8 @@
 package com.intuit.fuzzymatcher.domain;
 
-import com.intuit.fuzzymatcher.function.ScoringFunction;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.AbstractMap;
-import java.util.Date;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -37,16 +35,16 @@ public class Element<T> implements Matchable {
     private double neighborhoodRange;
     private ElementClassification elementClassification;
     private Document document;
-    private Function<Object, Object> preProcessFunction;
-    private Function<Element, Stream<Token>> tokenizerFunction;
+    private Function<T, T> preProcessFunction;
+    private Function<Element<T>, Stream<Token>> tokenizerFunction;
     private List<Token> tokens;
     private MatchType matchType;
 
-    private Object preProcessedValue;
+    private T preProcessedValue;
 
     public Element(ElementType type, String variance, T value, double weight, double threshold,
-                   double neighborhoodRange, Function<Object, Object> preProcessFunction,
-                   Function<Element, Stream<Token>> tokenizerFunction, MatchType matchType) {
+                   double neighborhoodRange, Function<T, T> preProcessFunction,
+                   Function<Element<T>, Stream<Token>> tokenizerFunction, MatchType matchType) {
         this.weight = weight;
         this.elementClassification = new ElementClassification(type, variance);
         this.value = value;
@@ -86,19 +84,20 @@ public class Element<T> implements Matchable {
         this.document = document;
     }
 
-    public void setPreProcessedValue(Object preProcessedValue) {
+    public void setPreProcessedValue(T preProcessedValue) {
         this.preProcessedValue = preProcessedValue;
     }
 
-    public Function<Object, Object> getPreProcessFunction() {
+    public Function<T, T> getPreProcessFunction() {
         return this.preProcessFunction;
     }
 
-    public Object getPreProcessedValue() {
+    public T getPreProcessedValue() {
         if (this.preProcessedValue == null) {
             if (this.value instanceof String) {
                 // Default String pre-processing
-                setPreProcessedValue(getPreProcessFunction().andThen(trim()).andThen(toLowerCase()).apply(this.value.toString()));
+                Function<String, String> preProcessingFunc = (Function<String, String>) getPreProcessFunction();
+                setPreProcessedValue((T) preProcessingFunc.andThen(trim()).andThen(toLowerCase()).apply((String) this.value));
             } else {
                 setPreProcessedValue(getPreProcessFunction().apply(this.value));
             }
@@ -110,7 +109,7 @@ public class Element<T> implements Matchable {
         return new AbstractMap.SimpleEntry(this.getElementClassification(), this.getPreProcessedValue());
     }
 
-    public Function<Element, Stream<Token>> getTokenizerFunction() {
+    public Function<Element<T>, Stream<Token>> getTokenizerFunction() {
         return this.tokenizerFunction;
     }
 
@@ -170,10 +169,10 @@ public class Element<T> implements Matchable {
         private double weight = 1.0;
         private double threshold = 0.3;
         private double neighborhoodRange = 0.9;
-        private Function<Object, Object> preProcessFunction;
+        private Function<T, T> preProcessFunction;
         private MatchType matchType;
 
-        private Function<Element, Stream<Token>> tokenizerFunction;
+        private Function<Element<T>, Stream<Token>> tokenizerFunction;
 
         public Builder setType(ElementType type) {
             this.type = type;
@@ -205,13 +204,13 @@ public class Element<T> implements Matchable {
             return this;
         }
 
-        public Builder setPreProcessingFunction(Function<Object, Object> preProcessingFunction) {
+        public Builder setPreProcessingFunction(Function<T, T> preProcessingFunction) {
             this.preProcessFunction = preProcessingFunction;
             return this;
         }
 
 
-        public Builder setTokenizerFunction(Function<Element, Stream<Token>> tokenizerFunction) {
+        public Builder setTokenizerFunction(Function<Element<T>, Stream<Token>> tokenizerFunction) {
             this.tokenizerFunction = tokenizerFunction;
             return this;
         }

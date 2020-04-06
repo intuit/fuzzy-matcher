@@ -13,14 +13,14 @@ import java.util.stream.Stream;
 
 public class Utils {
 
-    public static Stream<Object> getNGrams(Object value, int size) {
-        Stream.Builder<Object> stringStream = Stream.builder();
-        if (value.toString().length() <= size) {
+    public static Stream<String> getNGrams(String value, int size) {
+        Stream.Builder<String> stringStream = Stream.builder();
+        if (value.length() <= size) {
             stringStream.add(value);
         } else {
             NGramTokenizer nGramTokenizer = new NGramTokenizer(size, size);
             CharTermAttribute charTermAttribute = nGramTokenizer.addAttribute(CharTermAttribute.class);
-            nGramTokenizer.setReader(new StringReader(value.toString()));
+            nGramTokenizer.setReader(new StringReader(value));
             try {
                 nGramTokenizer.reset();
                 while (nGramTokenizer.incrementToken()) {

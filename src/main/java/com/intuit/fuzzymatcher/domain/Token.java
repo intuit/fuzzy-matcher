@@ -6,17 +6,17 @@ import java.util.Objects;
 /**
  * Elements are broken down into Token class using the TokenizerFunction
  */
-public class Token {
+public class Token<T> {
 
-    public Token(Object value, Element element) {
+    public Token(T value, Element element) {
         this.value = value;
         this.element = element;
     }
 
-    private Object value;
+    private T value;
     private Element element;
 
-    public Object getValue() {
+    public T getValue() {
         return value;
     }
 

@@ -5,7 +5,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.intuit.fuzzymatcher.domain.MatchType.EQUALITY;
-import static com.intuit.fuzzymatcher.domain.MatchType.NEAREST_NEIGHBOURS;
+import static com.intuit.fuzzymatcher.domain.MatchType.NEAREST_NEIGHBORS;
 import static com.intuit.fuzzymatcher.function.PreProcessFunction.*;
 import static com.intuit.fuzzymatcher.function.TokenizerFunction.*;
 
@@ -23,7 +23,7 @@ public enum ElementType {
     NUMBER,
     DATE;
 
-    protected Function<Object, Object> getPreProcessFunction() {
+    protected Function getPreProcessFunction() {
         switch (this) {
             case NAME:
                 return namePreprocessing();
@@ -37,14 +37,12 @@ public enum ElementType {
                 return usPhoneNormalization();
             case NUMBER:
                 return numberPreprocessing();
-            case DATE:
-                return none();
             default:
                 return none();
         }
     }
 
-    protected Function<Element, Stream<Token>> getTokenizerFunction() {
+    protected Function getTokenizerFunction() {
         switch (this) {
             case NAME:
                 return wordSoundexEncodeTokenizer();
@@ -56,10 +54,6 @@ public enum ElementType {
                 return triGramTokenizer();
             case PHONE:
                 return decaGramTokenizer();
-            case NUMBER:
-                return valueTokenizer();
-            case DATE:
-                return valueTokenizer();
             default:
                 return valueTokenizer();
         }
@@ -68,9 +62,9 @@ public enum ElementType {
     protected MatchType getMatchType() {
         switch (this) {
             case NUMBER:
-                return NEAREST_NEIGHBOURS;
+                return NEAREST_NEIGHBORS;
             case DATE:
-                return NEAREST_NEIGHBOURS;
+                return NEAREST_NEIGHBORS;
             default:
                 return EQUALITY;
         }
