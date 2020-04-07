@@ -1,16 +1,16 @@
 package com.intuit.fuzzymatcher.component;
 
-import com.intuit.fuzzymatcher.domain.Element;
-import com.intuit.fuzzymatcher.domain.ElementType;
-import com.intuit.fuzzymatcher.domain.MatchType;
-import com.intuit.fuzzymatcher.domain.Token;
+import com.intuit.fuzzymatcher.domain.*;
 import com.intuit.fuzzymatcher.exception.MatchException;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
+import javax.xml.parsers.DocumentBuilder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
@@ -110,16 +110,43 @@ public class TokenRepoTest {
         tokenRepo.get(token1);
     }
 
+    @Test
+    @Ignore
+    public void shouldGetMultipleMatchedWithNearestNeighbour() {
+        List<Object> numbers = Arrays.asList(100, 100);
+
+        List<Element> elements = getElements(numbers, ElementType.NUMBER, null);
+
+        TokenRepo tokenRepo = new TokenRepo();
+
+
+        elements.forEach(element -> {
+            List<Token> tokenStream = element.getTokens();
+            tokenStream.forEach(token -> tokenRepo.put(token));
+        });
+
+        Element<Number> testElement1 = new Element.Builder().setType(ElementType.NUMBER).setValue(100).createElement();
+        Token token1 = testElement1.getTokens().get(0);
+        Set<Element> matchingElements1 = tokenRepo.get(token1);
+        Assert.assertTrue(matchingElements1.contains(elements.get(0)));
+        Assert.assertTrue(matchingElements1.contains(elements.get(1)));
+    }
+
     private List<Element> getElements(List<Object> values, ElementType elementType, MatchType matchType) {
         return values.stream()
                 .map(value -> getElement(value, elementType, matchType)).collect(Collectors.toList());
     }
 
+    AtomicInteger ai = new AtomicInteger(0);
     private Element getElement(Object value, ElementType elementType, MatchType matchType) {
+        Document.Builder documentBuilder = new Document.Builder(ai.incrementAndGet()+"");
         Element.Builder elementBuilder = new Element.Builder().setType(elementType).setValue(value);
         if (matchType != null) {
             elementBuilder.setMatchType(matchType);
         }
-        return elementBuilder.createElement();
+        Element element =  elementBuilder.createElement();
+        documentBuilder.addElement(element);
+        element.setDocument(documentBuilder.createDocument());
+        return  element;
     }
 }
