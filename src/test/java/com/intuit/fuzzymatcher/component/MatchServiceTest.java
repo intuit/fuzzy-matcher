@@ -1,9 +1,6 @@
 package com.intuit.fuzzymatcher.component;
 
-import com.intuit.fuzzymatcher.domain.Document;
-import com.intuit.fuzzymatcher.domain.Element;
-import com.intuit.fuzzymatcher.domain.ElementType;
-import com.intuit.fuzzymatcher.domain.Match;
+import com.intuit.fuzzymatcher.domain.*;
 import com.intuit.fuzzymatcher.function.PreProcessFunction;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
@@ -51,7 +48,7 @@ public class MatchServiceTest {
     }
 
     @Test
-    public void itShouldApplyMatchArray() {
+    public void itShouldApplyMatchByDocId() {
         String[][] input = {
                 {"1", "Steven Wilson", "45th Avenue 5th st."},
                 {"2", "John Doe", "546 freeman ave"},
@@ -74,6 +71,29 @@ public class MatchServiceTest {
     }
 
     @Test
+    public void itShouldApplyMatchByGroups() {
+        String[][] input = {
+                {"1", "Steven Wilson", "45th Avenue 5th st."},
+                {"2", "John Doe", "546 freeman ave"},
+                {"3", "Stephen Wilkson", "45th Ave 5th Street"}
+        };
+        List<Document> documentList = Arrays.asList(input).stream().map(contact -> {
+            return new Document.Builder(contact[0])
+                    .addElement(new Element.Builder<String>().setValue(contact[1]).setType(NAME).createElement())
+                    .addElement(new Element.Builder<String>().setValue(contact[2]).setType(ADDRESS).createElement())
+                    .createDocument();
+        }).collect(Collectors.toList());
+
+        Set<Set<Match<Document>>> result = matchService.applyMatchByGroups(documentList);
+        result.forEach(matches -> {
+            matches.forEach(match -> {
+                System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
+            });
+        });
+        Assert.assertEquals(1, result.size());
+    }
+
+    @Test
     public void itShouldApplyMatchByDocIdForSingleDoc() throws IOException {
         Document doc = new Document.Builder("TestMatch")
                 .addElement(new Element.Builder().setType(NAME).setValue("john doe").createElement())
@@ -91,6 +111,13 @@ public class MatchServiceTest {
         Map<String, List<Match<Document>>> result = matchService.applyMatchByDocId(getTestDocuments());
         writeOutput(result);
         Assert.assertEquals(6, result.size());
+    }
+
+    @Test
+    public void itShouldApplyMatchByGroupsForAList() throws IOException {
+        Set<Set<Match<Document>>> result = matchService.applyMatchByGroups(getTestDocuments());
+        writeOutput(result);
+        Assert.assertEquals(2, result.size());
     }
 
     public static Stream<Element> getOrderedElements(Set<Element> elements) {
@@ -200,7 +227,7 @@ public class MatchServiceTest {
 
 
     @Test
-    public void itShouldApplyMatchWith3Documents() throws FileNotFoundException {
+    public void itShouldApplyMatchWith3Documents() {
         List<Document> inputData = new ArrayList<>();
         inputData.add(new Document.Builder("1")
                 .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
@@ -249,7 +276,7 @@ public class MatchServiceTest {
     }
 
     @Test
-    public void itShouldApplyMatchForMulitipleEmptyField() throws FileNotFoundException {
+    public void itShouldApplyMatchForMulitipleEmptyField() {
         List<Document> inputData = new ArrayList<>();
         inputData.add(new Document.Builder("1")
                 .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())
@@ -583,6 +610,24 @@ public class MatchServiceTest {
                                 getOrderedElements(md.getElements()).map(e -> e.getValue())).toArray(String[]::new);
                         writer.writeNext(matchArrs);
                         LOGGER.info("        " + match);
+                    });
+                });
+        writer.close();
+    }
+
+    public static void writeOutput(Set<Set<Match<Document>>> result) throws IOException {
+        CSVWriter writer = new CSVWriter(new FileWriter("src/test/resources/output.csv"));
+        writer.writeNext(new String[]{"Key", "Matched Key", "Score", "Name", "Address", "Email", "Phone"});
+
+        result.forEach(matches -> {
+            String[] arr = {"Group"};
+            writer.writeNext(arr);
+
+            matches.stream().forEach(match -> {
+                        Document md = match.getMatchedWith();
+                        String[] matchArrs = Stream.concat(Stream.of("", md.getKey(), Double.toString(match.getResult())),
+                                getOrderedElements(md.getElements()).map(e -> e.getValue())).toArray(String[]::new);
+                        writer.writeNext(matchArrs);
                     });
                 });
         writer.close();
