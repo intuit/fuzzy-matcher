@@ -6,8 +6,11 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import javax.xml.parsers.DocumentBuilder;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -69,6 +72,32 @@ public class TokenRepoTest {
     }
 
     @Test
+    public void shouldGetForNumberForNegativeWithNearestNeighbor() {
+        List<Object> numbers = Arrays.asList(-100, -200, -1, -25, -700, -99, -210, -500);
+
+        List<Element> elements = getElements(numbers, ElementType.NUMBER, null);
+
+        TokenRepo tokenRepo = new TokenRepo();
+
+        elements.forEach(element -> {
+            List<Token> tokenStream = element.getTokens();
+            tokenStream.forEach(token -> tokenRepo.put(token));
+        });
+
+        Element<Number> testElement1 = new Element.Builder().setType(ElementType.NUMBER).setValue(-101).createElement();
+        Token token1 = testElement1.getTokens().get(0);
+        Set<Element> matchingElements1 = tokenRepo.get(token1);
+        Assert.assertTrue(matchingElements1.contains(elements.get(0)));
+        Assert.assertTrue(matchingElements1.contains(elements.get(5)));
+
+        Element<Number> testElement2 = new Element.Builder().setType(ElementType.NUMBER).setValue(-205).createElement();
+        Token token2 = testElement2.getTokens().get(0);
+        Set<Element> matchingElements2 = tokenRepo.get(token2);
+        Assert.assertTrue(matchingElements2.contains(elements.get(1)));
+        Assert.assertTrue(matchingElements2.contains(elements.get(6)));
+    }
+
+    @Test
     public void shouldGetForNumberWithEquality() {
         List<Object> numbers = Arrays.asList(100, 200, 1, 25, 700, 99, 210, 500);
 
@@ -108,6 +137,35 @@ public class TokenRepoTest {
         Element<String> testElement1 = new Element.Builder().setType(ElementType.TEXT).setValue("101").createElement();
         Token token1 = testElement1.getTokens().get(0);
         tokenRepo.get(token1);
+    }
+
+    @Test
+    public void shouldGetForDateWithNearestNeighbor() {
+        List<Object> numbers = Arrays.asList(getDate("01/01/2020 00:00:00 GMT"), getDate("12/01/2020 00:00:00 GMT"), getDate("02/01/2020 00:00:00 GMT"), getDate("01/01/1970 01:59:00 GMT"));
+
+        List<Element> elements = getElements(numbers, ElementType.DATE, null);
+
+        TokenRepo tokenRepo = new TokenRepo();
+
+        elements.forEach(element -> {
+            List<Token> tokenStream = element.getTokens();
+            tokenStream.forEach(token -> tokenRepo.put(token));
+        });
+
+        Element<Date> testElement1 = new Element.Builder().setType(ElementType.DATE).setValue(getDate("01/01/1970 02:00:00 GMT")).createElement();
+        Token token1 = testElement1.getTokens().get(0);
+        Set<Element> matchingElements1 = tokenRepo.get(token1);
+        Assert.assertTrue(matchingElements1.contains(elements.get(3)));
+    }
+
+    private Date getDate(String val) {
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss z");
+        try {
+            return df.parse(val);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Test

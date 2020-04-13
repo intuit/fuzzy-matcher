@@ -121,13 +121,13 @@ public class TokenRepo {
 
         private Number getLower(Number number, double pct) {
             Double dnum = number.doubleValue();
-            Double pctVal = dnum * (1.0 - pct);
+            Double pctVal = Math.abs(dnum * (1.0 - pct));
             return dnum - pctVal;
         }
 
         private Number getHigher(Number number, double pct) {
             Double dnum = number.doubleValue();
-            Double pctVal = dnum * (1.0 - pct);
+            Double pctVal = Math.abs(dnum * (1.0 - pct));
             return dnum + pctVal;
         }
 
