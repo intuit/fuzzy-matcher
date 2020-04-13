@@ -45,18 +45,4 @@ public class Token<T> {
 
         return Objects.hash(value, element);
     }
-
-    public static Comparator<Token> byValue = (Token t1, Token t2) -> {
-        if (t2 == null) {
-            return -1;
-        }
-        if (t1 == null) {
-            return 1;
-        }
-
-        if (t1.getValue() instanceof Comparable) {
-            return ((Comparable) t1.getValue()).compareTo((Comparable) t2.getValue());
-        }
-        return -1;
-    };
 }

@@ -482,7 +482,7 @@ public class MatchServiceTest {
     }
 
     @Test
-    public void itShouldApplyMatchForUnBalancedEmptyElements() throws FileNotFoundException {
+    public void itShouldApplyMatchForUnBalancedEmptyElements() {
         List<Document> inputData = new ArrayList<>();
         inputData.add(new Document.Builder("1")
                 .addElement(new Element.Builder().setType(NAME).setValue("James Parker").createElement())

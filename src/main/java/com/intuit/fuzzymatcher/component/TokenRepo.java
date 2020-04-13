@@ -44,30 +44,26 @@ public class TokenRepo {
 
         Map<Object, Set<Element>> tokenElementSet;
 
-        TreeSet<Token> tokenBinaryTree;
+        TreeSet<Object> tokenBinaryTree;
 
         Repo(MatchType matchType) {
             this.matchType = matchType;
             switch (matchType) {
+                case NEAREST_NEIGHBORS:
+                    tokenBinaryTree = new TreeSet<>();
                 case EQUALITY:
                     tokenElementSet = new ConcurrentHashMap<>();
-                    break;
-                case NEAREST_NEIGHBORS:
-                    tokenBinaryTree = new TreeSet<>(Token.byValue);
-                    break;
             }
         }
 
         void put(Token token, Element element) {
             switch (matchType) {
+                case NEAREST_NEIGHBORS:
+                    tokenBinaryTree.add(token.getValue());
                 case EQUALITY:
                     Set<Element> elements = tokenElementSet.getOrDefault(token.getValue(), new HashSet<>());
                     elements.add(element);
                     tokenElementSet.put(token.getValue(), elements);
-                    break;
-                case NEAREST_NEIGHBORS:
-                    tokenBinaryTree.add(token);
-
             }
         }
 
@@ -79,7 +75,7 @@ public class TokenRepo {
                     TokenRange tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange());
                     return tokenBinaryTree.subSet(tokenRange.lower, true, tokenRange.higher, true)
                             .stream()
-                            .map(Token::getElement).collect(Collectors.toSet());
+                            .flatMap(val -> tokenElementSet.get(val).stream()).collect(Collectors.toSet());
 
             }
             return null;
@@ -88,35 +84,31 @@ public class TokenRepo {
 
     private class TokenRange {
 
-        private final Token lower;
-        private final Token higher;
+        private final Object lower;
+        private final Object higher;
         private static final double DATE_SCALE_FACTOR = 1.1;
 
 
         TokenRange(Token token, double pct) {
             Object value = token.getValue();
             if (value instanceof Double) {
-                this.lower = new Token(getLower((Double) value, pct).doubleValue(), token.getElement());
-                this.higher = new Token(getHigher((Double) value, pct).doubleValue(), token.getElement());
+                this.lower = getLower((Double) value, pct).doubleValue();
+                this.higher = getHigher((Double) value, pct).doubleValue();
             } else if (value instanceof Integer) {
-                this.lower = new Token(getLower((Integer) value, pct).intValue(), token.getElement());
-                this.higher = new Token(getHigher((Integer) value, pct).intValue(), token.getElement());
+                this.lower = getLower((Integer) value, pct).intValue();
+                this.higher = getHigher((Integer) value, pct).intValue();
             } else if (value instanceof Long) {
-                this.lower = new Token(getLower((Long) value, pct).longValue(), token.getElement());
-                this.higher = new Token(getHigher((Long) value, pct).longValue(), token.getElement());
+                this.lower = getLower((Long) value, pct).longValue();
+                this.higher = getHigher((Long) value, pct).longValue();
             } else if (value instanceof Float) {
-                this.lower = new Token(getLower((Float) value, pct).floatValue(), token.getElement());
-                this.higher = new Token(getHigher((Float) value, pct).floatValue(), token.getElement());
+                this.lower = getLower((Float) value, pct).floatValue();
+                this.higher = getHigher((Float) value, pct).floatValue();
             } else if (value instanceof Date) {
-                this.lower = getDateToken(getLower(((Date) value).getTime(), pct * DATE_SCALE_FACTOR), token);
-                this.higher = getDateToken(getHigher(((Date) value).getTime(), pct * DATE_SCALE_FACTOR), token);
+                this.lower = new Date(getLower(((Date) value).getTime(), pct * DATE_SCALE_FACTOR).longValue());
+                this.higher = new Date(getHigher(((Date) value).getTime(), pct * DATE_SCALE_FACTOR).longValue());
             } else {
                 throw new MatchException("Data Type not supported");
             }
-        }
-
-        private Token getDateToken(Number number, Token token) {
-            return new Token(new Date(number.longValue()), token.getElement());
         }
 
         private Number getLower(Number number, double pct) {

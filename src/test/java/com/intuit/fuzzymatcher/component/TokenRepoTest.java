@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 
 public class TokenRepoTest {
 
+    private final AtomicInteger ai = new AtomicInteger(0);
+
     @Test
     public void shouldGetForNameWithEquality() {
         List<Object> names = Arrays.asList("Amy Doe", "Brian Doe", "Jane Amy", "Michael Wane");
@@ -169,7 +171,6 @@ public class TokenRepoTest {
     }
 
     @Test
-    @Ignore
     public void shouldGetMultipleMatchedWithNearestNeighbour() {
         List<Object> numbers = Arrays.asList(100, 100);
 
@@ -195,7 +196,6 @@ public class TokenRepoTest {
                 .map(value -> getElement(value, elementType, matchType)).collect(Collectors.toList());
     }
 
-    AtomicInteger ai = new AtomicInteger(0);
     private Element getElement(Object value, ElementType elementType, MatchType matchType) {
         Document.Builder documentBuilder = new Document.Builder(ai.incrementAndGet()+"");
         Element.Builder elementBuilder = new Element.Builder().setType(elementType).setValue(value);
