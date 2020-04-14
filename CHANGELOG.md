@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.3 - 2020-04-14
+### Added
+- MatchService.applyMatchByGroups new service method to return groups of Matches. 
+Eg. A matches with B and B with C, all of them appear in the same group (set of matches) 
+
+### Changed
+- Token class now supports Generics for value instead of Object
+- TokenizerFunction and PreProcessing Functions are no longer functional interface, but instead a Java Class with static methods that return standard java functions.
+- ElementType does not take parameters in constructors and is now a simple enumeration. This is to allow easier JNBridge proxies for .net support 
+
+### Fixed
+- NEAREST_NEIGHBOR match issue with negative numbers and dates (before epoch) https://github.com/intuit/fuzzy-matcher/issues/28
+- NEAREST_NEIGHBOR match not returning multiple matches if the matching value is exactly same.
+
 ## 1.0.0 - 2020-03-25
 ### Added
 - In Element ability to set MatchType (this replaces similarityMatchFunction)
