@@ -2,6 +2,7 @@ package com.intuit.fuzzymatcher.component;
 
 import com.intuit.fuzzymatcher.domain.Element;
 import com.intuit.fuzzymatcher.domain.ElementClassification;
+import com.intuit.fuzzymatcher.domain.ElementType;
 import com.intuit.fuzzymatcher.domain.MatchType;
 import com.intuit.fuzzymatcher.domain.Token;
 import com.intuit.fuzzymatcher.exception.MatchException;
@@ -46,6 +47,9 @@ public class TokenRepo {
 
         TreeSet<Object> tokenBinaryTree;
 
+        private static final double MAX_AGE_DIFF = 5;
+        private static final double MIN_AGE_DIFF = 1;
+
         Repo(MatchType matchType) {
             this.matchType = matchType;
             switch (matchType) {
@@ -72,7 +76,12 @@ public class TokenRepo {
                 case EQUALITY:
                     return tokenElementSet.get(token.getValue());
                 case NEAREST_NEIGHBORS:
-                    TokenRange tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange());
+                    TokenRange tokenRange;
+                    if (token.getElement().getElementClassification().getElementType().equals(ElementType.AGE)) {
+                        tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange(), MAX_AGE_DIFF, MIN_AGE_DIFF);
+                    } else {
+                        tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange());
+                    }
                     return tokenBinaryTree.subSet(tokenRange.lower, true, tokenRange.higher, true)
                             .stream()
                             .flatMap(val -> tokenElementSet.get(val).stream()).collect(Collectors.toSet());
@@ -88,39 +97,46 @@ public class TokenRepo {
         private final Object higher;
         private static final double DATE_SCALE_FACTOR = 1.1;
 
-
-        TokenRange(Token token, double pct) {
+        TokenRange(Token token, double pct, double maxDiff, double minDiff) {
             Object value = token.getValue();
+            double absMaxDiff = Math.abs(maxDiff);
+            double absMinDiff = Math.abs(minDiff);
             if (value instanceof Double) {
-                this.lower = getLower((Double) value, pct).doubleValue();
-                this.higher = getHigher((Double) value, pct).doubleValue();
+                this.lower = getLower((Double) value, pct, absMaxDiff, absMinDiff).doubleValue();
+                this.higher = getHigher((Double) value, pct, absMaxDiff, absMinDiff).doubleValue();
             } else if (value instanceof Integer) {
-                this.lower = getLower((Integer) value, pct).intValue();
-                this.higher = getHigher((Integer) value, pct).intValue();
+                this.lower = getLower((Integer) value, pct, absMaxDiff, absMinDiff).intValue();
+                this.higher = getHigher((Integer) value, pct, absMaxDiff, absMinDiff).intValue();
             } else if (value instanceof Long) {
-                this.lower = getLower((Long) value, pct).longValue();
-                this.higher = getHigher((Long) value, pct).longValue();
+                this.lower = getLower((Long) value, pct, absMaxDiff, absMinDiff).longValue();
+                this.higher = getHigher((Long) value, pct, absMaxDiff, absMinDiff).longValue();
             } else if (value instanceof Float) {
-                this.lower = getLower((Float) value, pct).floatValue();
-                this.higher = getHigher((Float) value, pct).floatValue();
+                this.lower = getLower((Float) value, pct, absMaxDiff, absMinDiff).floatValue();
+                this.higher = getHigher((Float) value, pct, absMaxDiff, absMinDiff).floatValue();
             } else if (value instanceof Date) {
-                this.lower = new Date(getLower(((Date) value).getTime(), pct * DATE_SCALE_FACTOR).longValue());
-                this.higher = new Date(getHigher(((Date) value).getTime(), pct * DATE_SCALE_FACTOR).longValue());
+                this.lower = new Date(getLower(((Date) value).getTime(), pct * DATE_SCALE_FACTOR, absMaxDiff, absMinDiff).longValue());
+                this.higher = new Date(getHigher(((Date) value).getTime(), pct * DATE_SCALE_FACTOR, absMaxDiff, absMinDiff).longValue());
             } else {
                 throw new MatchException("Data Type not supported");
             }
         }
 
-        private Number getLower(Number number, double pct) {
-            Double dnum = number.doubleValue();
-            Double pctVal = Math.abs(dnum * (1.0 - pct));
-            return dnum - pctVal;
+        TokenRange(Token token, double pct) {
+            this(token, pct, Double.MAX_VALUE, 0);
         }
 
-        private Number getHigher(Number number, double pct) {
+        private Number getLower(Number number, double pct, double maxDiff, double minDiff) {
             Double dnum = number.doubleValue();
             Double pctVal = Math.abs(dnum * (1.0 - pct));
-            return dnum + pctVal;
+            Double diff = Math.min(maxDiff, Math.max(minDiff, pctVal));
+            return dnum - diff;
+        }
+
+        private Number getHigher(Number number, double pct, double maxDiff, double minDiff) {
+            Double dnum = number.doubleValue();
+            Double pctVal = Math.abs(dnum * (1.0 - pct));
+            Double diff = Math.min(maxDiff, Math.max(minDiff, pctVal));
+            return dnum + diff;
         }
 
     }
