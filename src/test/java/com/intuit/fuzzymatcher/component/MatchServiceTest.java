@@ -583,7 +583,7 @@ public class MatchServiceTest {
             for (Object matchWith: entry.getValue()) {
                 int match = (int) matchWith;
                 double diff = Math.abs(doc - match);
-                Assert.assertTrue(diff >= 1 && diff <=5);
+                Assert.assertTrue(diff >= 1 && diff <=10);
             }
         }
 
