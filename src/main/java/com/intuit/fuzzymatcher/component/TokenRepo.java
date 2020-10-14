@@ -2,6 +2,7 @@ package com.intuit.fuzzymatcher.component;
 
 import com.intuit.fuzzymatcher.domain.Element;
 import com.intuit.fuzzymatcher.domain.ElementClassification;
+import com.intuit.fuzzymatcher.domain.ElementType;
 import com.intuit.fuzzymatcher.domain.MatchType;
 import com.intuit.fuzzymatcher.domain.Token;
 import com.intuit.fuzzymatcher.exception.MatchException;
@@ -46,6 +47,9 @@ public class TokenRepo {
 
         TreeSet<Object> tokenBinaryTree;
 
+        private final Double AGE_PCT_OF = 10D;
+
+
         Repo(MatchType matchType) {
             this.matchType = matchType;
             switch (matchType) {
@@ -72,7 +76,12 @@ public class TokenRepo {
                 case EQUALITY:
                     return tokenElementSet.get(token.getValue());
                 case NEAREST_NEIGHBORS:
-                    TokenRange tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange());
+                    TokenRange tokenRange;
+                    if (token.getElement().getElementClassification().getElementType().equals(ElementType.AGE)) {
+                        tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange(), AGE_PCT_OF);
+                    } else {
+                        tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange());
+                    }
                     return tokenBinaryTree.subSet(tokenRange.lower, true, tokenRange.higher, true)
                             .stream()
                             .flatMap(val -> tokenElementSet.get(val).stream()).collect(Collectors.toSet());
@@ -88,38 +97,43 @@ public class TokenRepo {
         private final Object higher;
         private static final double DATE_SCALE_FACTOR = 1.1;
 
-
-        TokenRange(Token token, double pct) {
+        TokenRange(Token token, double pct, Double pctOf) {
             Object value = token.getValue();
             if (value instanceof Double) {
-                this.lower = getLower((Double) value, pct).doubleValue();
-                this.higher = getHigher((Double) value, pct).doubleValue();
+                this.lower = getLower((Double) value, pct, pctOf).doubleValue();
+                this.higher = getHigher((Double) value, pct, pctOf).doubleValue();
             } else if (value instanceof Integer) {
-                this.lower = getLower((Integer) value, pct).intValue();
-                this.higher = getHigher((Integer) value, pct).intValue();
+                this.lower = getLower((Integer) value, pct, pctOf).intValue();
+                this.higher = getHigher((Integer) value, pct, pctOf).intValue();
             } else if (value instanceof Long) {
-                this.lower = getLower((Long) value, pct).longValue();
-                this.higher = getHigher((Long) value, pct).longValue();
+                this.lower = getLower((Long) value, pct, pctOf).longValue();
+                this.higher = getHigher((Long) value, pct, pctOf).longValue();
             } else if (value instanceof Float) {
-                this.lower = getLower((Float) value, pct).floatValue();
-                this.higher = getHigher((Float) value, pct).floatValue();
+                this.lower = getLower((Float) value, pct, pctOf).floatValue();
+                this.higher = getHigher((Float) value, pct, pctOf).floatValue();
             } else if (value instanceof Date) {
-                this.lower = new Date(getLower(((Date) value).getTime(), pct * DATE_SCALE_FACTOR).longValue());
-                this.higher = new Date(getHigher(((Date) value).getTime(), pct * DATE_SCALE_FACTOR).longValue());
+                this.lower = new Date(getLower(((Date) value).getTime(), pct * DATE_SCALE_FACTOR, pctOf).longValue());
+                this.higher = new Date(getHigher(((Date) value).getTime(), pct * DATE_SCALE_FACTOR, pctOf).longValue());
             } else {
                 throw new MatchException("Data Type not supported");
             }
         }
 
-        private Number getLower(Number number, double pct) {
+        TokenRange(Token token, double pct) {
+            this(token, pct, null);
+        }
+
+        private Number getLower(Number number, double pct, Double pctOf) {
             Double dnum = number.doubleValue();
-            Double pctVal = Math.abs(dnum * (1.0 - pct));
+            Double dPctOf = pctOf != null ? pctOf : dnum;
+            Double pctVal = Math.abs(dPctOf * (1.0 - pct));
             return dnum - pctVal;
         }
 
-        private Number getHigher(Number number, double pct) {
+        private Number getHigher(Number number, double pct, Double pctOf) {
             Double dnum = number.doubleValue();
-            Double pctVal = Math.abs(dnum * (1.0 - pct));
+            Double dPctOf = pctOf != null ? pctOf : dnum;
+            Double pctVal = Math.abs(dPctOf * (1.0 - pct));
             return dnum + pctVal;
         }
 

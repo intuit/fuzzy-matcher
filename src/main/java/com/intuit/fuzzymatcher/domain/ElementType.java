@@ -21,7 +21,8 @@ public enum ElementType {
     EMAIL,
     PHONE,
     NUMBER,
-    DATE;
+    DATE,
+    AGE;
 
     protected Function getPreProcessFunction() {
         switch (this) {
@@ -36,6 +37,7 @@ public enum ElementType {
             case PHONE:
                 return usPhoneNormalization();
             case NUMBER:
+            case AGE:
                 return numberPreprocessing();
             default:
                 return none();
@@ -62,8 +64,8 @@ public enum ElementType {
     protected MatchType getMatchType() {
         switch (this) {
             case NUMBER:
-                return NEAREST_NEIGHBORS;
             case DATE:
+            case AGE:
                 return NEAREST_NEIGHBORS;
             default:
                 return EQUALITY;

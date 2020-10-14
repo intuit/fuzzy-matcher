@@ -541,6 +541,17 @@ public class MatchServiceTest {
         Map<Document, List<Match<Document>>> result1 = matchService.applyMatch(documentList1);
         Assert.assertEquals(6, result1.size());
 
+        for (Map.Entry<Document, List<Match<Document>>> entry : result1.entrySet()) {
+            int doc = (int) entry.getKey().getElements().iterator().next().getValue();
+            List<Object> matches = entry.getValue().stream().map(m -> m.getMatchedWith().getElements().iterator().next().getValue()).collect(Collectors.toList());
+            for (Object matchWith: matches) {
+                int match = (int) matchWith;
+                int small = Math.min(doc, match);
+                int big = Math.max(doc, match);
+                Assert.assertTrue(small >= (int) 0.9 * big && small <= (int) 1.1 * big);
+            }
+        }
+
         List<Document> documentList2 = getTestDocuments(numbers, NUMBER, 0.99);
         Map<Document, List<Match<Document>>> result2 = matchService.applyMatch(documentList2);
         Assert.assertEquals(2, result2.size());
@@ -567,6 +578,45 @@ public class MatchServiceTest {
         Assert.assertEquals(2, result.size());
     }
 
+    @Test
+    public void itShouldApplyMatchWithAge() {
+        List<Object> numbers = Arrays.asList(1, 2, 9, 10, 11, 45, 49, 50, 52, 55, 90, 95, 100, 107, 115);
+        List<Document> documentList1 = getTestDocuments(numbers, AGE, null);
+        Map<Document, List<Match<Document>>> result1 = matchService.applyMatch(documentList1);
+        documentList1.get(0).getElements().iterator().next().getValue();
+        Map<Object, List<Object>> collect = result1.entrySet().stream().
+                collect(Collectors.toMap(e -> e.getKey().getElements().iterator().next().getValue(),
+                        e -> e.getValue().stream().map(m -> m.getMatchedWith().getElements().iterator().next().getValue())
+                                .collect(Collectors.toList())));
+        Assert.assertEquals(7, result1.size());
+
+        for (Map.Entry<Object, List<Object>> entry : collect.entrySet()) {
+            int doc = (int) entry.getKey();
+            for (Object matchWith: entry.getValue()) {
+                int match = (int) matchWith;
+                double diff = Math.abs(doc - match);
+                Assert.assertTrue(diff <=1);
+            }
+        }
+
+        List<Document> documentList2 = getTestDocuments(numbers, AGE, 0.7);
+        Map<Document, List<Match<Document>>> result2 = matchService.applyMatch(documentList2);
+        Map<Object, List<Object>> collect2 = result2.entrySet().stream().
+                collect(Collectors.toMap(e -> e.getKey().getElements().iterator().next().getValue(),
+                        e -> e.getValue().stream().map(m -> m.getMatchedWith().getElements().iterator().next().getValue())
+                                .collect(Collectors.toList())));
+        Assert.assertEquals(9, result2.size());
+
+        for (Map.Entry<Object, List<Object>> entry : collect2.entrySet()) {
+            int doc = (int) entry.getKey();
+            for (Object matchWith: entry.getValue()) {
+                int match = (int) matchWith;
+                double diff = Math.abs(doc - match);
+                Assert.assertTrue(diff <=3);
+            }
+        }
+
+    }
 
     private List<Document> getTestDocuments(List<Object> values, ElementType elementType, Double neighborhoodRange) {
         AtomicInteger ai = new AtomicInteger(0);

@@ -139,6 +139,7 @@ Below is the list of predefined _Element Types_ available with sensible defaults
 | ___PHONE___   | numericValue()         | decaGramTokenizer()          |     EQUALITY       |
 | ___NUMBER___  | numberPreprocessing()  | valueTokenizer()             | NEAREST_NEIGHBORS |
 | ___DATE___    | none()                 | valueTokenizer()             | NEAREST_NEIGHBORS |
+| ___AGE___  | numberPreprocessing()  | valueTokenizer()             | NEAREST_NEIGHBORS |
 
 _Note: Since each element is unique in the way it should match, if you need to match a different element type than
  what is supported, please open a new [GitHub Issue](https://github.com/intuit/fuzzy-matcher/issues) and the community 
