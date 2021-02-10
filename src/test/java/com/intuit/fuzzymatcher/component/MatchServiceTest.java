@@ -2,6 +2,7 @@ package com.intuit.fuzzymatcher.component;
 
 import com.intuit.fuzzymatcher.domain.*;
 import com.intuit.fuzzymatcher.function.PreProcessFunction;
+import com.intuit.fuzzymatcher.util.Utils;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.CSVWriter;
@@ -458,6 +459,39 @@ public class MatchServiceTest {
     }
 
     @Test
+    public void itShouldOverridePreProcessingDictionary() {
+        Map<String, String> newNameDict = new HashMap<String, String>() {{
+            put("Queen", "");
+            put("Third", "");
+            put("III", "");
+        }};
+
+        Function<String, String> newNamePreProcessing = (str) -> {
+            return Arrays.stream(str.split("\\s+"))
+                    .map(d -> newNameDict.containsKey(d) ?
+                            newNameDict.get(d)
+                            : d)
+                    .collect(Collectors.joining(" "));
+        };
+
+        String[][] input = {
+                {"1", "Victoria Third"},
+                {"2", "Queen Victoria III"},
+        };
+        List<Document> documentList = Arrays.asList(input).stream().map(contact -> {
+            return new Document.Builder(contact[0])
+                    .addElement(new Element.Builder<String>().setValue(contact[1]).setType(NAME)
+                            // Set the custom function
+                            .setPreProcessingFunction(newNamePreProcessing)
+                            .createElement())
+                    .createDocument();
+        }).collect(Collectors.toList());
+        Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
+
+        Assert.assertEquals(2, result.size());
+    }
+
+    @Test
     public void itShouldApplyMatchForBalancedEmptyElements() throws FileNotFoundException {
         List<Document> inputData = new ArrayList<>();
         inputData.add(new Document.Builder("1")
@@ -544,7 +578,7 @@ public class MatchServiceTest {
         for (Map.Entry<Document, List<Match<Document>>> entry : result1.entrySet()) {
             int doc = (int) entry.getKey().getElements().iterator().next().getValue();
             List<Object> matches = entry.getValue().stream().map(m -> m.getMatchedWith().getElements().iterator().next().getValue()).collect(Collectors.toList());
-            for (Object matchWith: matches) {
+            for (Object matchWith : matches) {
                 int match = (int) matchWith;
                 int small = Math.min(doc, match);
                 int big = Math.max(doc, match);
@@ -592,10 +626,10 @@ public class MatchServiceTest {
 
         for (Map.Entry<Object, List<Object>> entry : collect.entrySet()) {
             int doc = (int) entry.getKey();
-            for (Object matchWith: entry.getValue()) {
+            for (Object matchWith : entry.getValue()) {
                 int match = (int) matchWith;
                 double diff = Math.abs(doc - match);
-                Assert.assertTrue(diff <=1);
+                Assert.assertTrue(diff <= 1);
             }
         }
 
@@ -609,10 +643,10 @@ public class MatchServiceTest {
 
         for (Map.Entry<Object, List<Object>> entry : collect2.entrySet()) {
             int doc = (int) entry.getKey();
-            for (Object matchWith: entry.getValue()) {
+            for (Object matchWith : entry.getValue()) {
                 int match = (int) matchWith;
                 double diff = Math.abs(doc - match);
-                Assert.assertTrue(diff <=3);
+                Assert.assertTrue(diff <= 3);
             }
         }
 
@@ -674,12 +708,12 @@ public class MatchServiceTest {
             writer.writeNext(arr);
 
             matches.stream().forEach(match -> {
-                        Document md = match.getMatchedWith();
-                        String[] matchArrs = Stream.concat(Stream.of("", md.getKey(), Double.toString(match.getResult())),
-                                getOrderedElements(md.getElements()).map(e -> e.getValue())).toArray(String[]::new);
-                        writer.writeNext(matchArrs);
-                    });
-                });
+                Document md = match.getMatchedWith();
+                String[] matchArrs = Stream.concat(Stream.of("", md.getKey(), Double.toString(match.getResult())),
+                        getOrderedElements(md.getElements()).map(e -> e.getValue())).toArray(String[]::new);
+                writer.writeNext(matchArrs);
+            });
+        });
         writer.close();
     }
 
@@ -699,4 +733,6 @@ public class MatchServiceTest {
                     .createDocument();
         }).collect(Collectors.toList());
     }
+
+
 }
