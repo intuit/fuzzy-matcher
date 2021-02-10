@@ -613,6 +613,14 @@ public class MatchServiceTest {
     }
 
     @Test
+    public void itShouldApplyMatchWithDateForHighNeighborhoodRange() {
+        List<Object> dates = Arrays.asList(getDate("01/01/2020"), getDate("01/02/2020"), getDate("02/01/2019"));
+        List<Document> documentList = getTestDocuments(dates, DATE, 0.99); //0.99 neighborhood is about 18 days
+        Map<Document, List<Match<Document>>> result = matchService.applyMatch(documentList);
+        Assert.assertEquals(2, result.size());
+    }
+
+    @Test
     public void itShouldApplyMatchWithAge() {
         List<Object> numbers = Arrays.asList(1, 2, 9, 10, 11, 45, 49, 50, 52, 55, 90, 95, 100, 107, 115);
         List<Document> documentList1 = getTestDocuments(numbers, AGE, null);

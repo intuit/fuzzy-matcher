@@ -48,6 +48,7 @@ public class TokenRepo {
         TreeSet<Object> tokenBinaryTree;
 
         private final Double AGE_PCT_OF = 10D;
+        private final Double DATE_PCT_OF = 15777e7D; // 5 years of range
 
 
         Repo(MatchType matchType) {
@@ -77,10 +78,15 @@ public class TokenRepo {
                     return tokenElementSet.get(token.getValue());
                 case NEAREST_NEIGHBORS:
                     TokenRange tokenRange;
-                    if (token.getElement().getElementClassification().getElementType().equals(ElementType.AGE)) {
-                        tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange(), AGE_PCT_OF);
-                    } else {
-                        tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange());
+                    switch (token.getElement().getElementClassification().getElementType()){
+                        case AGE:
+                            tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange(), AGE_PCT_OF);
+                            break;
+                        case DATE:
+                            tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange(), DATE_PCT_OF);
+                            break;
+                        default:
+                            tokenRange = new TokenRange(token, token.getElement().getNeighborhoodRange());
                     }
                     return tokenBinaryTree.subSet(tokenRange.lower, true, tokenRange.higher, true)
                             .stream()
@@ -95,7 +101,6 @@ public class TokenRepo {
 
         private final Object lower;
         private final Object higher;
-        private static final double DATE_SCALE_FACTOR = 1.1;
 
         TokenRange(Token token, double pct, Double pctOf) {
             Object value = token.getValue();
@@ -112,8 +117,8 @@ public class TokenRepo {
                 this.lower = getLower((Float) value, pct, pctOf).floatValue();
                 this.higher = getHigher((Float) value, pct, pctOf).floatValue();
             } else if (value instanceof Date) {
-                this.lower = new Date(getLower(((Date) value).getTime(), pct * DATE_SCALE_FACTOR, pctOf).longValue());
-                this.higher = new Date(getHigher(((Date) value).getTime(), pct * DATE_SCALE_FACTOR, pctOf).longValue());
+                this.lower = new Date(getLower(((Date) value).getTime(), pct, pctOf).longValue());
+                this.higher = new Date(getHigher(((Date) value).getTime(), pct, pctOf).longValue());
             } else {
                 throw new MatchException("Data Type not supported");
             }
