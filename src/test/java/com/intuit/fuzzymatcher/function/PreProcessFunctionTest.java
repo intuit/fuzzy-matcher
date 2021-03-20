@@ -8,6 +8,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.function.Function;
 
 import static com.intuit.fuzzymatcher.domain.ElementType.*;
 
@@ -20,11 +21,26 @@ public class PreProcessFunctionTest {
     }
 
     @Test
-    public void itShouldNotRemoveNameSuffixFromAddress_Success(){
+    public void itShouldPreprocessAddress(){
         String value = "123 XYZ Ltd st, TX";
         Element element = new Element.Builder().setType(ADDRESS).setValue(value).createElement();
         Assert.assertEquals("123 xyz ltd street texas", element.getPreProcessedValue());
     }
+
+    @Test
+    public void itShouldCustomPreprocessAddress(){
+        String value = "123_XYZ_Ltd_st, TX";
+        Function<String, String> customPreProcessing = (str -> str.replaceAll("_", " "));
+        customPreProcessing = customPreProcessing.andThen(PreProcessFunction.addressPreprocessing());
+
+        Element element = new Element.Builder().setType(ADDRESS)
+                .setPreProcessingFunction(customPreProcessing)
+                .setValue(value)
+                .createElement();
+
+        Assert.assertEquals("123 xyz ltd street texas", element.getPreProcessedValue());
+    }
+
 
     @Test
     public void itShouldGetNullString_Success(){
