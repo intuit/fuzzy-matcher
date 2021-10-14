@@ -43,10 +43,10 @@ public class TokenizerFunctionTest {
 
     @Test
     public void itShouldGetValueTokenizer_Success(){
-        String value = "1234567890";
+        String value = "0011234567890";
         Element elem = new Element.Builder().setType(PHONE).setValue(value).createElement();
         Assert.assertEquals(1, valueTokenizer().apply(elem).count() );
-        Assert.assertEquals("11234567890", valueTokenizer().apply(elem).findFirst().get().getValue() );
+        Assert.assertEquals("1234567890", valueTokenizer().apply(elem).findFirst().get().getValue() );
     }
 
     @Test

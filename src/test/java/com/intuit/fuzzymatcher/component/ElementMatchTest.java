@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.intuit.fuzzymatcher.domain.ElementType.ADDRESS;
 import static com.intuit.fuzzymatcher.domain.ElementType.NAME;
+import static com.intuit.fuzzymatcher.domain.ElementType.PHONE;
 
 public class ElementMatchTest {
 
@@ -101,6 +102,17 @@ public class ElementMatchTest {
     public void itShouldMatchUnorderedTokens() {
         Element element1 = getElement(ADDRESS, "James Parker");
         Element element2 = getElement(ADDRESS, "Parker Jamies");
+
+        elementMatch.matchElement(element1);
+        Set<Match<Element>> matchSet = elementMatch.matchElement(element2);
+        Assert.assertEquals(1, matchSet.size());
+        Assert.assertEquals(1.0, matchSet.iterator().next().getResult(), 0.0);
+    }
+
+    @Test
+    public void itShouldMatchPhoneTokens() {
+        Element element1 = getElement(PHONE, "+1 (123) 234-2345");
+        Element element2 = getElement(PHONE, "123-234-2345");
 
         elementMatch.matchElement(element1);
         Set<Match<Element>> matchSet = elementMatch.matchElement(element2);

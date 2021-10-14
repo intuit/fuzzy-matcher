@@ -35,7 +35,7 @@ public enum ElementType {
             case EMAIL:
                 return removeDomain();
             case PHONE:
-                return usPhoneNormalization();
+                return phoneNormalization();
             case NUMBER:
             case AGE:
                 return numberPreprocessing();

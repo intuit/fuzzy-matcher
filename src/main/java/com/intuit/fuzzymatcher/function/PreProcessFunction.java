@@ -114,12 +114,12 @@ public class PreProcessFunction<T>{
     }
 
     /**
-     * For a 10 character string, it prefixes it with US international code of "1".
+     * Returns a 10 character string, removes country code if present.
      *
-     * @return the function to perform usPhoneNormalization
+     * @return the function to perform phoneNormalization
      */
-    public static Function<String, String> usPhoneNormalization() {
-        return str -> numericValue().andThen(s -> (s.length() == 10) ? "1" + s : s).apply(str);
+    public static Function<String, String> phoneNormalization() {
+        return str -> numericValue().andThen(s -> (s.length() > 10) ? s.substring(s.length()-10) : s).apply(str);
     }
 
     /**
