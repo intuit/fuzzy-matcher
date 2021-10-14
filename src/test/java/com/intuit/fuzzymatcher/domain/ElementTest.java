@@ -47,7 +47,25 @@ public class ElementTest {
         Assert.assertEquals(2, result1.size());
         Assert.assertEquals(1.0, result1.get(documents1.get(0)).get(0).getResult(), .01);
 
-        List<Document> documents2 = getDocuments(names, TokenizerFunction.chainTokenizers(TokenizerFunction.wordTokenizer(), TokenizerFunction.wordSoundexEncodeTokenizer(), TokenizerFunction.triGramTokenizer()));
+        List<Document> documents2 = getDocuments(names,
+                TokenizerFunction.chainTokenizers(TokenizerFunction.wordTokenizer(),
+                        TokenizerFunction.wordSoundexEncodeTokenizer(), TokenizerFunction.triGramTokenizer()));
+
+        Map<Document, List<Match<Document>>> result2 = matchService.applyMatch(documents2);
+        Assert.assertEquals(0, result2.size());
+    }
+    
+    @Test
+    public void itShouldNotMatchPhoneticWordsWithCustomTokenizerFunction2() {
+        List<String> names = Arrays.asList("Caputo", "Chabot");
+
+        List<Document> documents1 = getDocuments(names, TokenizerFunction.wordSoundexEncodeTokenizer());
+
+        Map<Document, List<Match<Document>>> result1 = matchService.applyMatch(documents1);
+        Assert.assertEquals(2, result1.size());
+        Assert.assertEquals(1.0, result1.get(documents1.get(0)).get(0).getResult(), .01);
+
+        List<Document> documents2 = getDocuments(names, TokenizerFunction.chainTokenizers(TokenizerFunction.wordSoundexEncodeTokenizer (), TokenizerFunction.triGramTokenizer()));
 
         Map<Document, List<Match<Document>>> result2 = matchService.applyMatch(documents2);
         Assert.assertEquals(0, result2.size());
@@ -62,11 +80,28 @@ public class ElementTest {
         Map<Document, List<Match<Document>>> result1 = matchService.applyMatch(documents1);
         Assert.assertEquals(0, result1.size());
 
-        List<Document> documents2 = getDocuments(names, TokenizerFunction.chainTokenizers(TokenizerFunction.wordSoundexEncodeTokenizer(), TokenizerFunction.triGramTokenizer()));
+        List<Document> documents2 = getDocuments(names, TokenizerFunction
+                .chainTokenizers(TokenizerFunction.wordSoundexEncodeTokenizer(), TokenizerFunction.triGramTokenizer()));
 
         Map<Document, List<Match<Document>>> result2 = matchService.applyMatch(documents2);
         Assert.assertEquals(2, result2.size());
         Assert.assertEquals(0.6, result2.get(documents1.get(0)).get(0).getResult(), .01);
+    }
+    
+    @Test
+    public void itShouldMatchUnequalWordsWithCustomTokenizerFunction2() {
+        List<String> names = Arrays.asList("Nikolau", "Nikolaou");
+
+        List<Document> documents1 = getDocuments(names, TokenizerFunction.wordTokenizer());
+
+        Map<Document, List<Match<Document>>> result1 = matchService.applyMatch(documents1);
+        Assert.assertEquals(0, result1.size());
+
+        List<Document> documents2 = getDocuments(names, TokenizerFunction.chainTokenizers(TokenizerFunction.wordTokenizer(), TokenizerFunction.triGramTokenizer()));
+
+        Map<Document, List<Match<Document>>> result2 = matchService.applyMatch(documents2);
+        Assert.assertEquals(2, result2.size());
+        Assert.assertEquals(0.58, result2.get(documents1.get(0)).get(0).getResult(), .01);
     }
 
     private List<Document> getDocuments(List<String> names, Function tokenizerFunction) {
