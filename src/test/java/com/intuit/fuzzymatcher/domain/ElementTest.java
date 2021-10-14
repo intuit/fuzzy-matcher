@@ -38,7 +38,7 @@ public class ElementTest {
     }
 
     @Test
-    public void itShouldNotMatchPhoneticWordsWithCustomTokenizerFunction() {
+    public void itShouldNotMatchPhoneticWordsWithChainTokenizerFunction() {
         List<String> names = Arrays.asList("bold", "bolt");
 
         List<Document> documents1 = getDocuments(names, TokenizerFunction.wordSoundexEncodeTokenizer());
@@ -56,7 +56,7 @@ public class ElementTest {
     }
     
     @Test
-    public void itShouldNotMatchPhoneticWordsWithCustomTokenizerFunction2() {
+    public void itShouldNotMatchPhoneticWordsWithChainTokenizerFunction2() {
         List<String> names = Arrays.asList("Caputo", "Chabot");
 
         List<Document> documents1 = getDocuments(names, TokenizerFunction.wordSoundexEncodeTokenizer());
@@ -72,7 +72,7 @@ public class ElementTest {
     }
 
     @Test
-    public void itShouldMatchUnequalWordsWithCustomTokenizerFunction() {
+    public void itShouldMatchUnequalWordsWithChainTokenizerFunction() {
         List<String> names = Arrays.asList("Mario", "Marieo");
 
         List<Document> documents1 = getDocuments(names, TokenizerFunction.wordTokenizer());
@@ -89,7 +89,7 @@ public class ElementTest {
     }
     
     @Test
-    public void itShouldMatchUnequalWordsWithCustomTokenizerFunction2() {
+    public void itShouldMatchUnequalWordsWithChainTokenizerFunction2() {
         List<String> names = Arrays.asList("Nikolau", "Nikolaou");
 
         List<Document> documents1 = getDocuments(names, TokenizerFunction.wordTokenizer());
