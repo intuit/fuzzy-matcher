@@ -59,8 +59,11 @@ public class TokenizerFunction {
         } else {
             throw new MatchException("Unsupported data type");
         }
-        return Utils.getNGrams(elementValueStr, size)
-                .map(str -> new Token<String>(str, element));
+        return Utils.getNGrams(elementValueStr, size).map(str -> new Token<String>(str, element));
 
+    }
+    
+    public static Function<Element<String>, Stream<Token<String>>> chainTokenizers(Function<Element<String>, Stream<Token<String>>>... tokenizers) {
+        return element -> Arrays.stream(tokenizers).flatMap(fun -> fun.apply(element));
     }
 }
