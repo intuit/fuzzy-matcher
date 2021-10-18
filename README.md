@@ -207,9 +207,10 @@ The library is published to maven central
 <dependency>
     <groupId>com.intuit.fuzzymatcher</groupId>
     <artifactId>fuzzy-matcher</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
+(Note: This requires java 11. For java 8 use version 1.1.x)
 
 ### Input
 This library takes a collection of _Document_ objects with various _Elements_ as input.

@@ -8,7 +8,7 @@ Readme.md file gives a good overview of the architecture. Make sure to review th
 
 ## Building the Library
 ### Prerequisite
-You need Java SDK v1.8 or higher. Before you begin, you should check your current Java installation by using the following command:
+You need Java JDK 11 or higher. Before you begin, you should check your current Java installation by using the following command:
 ``` java -version ```
 
 fuzzy-match is compatible with Apache Maven 4.0 or above. If you do not already have Maven installed, you can follow the instructions at maven.apache.org.
