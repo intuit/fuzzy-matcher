@@ -4,8 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 1.0.5 - 2021-10-12
+## 1.1.0 - 2021-10-18
+### Added
+- Support for chaining multiple Tokenizers using `chainTokenizers` function
 
+## 1.0.5 - 2021-10-12
 ### Fixed
 - DateMatch with NeighborhoodRange greater than 0.9 https://github.com/intuit/fuzzy-matcher/issues/35
 - Security fixes and updates on dependent libraries
