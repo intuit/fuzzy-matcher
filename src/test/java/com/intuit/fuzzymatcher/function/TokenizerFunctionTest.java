@@ -5,7 +5,9 @@ import com.intuit.fuzzymatcher.domain.Token;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -104,7 +106,34 @@ public class TokenizerFunctionTest {
         List<Token> results2 = tokenStream2.collect(Collectors.toList());
         Assert.assertEquals("S315", results2.get(0).getValue());
         Assert.assertEquals("W425", results2.get(1).getValue());
+    }
 
+    @Test
+    public void itShouldCustomTokenizeText(){
+        String value = "123a234a345";
+
+        Element defaultTokenElement = new Element.Builder().setType(TEXT)
+                .setValue(value)
+                .createElement();
+        Stream<Token> defaultStream = (Stream<Token>) defaultTokenElement.getTokenizerFunction().apply(defaultTokenElement);
+        List<Token> defaultResults = defaultStream.collect(Collectors.toList());
+        Assert.assertEquals(1, defaultResults.size());
+        Assert.assertEquals(value, defaultResults.get(0).getValue());
+
+        // Split the value with delimiter as character 'a'
+        Function<Element<String>, Stream<Token>> customTokenFunc = (element) -> Arrays.stream(element.getPreProcessedValue().split("a"))
+                .map(token -> new Token(token, element));
+
+        Element customTokenElement = new Element.Builder().setType(TEXT)
+                .setTokenizerFunction(customTokenFunc)
+                .setValue(value)
+                .createElement();
+        Stream<Token> customStream = (Stream<Token>) customTokenElement
+                .getTokenizerFunction()
+                .apply(customTokenElement);
+        List<Token> customResults = customStream.collect(Collectors.toList());
+        Assert.assertEquals(3, customResults.size());
+        Assert.assertEquals("123", customResults.get(0).getValue());
     }
 
 
