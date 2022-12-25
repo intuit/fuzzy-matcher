@@ -40,8 +40,8 @@ public class Dictionary {
             BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream("name-dictionary.txt")));
             return getDictionary(br);
         } catch (IOException e) {
-            LOGGER.error("could not load address dictonary", e);
-            throw new MatchException("could not load address dictonary", e);
+            LOGGER.error("could not load name dictonary", e);
+            throw new MatchException("could not load name dictonary", e);
         }
     }
 
