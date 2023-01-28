@@ -1,9 +1,6 @@
 package com.intuit.fuzzymatcher.domain;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * Defines how each element is classified using ElementType and variance.
@@ -43,5 +40,10 @@ public class ElementClassification {
     @Override
     public int hashCode() {
         return Objects.hash(elementType, variance);
+    }
+
+    @Override
+    public String toString() {
+        return elementType.name() + ":" + variance;
     }
 }

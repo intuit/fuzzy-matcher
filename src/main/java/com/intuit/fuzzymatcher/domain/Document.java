@@ -4,10 +4,7 @@ import com.intuit.fuzzymatcher.function.ScoringFunction;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -80,30 +77,39 @@ public class Document implements Matchable {
     }
 
     @Override
-    public long getChildCount(Matchable other) {
+    public double getWeightedChildCount(Matchable other) {
         if (other instanceof Document) {
             Document o = (Document) other;
-            List<ElementClassification> childrenType = this.getPreProcessedElement().stream()
-                    .map(Element::getElementClassification).collect(Collectors.toList());
-            List<ElementClassification> oChildrenType = o.getPreProcessedElement().stream()
-                    .map(Element::getElementClassification).collect(Collectors.toList());
-            return CollectionUtils.union(childrenType, oChildrenType).size();
+            Map<ElementClassification, Double> childrenTypeAndWeight = this.getPreProcessedElement().stream()
+                    .collect(Collectors.toMap(Element::getElementClassification, Element::getWeight, Double::sum));
+            Map<ElementClassification, Double> oChildrenTypeAndWeight = o.getPreProcessedElement().stream()
+                    .collect(Collectors.toMap(Element::getElementClassification, Element::getWeight, Double::sum));
+            double val = CollectionUtils.union(childrenTypeAndWeight.keySet(), oChildrenTypeAndWeight.keySet()).stream()
+                    .map(element -> Optional.ofNullable(childrenTypeAndWeight.get(element))
+                            .orElseGet(() -> oChildrenTypeAndWeight.get(element)))
+                    .reduce(Double::sum)
+                    .orElse(0.0);
+            return val;
         }
-        return 0;
-
+        return 0.0;
     }
 
     @Override
-    public long getUnmatchedChildCount(Matchable other) {
+    public double getUnmatchedChildWeight(Matchable other) {
         if (other instanceof Document) {
             Document o = (Document) other;
-            List<ElementClassification> childrenType = this.getPreProcessedElement().stream()
-                    .map(Element::getElementClassification).collect(Collectors.toList());
-            List<ElementClassification> oChildrenType = o.getPreProcessedElement().stream()
-                    .map(Element::getElementClassification).collect(Collectors.toList());
-            return CollectionUtils.disjunction(childrenType, oChildrenType).size();
+            Map<ElementClassification, Double> childrenTypeAndWeight = this.getPreProcessedElement().stream()
+                    .collect(Collectors.toMap(Element::getElementClassification, Element::getWeight, Double::sum));
+            Map<ElementClassification, Double> oChildrenTypeAndWeight = o.getPreProcessedElement().stream()
+                    .collect(Collectors.toMap(Element::getElementClassification, Element::getWeight, Double::sum));
+            double val = CollectionUtils.disjunction(childrenTypeAndWeight.keySet(), oChildrenTypeAndWeight.keySet()).stream()
+                    .map(element -> Optional.ofNullable(childrenTypeAndWeight.get(element))
+                            .orElseGet(() -> oChildrenTypeAndWeight.get(element)))
+                    .reduce(Double::sum)
+                    .orElse(0.0);
+            return val;
         }
-        return 0;
+        return 0.0;
     }
 
     @Override

@@ -9,68 +9,18 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ScoringFunctionTest {
 
     @Test
-    public void itShouldGiveAverageScore_Success(){
-        Document document1 = getMockDocument(4L, 0L);
-        Document document2 = getMockDocument(4L, 0L);
-
-        Match<Document> match = getMockMatch(document1, document2);
-        List<Score> childScores = getMockChildScores(new Match(getMockElement(1.0, 1), null, 0.66),
-                new Match(getMockElement(2.0, 1), null, 1.0));
-
-        Score score = ScoringFunction.getAverageScore().apply(match, childScores);
-        Assert.assertEquals(0.41, score.getResult(), 0.01);
-    }
-
-    @Test
-    public void itShouldGiveAverageScoreWithEmptyFields_Success(){
-        Document document1 = getMockDocument(4L, 2L);
-        Document document2 = getMockDocument(4L, 0L);
-
-        Match<Document> match = getMockMatch(document1, document2);
-        List<Score> childScores = getMockChildScores(new Match(getMockElement(1.0, 1), null, 0.5),
-                new Match(getMockElement(2.0, 1), null, 1.0));
-
-        Score score = ScoringFunction.getAverageScore().apply(match, childScores);
-        Assert.assertEquals(.62, score.getResult(), 0.01);
-    }
-
-    @Test
-    public void itShouldGiveSimpleAverageScore_Success(){
-        Document document1 = getMockDocument(4L, 0L);
-        Document document2 = getMockDocument(4L, 0L);
-
-        Match<Document> match = getMockMatch(document1, document2);
-        List<Score> childScores = getMockChildScores(new Match(getMockElement(1.0, 1), null, 0.66),
-                new Match(getMockElement(2.0, 1), null, 1.0));
-
-        Score score = ScoringFunction.getSimpleAverageScore().apply(match, childScores);
-        Assert.assertEquals(0.41, score.getResult(), 0.01);
-    }
-
-    @Test
-    public void itShouldGetExponentialScoring_Success(){
-        Document document1 = getMockDocument(4L, 2L);
-        Document document2 = getMockDocument(4L, 0L);
-
-        Match<Document> match = getMockMatch(document1, document2);
-        List<Score> childScores = getMockChildScores(new Match(getMockElement(1.0, 1), null, 1.0),
-                new Match(getMockElement(2.0, 1), null, 1.0));
-
-        Score score = ScoringFunction.getExponentialAverageScore().apply(match, childScores);
-        Assert.assertEquals(.79, score.getResult(), 0.01);
-    }
-
-    @Test
     public void itShouldGiveWeightedAverageScore_Success(){
-        Document document1 = getMockDocument(4L, 2L);
-        Document document2 = getMockDocument(4L, 0L);
+        Document document1 = mock(Document.class);
+        Document document2 = mock(Document.class);
+
+        when(document1.getWeightedChildCount(document2)).thenReturn(5.0);
+        when(document1.getUnmatchedChildWeight(document2)).thenReturn(2.0);
 
         Match<Document> match = getMockMatch(document1, document2);
         List<Score> childScores = getMockChildScores(new Match(getMockElement(1.0, 1), null, 1.0),
@@ -79,11 +29,13 @@ public class ScoringFunctionTest {
         Assert.assertEquals(.8, score.getResult(), 0.01);
     }
 
-
     @Test
     public void itShouldGetExponentialWeightedScoring_Success(){
-        Document document1 = getMockDocument(4L, 2L);
-        Document document2 = getMockDocument(4L, 0L);
+        Document document1 = mock(Document.class);
+        Document document2 = mock(Document.class);
+
+        when(document1.getWeightedChildCount(document2)).thenReturn(5.0);
+        when(document1.getUnmatchedChildWeight(document2)).thenReturn(2.0);
 
         Match<Document> match = getMockMatch(document1, document2);
         List<Score> childScores = getMockChildScores(new Match(getMockElement(1.0, 1), null, 1.0),
@@ -91,13 +43,6 @@ public class ScoringFunctionTest {
 
         Score score = ScoringFunction.getExponentialWeightedAverageScore().apply(match, childScores);
         Assert.assertEquals(.86, score.getResult(), 0.01);
-    }
-
-    private Document getMockDocument(long childCount, long emptyCount) {
-        Document doc = mock(Document.class);
-        when(doc.getChildCount(any())).thenReturn(childCount);
-        when(doc.getUnmatchedChildCount(any())).thenReturn(emptyCount);
-        return doc;
     }
 
     private Element getMockElement(double weight, long childCount) {

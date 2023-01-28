@@ -9,11 +9,11 @@ import java.util.function.BiFunction;
  */
 public interface Matchable {
 
-    public long getChildCount(Matchable other);
+    public double getWeightedChildCount(Matchable other);
 
     public BiFunction<Match, List<Score>, Score> getScoringFunction();
 
     public double getWeight();
 
-    public long getUnmatchedChildCount(Matchable other);
+    public double getUnmatchedChildWeight(Matchable other);
 }

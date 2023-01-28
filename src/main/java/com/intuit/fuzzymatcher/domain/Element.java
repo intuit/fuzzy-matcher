@@ -125,16 +125,17 @@ public class Element<T> implements Matchable {
     }
 
     public double getScore(Integer matchingCount, Element other) {
-        return ((double)matchingCount / (double) getChildCount(other));
+        return ((double)matchingCount / getWeightedChildCount(other));
     }
 
 
     /**
      * This gets the Max number of tokens present between matching Elements.
      * For Elements that do not have a balanced set of tokens, it can push the score down.
+     * @return
      */
     @Override
-    public long getChildCount(Matchable other) {
+    public double getWeightedChildCount(Matchable other) {
         if (other instanceof Element) {
             Element<T> o = (Element<T>) other;
             return Math.max(this.getTokens().size(), o.getTokens().size());
@@ -143,7 +144,7 @@ public class Element<T> implements Matchable {
     }
 
     @Override
-    public long getUnmatchedChildCount(Matchable other) {
+    public double getUnmatchedChildWeight(Matchable other) {
         if (other instanceof Element) {
             Element<T> o = (Element<T>) other;
             long emptyChildren = this.getTokens().stream()
@@ -228,8 +229,9 @@ public class Element<T> implements Matchable {
 
     @Override
     public String toString() {
-        return "{" +
-                "'" + value + '\'' +
+        return "Element{" +
+                "value=" + value +
+                ", classification=" + elementClassification +
                 '}';
     }
 

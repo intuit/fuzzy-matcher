@@ -22,9 +22,9 @@ public class DocumentTest {
                 .addElement(new Element.Builder().setType(EMAIL).setValue("james@email.com").createElement())
                 .createDocument();
 
-        Assert.assertEquals(4, d1.getChildCount(d2));
-        Assert.assertEquals(4, d2.getChildCount(d1));
-        Assert.assertEquals(2, d1.getUnmatchedChildCount(d2));
+        Assert.assertEquals(4, d1.getWeightedChildCount(d2), 0.01);
+        Assert.assertEquals(4, d2.getWeightedChildCount(d1), 0.01);
+        Assert.assertEquals(2, d1.getUnmatchedChildWeight(d2), 0.01);
     }
 
     @Test
@@ -42,8 +42,8 @@ public class DocumentTest {
                 .addElement(new Element.Builder().setType(EMAIL).setValue("").createElement())
                 .createDocument();
 
-        Assert.assertEquals(2, d1.getChildCount(d2));
-        Assert.assertEquals(0, d1.getUnmatchedChildCount(d2));
+        Assert.assertEquals(2, d1.getWeightedChildCount(d2), 0.01);
+        Assert.assertEquals(0, d1.getUnmatchedChildWeight(d2), 0.01);
     }
 
     @Test
@@ -61,8 +61,8 @@ public class DocumentTest {
                 .addElement(new Element.Builder().setType(EMAIL).setValue("").createElement())
                 .createDocument();
 
-        Assert.assertEquals(3, d1.getChildCount(d2));
-        Assert.assertEquals(2, d1.getUnmatchedChildCount(d2));
+        Assert.assertEquals(3, d1.getWeightedChildCount(d2), 0.01);
+        Assert.assertEquals(2, d1.getUnmatchedChildWeight(d2), 0.01);
     }
 
     @Test
@@ -81,8 +81,8 @@ public class DocumentTest {
                 .addElement(new Element.Builder().setType(EMAIL).setValue("").createElement())
                 .createDocument();
 
-        Assert.assertEquals(4, d1.getChildCount(d2));
-        Assert.assertEquals(3, d1.getUnmatchedChildCount(d2));
+        Assert.assertEquals(4, d1.getWeightedChildCount(d2), 0.01);
+        Assert.assertEquals(3, d1.getUnmatchedChildWeight(d2), 0.01);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class DocumentTest {
                 .addElement(new Element.Builder().setType(EMAIL).setValue("").createElement())
                 .createDocument();
 
-        Assert.assertEquals(3, d1.getChildCount(d2));
-        Assert.assertEquals(1, d1.getUnmatchedChildCount(d2));
+        Assert.assertEquals(3, d1.getWeightedChildCount(d2), 0.01);
+        Assert.assertEquals(1, d1.getUnmatchedChildWeight(d2), 0.01);
     }
 }

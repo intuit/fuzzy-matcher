@@ -111,7 +111,8 @@ public class MatchServiceTest {
 
     @Test
     public void itShouldApplyMatchByDocIdForAList() throws IOException {
-        Map<String, List<Match<Document>>> result = matchService.applyMatchByDocId(getTestDocuments());
+        List<Document> documents = getTestDocuments();
+        Map<String, List<Match<Document>>> result = matchService.applyMatchByDocId(documents);
         writeOutput(result);
         Assert.assertEquals(6, result.size());
     }
