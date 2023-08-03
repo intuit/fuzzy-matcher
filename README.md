@@ -207,7 +207,7 @@ The library is published to maven central
 <dependency>
     <groupId>com.intuit.fuzzymatcher</groupId>
     <artifactId>fuzzy-matcher</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
 </dependency>
 ```
 (Note: This requires java 11. For java 8 use version 1.1.x)
