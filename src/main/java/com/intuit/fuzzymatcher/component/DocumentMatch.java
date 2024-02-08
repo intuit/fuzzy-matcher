@@ -41,10 +41,10 @@ public class DocumentMatch {
     }
 
     private Stream<Match<Document>> documentThresholdMatching(Document document, Set<Match<Element>> matchingElements) {
-        Map<Document, List<Match<Element>>> mathes = matchingElements.stream()
+        Map<Document, List<Match<Element>>> matches = matchingElements.stream()
                 .collect(Collectors.groupingBy(matchElement -> matchElement.getMatchedWith().getDocument()));
 
-        Stream<Match<Document>> result = mathes.entrySet().stream().flatMap(matchEntry -> {
+        Stream<Match<Document>> result = matches.entrySet().stream().flatMap(matchEntry -> {
 
             List<Score> childScoreList = matchEntry.getValue()
                     .stream()
