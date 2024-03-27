@@ -66,4 +66,23 @@ public class TokenizerFunction {
     public static Function<Element<String>, Stream<Token<String>>> chainTokenizers(Function<Element<String>, Stream<Token<String>>>... tokenizers) {
         return element -> Arrays.stream(tokenizers).flatMap(fun -> fun.apply(element));
     }
+
+    /**
+     * Tokenizes a path by splitting it using forward slashes and dots as delimiters.
+     * the element containing the path value
+     * @return a stream of tokens representing the path components
+     */
+    public static Function<Element<String>, Stream<Token<String>>> pathTokenizer() {
+        return element -> Arrays.stream(element.getPreProcessedValue().split("[/\\.]"))
+                .map(token -> new Token<>(token, element));
+    }
+
+    /**
+     * Tokenizes a phone number by treating the entire preprocessed phone number as a single token.
+     * the input element containing the preprocessed phone number
+     * @return a stream containing a single token representing the entire phone number
+     */
+    public static Function<Element<String>, Stream<Token<String>>> phoneNumberTokenizer() {
+        return element -> Stream.of(new Token<>(element.getPreProcessedValue(), element));
+    }
 }
