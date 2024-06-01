@@ -92,7 +92,6 @@ public class PreProcessFunction<T>{
      * @return the function to perform namePreprocessing
      */
     public static Function<String, String> namePreprocessing() {
-        // return (str) -> removeTrailingNumber().andThen(removeSpecialChars()).andThen(transliterateName()).andThen(nameNormalization()).apply(str);
         return (str) -> transliterateName().andThen(removeTrailingNumber()).andThen(removeSpecialChars()).andThen(nameNormalization()).apply(str);
     }
 
