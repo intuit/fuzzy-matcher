@@ -74,6 +74,38 @@ public class MatchServiceTest {
     }
 
     @Test
+    public void itShouldApplyMatchByDocIdWithNonEnglishValues() {
+        String[][] input = {
+                {"1", "Steven Wilson", "45th Avenue 5th st."},
+                {"2", "John Doe", "546 freeman ave"},
+                {"3", "Stephen Wilkson", "45th Ave 5th Street"},
+                {"4", "Hagar Usama", "Nasr city - 8th neighborhood"},
+                {"5","هاجر أُسامة", "Nasr city, neighborhod 8"},
+                {"6","Asala Wasel", ""},
+                {"7","아살라 와셀", ""},
+                {"8","ستيفين ويلسون", "45 Ave St 5"}
+
+        };
+
+        List<Document> documentList = Arrays.asList(input).stream().map(contact -> {
+            return new Document.Builder(contact[0])
+                    .addElement(new Element.Builder<String>().setValue(contact[1]).setType(NAME).createElement())
+                    .addElement(new Element.Builder<String>().setValue(contact[2]).setType(ADDRESS).createElement())
+                    .createDocument();
+        }).collect(Collectors.toList());
+
+        Map<String, List<Match<Document>>> result = matchService.applyMatchByDocId(documentList);
+        result.entrySet().forEach(entry -> {
+            entry.getValue().forEach(match -> {
+                System.out.println("Data: " + match.getData() + " Matched With: " + match.getMatchedWith() + " Score: " + match.getScore().getResult());
+            });
+        });
+
+
+        Assert.assertEquals(7, result.size());
+    }
+
+    @Test
     public void itShouldApplyMatchByGroups() {
         String[][] input = {
                 {"1", "Steven Wilson", "45th Avenue 5th st."},

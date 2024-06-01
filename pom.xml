@@ -122,6 +122,13 @@
             <version>3.8</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>com.ibm.icu</groupId>
+            <artifactId>icu4j</artifactId>
+            <version>64.2</version>
+        </dependency>
+        
     </dependencies>
     <build>
         <plugins>
