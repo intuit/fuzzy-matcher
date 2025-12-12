@@ -28,3 +28,4 @@ hs_err_pid*
 .idea
 *.DS_Store
 target
+.vscode/settings.json
