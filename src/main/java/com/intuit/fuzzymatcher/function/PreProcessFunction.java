@@ -25,6 +25,17 @@ public class PreProcessFunction<T>{
     }
 
     /**
+     * Uses com.ibm.icu.text.Transliterator
+     * Returns a function that takes a string as input and returns the transliterated version of the name.
+     *
+     * @return the function to perform transliteration
+     */
+
+    public static Function<String, String> transliterateName(){
+        return (str) -> Utils.transliterateName(str);
+    }
+
+    /**
      * Uses Apache commons StringUtils lowerCase method
      *
      * @return the function to perform toLowerCase
@@ -76,12 +87,12 @@ public class PreProcessFunction<T>{
     }
 
     /**
-     * applies "removeTrailingNumber", "removeSpecialChars" and "nameNormalization" functions
+     * applies "removeTrailingNumber", "removeSpecialChars", "transliterateName" and "nameNormalization" functions
      *
      * @return the function to perform namePreprocessing
      */
     public static Function<String, String> namePreprocessing() {
-        return (str) -> removeTrailingNumber().andThen(removeSpecialChars()).andThen(nameNormalization()).apply(str);
+        return (str) -> transliterateName().andThen(removeTrailingNumber()).andThen(removeSpecialChars()).andThen(nameNormalization()).apply(str);
     }
 
     /**
